@@ -1,0 +1,228 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  extensions        = [pgcrypto(map: "pgcrypto")]
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            String  @db.Uuid // Ensure this type matches the User model's primary key type
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? // Add additional fields as necessary
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+}
+
+model Bookmark {
+  bookmark_id        Int       @id @default(autoincrement())
+  user_id            String    @db.Uuid
+  bookmarked_item_id String    @db.Uuid
+  created_at         DateTime? @default(now()) @db.Timestamp(6)
+  User               User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Comment {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content     String
+  user_id     String        @db.Uuid
+  post_id     Int // Changed from String to Int
+  created_at  DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?     @default(now()) @db.Timestamp(6)
+  User        User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  CommentLike CommentLike[]
+  parent_id   String?       @db.Uuid
+  parent      Comment?      @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies     Comment[]     @relation("CommentReplies")
+}
+
+model CommentLike {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  comment_id String    @db.Uuid
+  user_id    String    @db.Uuid
+  like_type  String // 'like' or 'dislike'
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  Comment    Comment   @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Favorite {
+  favorite_id      Int       @id @default(autoincrement())
+  user_id          String?   @db.Uuid
+  favorite_item_id String?   @db.Uuid
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  User             User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Follow {
+  id                             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  follower_id                    String    @db.Uuid
+  following_id                   String    @db.Uuid
+  created_at                     DateTime? @default(now()) @db.Timestamp(6)
+  User_Follow_follower_idToUser  User      @relation("Follow_follower_idToUser", fields: [follower_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  User_Follow_following_idToUser User      @relation("Follow_following_idToUser", fields: [following_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Follower {
+  id                              Int    @id @default(autoincrement())
+  user_id                         String @db.Uuid
+  follower_id                     String @db.Uuid
+  User_Follower_follower_idToUser User   @relation("Follower_follower_idToUser", fields: [follower_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  User_Follower_user_idToUser     User   @relation("Follower_user_idToUser", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Like {
+  like_id       Int        @id @default(autoincrement())
+  user_id       String     @db.Uuid
+  newsletter_id Int
+  created_at    DateTime?  @default(now()) @db.Timestamp(6)
+  Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
+  User          User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Newsletter {
+  newsletter_id       Int             @id @default(autoincrement())
+  user_id             String?         @db.Uuid
+  sender              String?         @db.Text
+  date                DateTime?       @default(now()) @db.Timestamp(6)
+  subject             String?         @db.Text
+  html_file_url       String?         @db.Text
+  full_screenshot_url String?         @db.Text
+  top_screenshot_url  String?         @db.Text
+  likes_count         Int?            @default(0)
+  you_rocks_count     Int?            @default(0)
+  created_at          DateTime?       @default(now()) @db.Timestamp(6)
+  products_link       String?         @db.Text
+  summary             String?         @db.Text
+  tags                String?         @db.Text
+  Like                Like[]
+  User                User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  NewsletterTag       NewsletterTag[]
+}
+
+model Post {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String
+  content    String
+  user_id    String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  User       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  PostTag    PostTag[]
+}
+
+model User {
+  user_id                             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                String        @db.VarChar(255)
+  surname                             String        @db.VarChar(255)
+  company_name                        String        @db.VarChar(255)
+  username                            String        @unique @db.VarChar(255)
+  email                               String        @unique
+  profile_photo                       String?
+  password                            String
+  created_at                          DateTime?     @default(now()) @db.Timestamp(6)
+  role                                String?       @default("FREE") @db.VarChar
+  full_name                           String?       @db.VarChar(255)
+  bio                                 String?       @db.Text
+  website                             String?       @db.Text
+  location                            String?       @db.VarChar(255)
+  date_of_birth                       DateTime?     @db.Date
+  updated_at                          DateTime?     @default(now()) @db.Timestamp(6)
+  status                              String?       @default("active") @db.VarChar(255)
+  last_login                          DateTime?     @db.Timestamp(6)
+  emailVerified                       DateTime?     @db.Timestamp(6)
+  twitter_username                    String?       @db.VarChar(255)
+  instagram_username                  String?       @db.VarChar(255)
+  youtube_channel                     String?       @db.Text
+  linkedin_profile                    String?       @db.Text // Add this line
+  Account                             Account[]
+  Session                             Session[]
+  Bookmark                            Bookmark[]
+  Comment                             Comment[]
+  CommentLike                         CommentLike[]
+  Favorite                            Favorite[]
+  Follow_Follow_follower_idToUser     Follow[]      @relation("Follow_follower_idToUser")
+  Follow_Follow_following_idToUser    Follow[]      @relation("Follow_following_idToUser")
+  Follower_Follower_follower_idToUser Follower[]    @relation("Follower_follower_idToUser")
+  Follower_Follower_user_idToUser     Follower[]    @relation("Follower_user_idToUser")
+  Like                                Like[]
+  Newsletter                          Newsletter[]
+  Post                                Post[]
+  UserTag                             UserTag[]
+  YouRocks                            YouRock[]
+}
+
+model UserTag {
+  tag_id        Int             @id @default(autoincrement())
+  user_id       String?         @db.Uuid
+  tag           String?         @db.VarChar(255)
+  NewsletterTag NewsletterTag[]
+  PostTag       PostTag[]
+  User          User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model YouRock {
+  yourock_id        Int       @id @default(autoincrement())
+  user_id           String?   @db.Uuid
+  yourocked_item_id Int
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  User              User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model NewsletterTag {
+  newsletter_id Int
+  tag_id        Int
+  Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
+  Tag           Tag        @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  UserTag       UserTag?   @relation(fields: [userTagTag_id], references: [tag_id])
+  userTagTag_id Int?
+
+  @@id([newsletter_id, tag_id])
+}
+
+model PostTag {
+  post_id String  @db.Uuid
+  tag_id  Int
+  Post    Post    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  UserTag UserTag @relation(fields: [tag_id], references: [tag_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, tag_id])
+}
+
+model Tag {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now())
+  Newsletters NewsletterTag[]
+}
