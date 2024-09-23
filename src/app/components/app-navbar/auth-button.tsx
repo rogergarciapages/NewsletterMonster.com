@@ -1,18 +1,15 @@
 "use client";
 
-import {
-    Avatar,
-    Button,
-    CircularProgress,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownTrigger,
-} from "@nextui-org/react";
+import { Avatar, Button, CircularProgress, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
 import { IconUser } from "@tabler/icons-react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
-export default function AuthButton({ minimal = true }: { minimal?: boolean }) {
+interface AuthButtonProps {
+  minimal?: boolean;
+  onOpenLoginModal?: () => void; // Add this prop
+}
+
+const AuthButton: React.FC<AuthButtonProps> = ({ minimal = true, onOpenLoginModal }) => {
   const { data, status } = useSession();
 
   if (status === "loading") {
@@ -20,10 +17,7 @@ export default function AuthButton({ minimal = true }: { minimal?: boolean }) {
   }
 
   if (status === "authenticated") {
-    const signOutClick = () =>
-      signOut({
-        callbackUrl: "/",
-      });
+    const signOutClick = () => signOut({ callbackUrl: "/" });
     if (minimal) {
       return (
         <Button onClick={signOutClick} color="warning" variant="solid">
@@ -58,17 +52,11 @@ export default function AuthButton({ minimal = true }: { minimal?: boolean }) {
   }
 
   return (
-    <Button
-      onClick={() =>
-        signIn("google", {
-          callbackUrl: "/",
-        })
-      }
-      color="warning"
-      variant="solid"
-    >
+    <Button onClick={onOpenLoginModal} color="warning" variant="solid">
       <IconUser />
       Sign In
     </Button>
   );
-}
+};
+
+export default AuthButton;
