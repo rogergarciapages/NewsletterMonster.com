@@ -5,7 +5,7 @@ import {
 } from "@nextui-org/react";
 import { IconPackage } from "@tabler/icons-react";
 import React from "react";
-import LoginModal from "../login-modal"; // Ensure to import the LoginModal
+import LoginModal from "../login-modal";
 import AuthButton from "./auth-button";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -15,8 +15,8 @@ export default function AppNavbar() {
 
   const menuItems = [
     { label: "Home", href: "/" },
-    { label: "Profile", href: "/profile" },
-    { label: "Guestbook", href: "/guestbook" }
+    { label: "About", href: "/about" },
+    { label: "Blog", href: "/blog" }
   ];
 
   return (
