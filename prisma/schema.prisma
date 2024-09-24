@@ -164,7 +164,7 @@ model User {
   twitter_username                    String?       @db.VarChar(255)
   instagram_username                  String?       @db.VarChar(255)
   youtube_channel                     String?       @db.Text
-  linkedin_profile                    String?       @db.Text // Add this line
+  linkedin_profile                    String?       @db.Text
   Account                             Account[]
   Session                             Session[]
   Bookmark                            Bookmark[]

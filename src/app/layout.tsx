@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-
 import AppNavbar from "./components/app-navbar";
 import Providers from "./components/providers";
 import "./globals.css";
@@ -26,9 +25,10 @@ export default function RootLayout({
         <Providers>
           <AppNavbar />
           <main className="flex-grow">
-          {children}
+            {children}
           </main>
-        </Providers></body>
+        </Providers>
+      </body>
     </html>
   );
 }

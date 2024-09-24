@@ -32,7 +32,7 @@ export default function AppNavbar() {
 
         <NavbarContent className="hidden gap-4 sm:flex" justify="center">
           {menuItems.map((item, index) => (
-            <NavbarItem key={`${item}-${index}`}>
+            <NavbarItem key={`${item.label}-${index}`}>
               <Link className="w-full" href={item.href} size="lg">
                 {item.label}
               </Link>
@@ -42,7 +42,7 @@ export default function AppNavbar() {
             <ThemeSwitcher />
           </NavbarItem>
           <NavbarItem>
-            <AuthButton minimal={false} onOpenLoginModal={onOpen} />
+            <AuthButton onOpenLoginModal={onOpen} />
           </NavbarItem>
         </NavbarContent>
         <NavbarMenu>
@@ -50,7 +50,7 @@ export default function AppNavbar() {
             <ThemeSwitcher showLabel />
           </NavbarMenuItem>
           {menuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+            <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link className="w-full" href={item.href} size="lg">
                 {item.label}
               </Link>
