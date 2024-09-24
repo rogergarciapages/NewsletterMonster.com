@@ -10,7 +10,7 @@ import {
     ModalFooter,
     ModalHeader,
 } from "@nextui-org/react";
-import { IconBrandDiscord, IconBrandGoogle, IconBrandLinkedin, IconLock, IconMail } from "@tabler/icons-react";
+import { IconBrandDiscord, IconBrandGithub, IconBrandGoogle, IconBrandLinkedin, IconLock, IconMail } from "@tabler/icons-react";
 import { signIn } from "next-auth/react";
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
@@ -191,6 +191,16 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
                         style={{ marginTop: "5px", backgroundColor: "#351d49" }}
                       > <IconBrandDiscord />
                         Sign In with Discord
+                      </Button>
+
+                      <Button
+                        onClick={() => signIn("github", { callbackUrl: "/" })}
+                        color="danger"
+                        variant="solid"
+                        fullWidth
+                        style={{ marginTop: "5px", backgroundColor: "#3869a8" }}
+                      > <IconBrandGithub />
+                        Sign In with Github
                       </Button>
 
                       <div className="w-full flex-auto">

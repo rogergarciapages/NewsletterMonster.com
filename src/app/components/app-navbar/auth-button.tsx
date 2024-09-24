@@ -1,23 +1,58 @@
 "use client";
 
-import { Button, CircularProgress } from "@nextui-org/react";
+import {
+    Avatar,
+    Button,
+    CircularProgress,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownTrigger,
+} from "@nextui-org/react";
 import { IconUser } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
-export default function AuthButton({ onOpenLoginModal }) {
-  const { status } = useSession();
+interface AuthButtonProps {
+  onOpenLoginModal: () => void;
+}
+
+export default function AuthButton({ onOpenLoginModal }: AuthButtonProps) {
+  const { data: session, status } = useSession();
 
   if (status === "loading") {
     return <CircularProgress aria-label="Loading authentication status..." />;
   }
 
   if (status === "authenticated") {
-    return null; // Hide the button if the user is authenticated
+    const signOutClick = () => signOut({ callbackUrl: "/" });
+
+    return (
+      <Dropdown placement="bottom-end">
+        <DropdownTrigger>
+          <Avatar
+            isBordered
+            as="button"
+            className="transition-transform"
+            showFallback={!session.user.image}
+            src={session.user.image || ""}
+          />
+        </DropdownTrigger>
+        <DropdownMenu aria-label="Profile Actions" variant="flat">
+          <DropdownItem key="profile" className="h-14 gap-2">
+            <p className="font-semibold">Signed in as</p>
+            <p className="font-semibold">{session.user.email}</p>
+          </DropdownItem>
+          <DropdownItem key="sign-out" color="danger" onClick={signOutClick}>
+            Sign Out
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+    );
   }
 
   return (
     <Button onClick={onOpenLoginModal} color="warning" variant="shadow">
-        <IconUser />
+      <IconUser />
       Sign In
     </Button>
   );

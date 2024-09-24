@@ -1,6 +1,6 @@
 import NextAuth, { User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "../../../../lib/prisma-client"; // Ensure correct path to your prisma client
+import { prisma } from "../../../../lib/prisma-client";
 
 interface ExtendedUser extends User {
   id: string;

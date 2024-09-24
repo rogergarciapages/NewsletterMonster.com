@@ -1,7 +1,15 @@
 "use client";
 
 import {
-  Link, Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuItem, NavbarMenuToggle, useDisclosure
+  Link,
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
+  useDisclosure,
 } from "@nextui-org/react";
 import { IconPackage } from "@tabler/icons-react";
 import React from "react";
@@ -16,7 +24,7 @@ export default function AppNavbar() {
   const menuItems = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" }
+    { label: "Blog", href: "/blog" },
   ];
 
   return (
