@@ -92,8 +92,6 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
           return;
         }
   
-        const { token } = await res.json();
-        localStorage.setItem("jwtToken", token);
         toast.success("Signup successful!");
         setShowSignup(false);
         setSignupFormData({ name: "", surname: "", company_name: "", email: "", password: "", verifyPassword: "" });
@@ -151,7 +149,6 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
                           Create Account
                         </Link>
                       </div>
-
                     </ModalBody>
                     <ModalFooter className="flex-col">
                       <Button color="warning" onPress={handleLogin} isLoading={isLoading}>
@@ -160,49 +157,47 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
                       <Button color="default" variant="solid" onPress={onClose}>
                         Close
                       </Button>
-
                       <Divider className="my-4" />
-
                       <Button
                         onClick={() => signIn("google", { callbackUrl: "/" })}
                         color="danger"
                         variant="solid"
                         fullWidth
                         style={{ marginTop: "2px", backgroundColor: "#b10329" }}
-                      > <IconBrandGoogle />
+                      >
+                        <IconBrandGoogle />
                         Sign In with Google
                       </Button>
-
                       <Button
                         onClick={() => signIn("linkedin", { callbackUrl: "/" })}
                         color="danger"
                         variant="solid"
                         fullWidth
                         style={{ marginTop: "5px", backgroundColor: "#2e485c" }}
-                      > <IconBrandLinkedin />
+                      >
+                        <IconBrandLinkedin />
                         Sign In with LinkedIn
                       </Button>
-
                       <Button
                         onClick={() => signIn("discord", { callbackUrl: "/" })}
                         color="danger"
                         variant="solid"
                         fullWidth
                         style={{ marginTop: "5px", backgroundColor: "#351d49" }}
-                      > <IconBrandDiscord />
+                      >
+                        <IconBrandDiscord />
                         Sign In with Discord
                       </Button>
-
                       <Button
                         onClick={() => signIn("github", { callbackUrl: "/" })}
                         color="danger"
                         variant="solid"
                         fullWidth
                         style={{ marginTop: "5px", backgroundColor: "#3869a8" }}
-                      > <IconBrandGithub />
+                      >
+                        <IconBrandGithub />
                         Sign In with Github
                       </Button>
-
                       <div className="w-full flex-auto">
                         <p className="text-sm muted">
                           By creating an account, you agree to our Terms and have read and acknowledge the Global Privacy

@@ -1,71 +1,42 @@
-import NextAuth, { User } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "../../../../lib/prisma-client";
+import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
+import { prisma } from "../../../lib/prisma-client";
 
-interface ExtendedUser extends User {
-  id: string;
-  profile_photo?: string | null;
+export async function POST(req: Request) {
+  try {
+    const { email, password, name } = await req.json();
+
+    if (!email || !password || !name) {
+      return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        profile_photo: null,
+        name,
+      },
+    });
+
+    return NextResponse.json({ user: newUser }, { status: 201 });
+  } catch (err) {
+    const error = err as Error; // Type assertion
+    console.error("Error during signup:", error);
+    return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
+  }
 }
 
-const handler = NextAuth({
-  providers: [
-    CredentialsProvider({
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      authorize: async (credentials) => {
-        if (!credentials) {
-          return null;
-        }
-
-        const { email, password } = credentials;
-
-        // Fetch user from Prisma
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (user && user.password === password) {
-          const extendedUser: ExtendedUser = {
-            id: user.user_id, // Map to id
-            name: user.name,
-            email: user.email,
-            profile_photo: user.profile_photo,
-          };
-          return extendedUser;
-        } else {
-          return null;
-        }
-      },
-    }),
-  ],
-  callbacks: {
-    async session({ session, token }) {
-      console.log("Session callback", { session, token });
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.image = (token.picture as string) || "/default-profile.png";
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      console.log("JWT callback", { token, user });
-      if (user) {
-        token.id = (user as ExtendedUser).id;
-        token.picture = (user as ExtendedUser).profile_photo;
-      }
-      return token;
-    },
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-  },
-});
-
-export { handler as GET, handler as POST };
-
+export async function GET() {
+  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+}

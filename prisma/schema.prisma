@@ -144,9 +144,9 @@ model Post {
 model User {
   user_id                             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                                String        @db.VarChar(255)
-  surname                             String        @db.VarChar(255)
-  company_name                        String        @db.VarChar(255)
-  username                            String        @unique @db.VarChar(255)
+  surname                             String?       @db.VarChar(255)
+  company_name                        String?       @db.VarChar(255)
+  username                            String?       @unique @db.VarChar(255)
   email                               String        @unique
   profile_photo                       String?
   password                            String

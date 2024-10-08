@@ -11,15 +11,22 @@ import {
   NavbarMenuToggle,
   useDisclosure,
 } from "@nextui-org/react";
-import { IconPackage } from "@tabler/icons-react";
 import React from "react";
 import LoginModal from "../login-modal";
 import AuthButton from "./auth-button";
 import { ThemeSwitcher } from "./theme-switcher";
 
+// Import both light and dark logo components
+import LogoNewsletterMonsterdark from "./logo-newsletter-monster-dark";
+import LogoNewsletterMonsterlight from "./logo-newsletter-monster-light";
+
+// Import the useTheme hook from next-themes
+import { useTheme } from "next-themes";
+
 export default function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { theme } = useTheme(); // Access the current theme
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -31,10 +38,17 @@ export default function AppNavbar() {
     <>
       <Navbar onMenuOpenChange={setIsMenuOpen}>
         <NavbarContent>
-          <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} className="sm:hidden" />
+          <NavbarMenuToggle
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            className="sm:hidden"
+          />
           <NavbarBrand>
-            <IconPackage />
-            <p className="font-bold text-inherit">Next.js Starter</p>
+            {/* Conditionally render logos based on the current theme */}
+            {theme === "dark" ? (
+              <LogoNewsletterMonsterdark />
+            ) : (
+              <LogoNewsletterMonsterlight />
+            )}
           </NavbarBrand>
         </NavbarContent>
 
