@@ -1,13 +1,13 @@
 "use client";
 
 import {
-    Avatar,
-    Button,
-    CircularProgress,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownTrigger,
+  Avatar,
+  Button,
+  CircularProgress,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
 } from "@nextui-org/react";
 import { IconUser } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
@@ -26,6 +26,8 @@ export default function AuthButton({ onOpenLoginModal }: AuthButtonProps) {
   if (status === "authenticated") {
     const signOutClick = () => signOut({ callbackUrl: "/" });
 
+    console.log("Session User:", session.user);
+
     return (
       <Dropdown placement="bottom-end">
         <DropdownTrigger>
@@ -33,8 +35,8 @@ export default function AuthButton({ onOpenLoginModal }: AuthButtonProps) {
             isBordered
             as="button"
             className="transition-transform"
-            showFallback={!session.user.image}
-            src={session.user.image || ""}
+            showFallback={!session.user.profile_photo}
+            src={session.user.profile_photo || ""}
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="Profile Actions" variant="flat">

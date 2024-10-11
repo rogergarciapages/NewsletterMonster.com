@@ -9,19 +9,19 @@ import { env } from "process";
 import { prisma } from "../lib/prisma-client";
 import { generateUniqueUsername } from "../utils/username-generator";
 
-// Extend the built-in session type
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       user_id: string;
-    } & DefaultSession["user"]
+      profile_photo?: string | null; // Include profile photo
+    } & DefaultSession["user"];
   }
 }
 
-// Extend the built-in JWT type
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     user_id: string;
+    profile_photo?: string | null;
   }
 }
 
@@ -48,12 +48,16 @@ const options: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.user_id = user.user_id; // Ensure we use user_id
+        token.user_id = user.user_id;
+        token.profile_photo = user?.image || (await prisma.user.findUnique({
+          where: { user_id: user.user_id }
+        }))?.profile_photo; // Retrieve from Supabase if not provided
       }
       return token;
     },
     async session({ session, token }) {
       session.user.user_id = token.user_id;
+      session.user.profile_photo = token.profile_photo; // Use profile photo
       return session;
     },
   },

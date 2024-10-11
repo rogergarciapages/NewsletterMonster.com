@@ -16,17 +16,15 @@ import LoginModal from "../login-modal";
 import AuthButton from "./auth-button";
 import { ThemeSwitcher } from "./theme-switcher";
 
-// Import both light and dark logo components
 import LogoNewsletterMonsterdark from "./logo-newsletter-monster-dark";
 import LogoNewsletterMonsterlight from "./logo-newsletter-monster-light";
 
-// Import the useTheme hook from next-themes
 import { useTheme } from "next-themes";
 
 export default function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { theme } = useTheme(); // Access the current theme
+  const { theme } = useTheme(); 
 
   const menuItems = [
     { label: "Home", href: "/" },
