@@ -1,7 +1,7 @@
+import { Button } from "@nextui-org/react";
 import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plusicon } from "@/assets/svg";
-import { Button } from "@/components/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "../../assets/avatar";
+import { Plusicon } from "../../assets/svg";
 
 const RightSidebar = () => {
   return (
@@ -23,7 +23,7 @@ const RightSidebar = () => {
               </div>
               <Button
                 variant="ghost"
-                size="icon"
+                size="md"
                 className="ml-auto hover:bg-primary"
               >
                 <Plusicon className="h-5 w-5" />
@@ -42,7 +42,7 @@ const RightSidebar = () => {
               </div>
               <Button
                 variant="ghost"
-                size="icon"
+                size="md"
                 className="ml-auto hover:bg-primary"
               >
                 <Plusicon className="h-5 w-5" />
@@ -61,7 +61,7 @@ const RightSidebar = () => {
               </div>
               <Button
                 variant="ghost"
-                size="icon"
+                size="md"
                 className="ml-auto hover:bg-primary"
               >
                 <Plusicon className="h-5 w-5" />
