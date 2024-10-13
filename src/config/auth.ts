@@ -7,13 +7,12 @@ import GoogleProvider from "next-auth/providers/google";
 import LinkedInProvider from "next-auth/providers/linkedin";
 import { env } from "process";
 import { prisma } from "../lib/prisma-client";
-import { generateUniqueUsername } from "../utils/username-generator";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       user_id: string;
-      profile_photo?: string | null; // Include profile photo
+      profile_photo?: string | null;
     } & DefaultSession["user"];
   }
 }
@@ -48,16 +47,19 @@ const options: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.user_id = user.user_id;
-        token.profile_photo = user?.image || (await prisma.user.findUnique({
-          where: { user_id: user.user_id }
-        }))?.profile_photo; // Retrieve from Supabase if not provided
+        token.user_id = user.user_id || user.id;
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+          token.profile_photo = user.image || dbUser?.profile_photo;
+        }
       }
       return token;
     },
     async session({ session, token }) {
       session.user.user_id = token.user_id;
-      session.user.profile_photo = token.profile_photo; // Use profile photo
+      session.user.profile_photo = token.profile_photo;
       return session;
     },
   },
@@ -75,11 +77,14 @@ const options: NextAuthOptions = {
   events: {
     async createUser(message) {
       const { user } = message;
-      const username = await generateUniqueUsername();
-      await prisma.user.update({
-        where: { user_id: user.user_id },
-        data: { username },
-      });
+      if (user.email) {
+        await prisma.user.update({
+          where: { email: user.email },
+          data: { profile_photo: user.image },
+        });
+      } else {
+        console.error("Invalid email for user creation event");
+      }
     },
   },
 };

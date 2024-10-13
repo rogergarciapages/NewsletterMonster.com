@@ -26,12 +26,14 @@ export default function AuthButton({ onOpenLoginModal }: AuthButtonProps) {
   if (status === "authenticated") {
     const signOutClick = () => signOut({ callbackUrl: "/" });
 
-    console.log("Session User:", session.user);
+    // Log session data to ensure profile photo and user's details are present
+    console.log("Session Data on Render:", session);
 
     return (
       <Dropdown placement="bottom-end">
         <DropdownTrigger>
           <Avatar
+
             isBordered
             as="button"
             className="transition-transform"
