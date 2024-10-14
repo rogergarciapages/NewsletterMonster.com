@@ -53,6 +53,13 @@ export const HeroSection = () => {
                     </div>
                 </div>
             </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[710px] ">
+                <div className="animate-spin size-[710px] [animation-duration:20s]">
+                    <div className="inline-flex animate-spin [animation-duration:12s]">
+                        <div className="size-3 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[550px] ">
                 <div className="animate-spin size-[550px] [animation-duration:50s]">
                     <div className="inline-flex animate-spin [animation-duration:10s]">
@@ -63,7 +70,7 @@ export const HeroSection = () => {
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[650px] ">
                 <div className="animate-spin size-[650px] [animation-duration:10s]">
                     <div className="inline-flex animate-spin [animation-duration:10s]">
-                        <div className="size-4 rounded-full bg-torch-900/80"/>
+                        <div className="size-6 rounded-full bg-torch-900/80"/>
                     </div>
                 </div>
             </div>
