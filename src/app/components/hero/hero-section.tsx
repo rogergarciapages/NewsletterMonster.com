@@ -35,19 +35,26 @@ export const HeroSection = () => {
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[430px] ">
                 <div className="animate-spin size-[430px] [animation-duration:150s]">
                     <div className="inline-flex animate-spin [animation-duration:3s]">
-                        <IconMail className="size-12 text-torch-600/80"/>
+                        <IconMail className="size-8 text-torch-600/80"/>
                     </div>
                 </div>
             </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[680px] ">
                 <div className="animate-spin size-[680px] [animation-duration:30s]">
-                    <div className="inline-flex animate-spin [animation-duration:8s]">
-                        <IconMail className="size-28 text-torch-600/80"/>
+                    <div className="inline-flex animate-spin [animation-duration:4s]">
+                        <IconMail className="size-16 text-torch-600/80"/>
                     </div>
                 </div>
             </div>   
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[850px] ">
                 <div className="animate-spin size-[850px] [animation-duration:50s]">
+                    <div className="inline-flex animate-spin [animation-duration:10s]">
+                        <div className="size-4 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[550px] ">
+                <div className="animate-spin size-[550px] [animation-duration:50s]">
                     <div className="inline-flex animate-spin [animation-duration:10s]">
                         <div className="size-4 rounded-full bg-torch-900/80"/>
                     </div>
