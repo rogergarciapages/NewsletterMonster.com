@@ -1,0 +1,115 @@
+import grainImage from "@/assets/grain.jpg";
+import { Button } from "@nextui-org/react";
+import { IconAsterisk, IconMail, IconMailBolt, IconMailbox, IconMailCheck, IconMailDollar, IconRobot, IconRocket } from "@tabler/icons-react";
+import { HeroOrbit } from "./hero-orbit";
+
+export const HeroSection = () => {
+    return (
+    <div className="py-32 md:py-48 lg:py-60 relative z-0 overflow-x-clip">
+        <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_70%,transparent)]">
+        <div className="absolute inset-0 -z-30 opacity-5" style={{
+            backgroundImage: `url(${grainImage.src})`
+        }}></div>
+        <div className="absolute inset-0 size-[620px] border-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full dark:border-torch-500/10 dark:shadow-[0_0_80px_inset] dark:shadow-torch-500/10 border-torch-900/25 shadow-[0_0_80px_inset] shadow-torch-900/45"></div>
+        <div className="absolute inset-0 size-[820px] border-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full dark:border-torch-500/10 dark:shadow-[0_0_80px_inset] dark:shadow-torch-500/10 border-torch-900/25 shadow-[0_0_80px_inset] shadow-torch-900/45"></div>
+        <div className="absolute inset-0 size-[1020px] border-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full dark:border-torch-500/10 dark:shadow-[0_0_80px_inset] dark:shadow-torch-500/10 border-torch-900/25 shadow-[0_0_80px_inset] shadow-torch-900/45"></div>
+        <div className="absolute inset-0 size-[1220px] border-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full dark:border-torch-500/10 dark:shadow-[0_0_80px_inset] dark:shadow-torch-500/10 border-torch-900/25 shadow-[0_0_80px_inset] shadow-torch-900/45"></div>
+            <HeroOrbit size={800} rotation={-72}>
+                <IconMail className="size-28 text-torch-600/80" />
+            </HeroOrbit>
+            <HeroOrbit size={550} rotation={-172}>
+                <IconMailbox className="size-16 text-torch-600/80" />
+            </HeroOrbit>
+            <HeroOrbit size={550} rotation={-17}>
+                <IconMailBolt className="size-12 text-torch-600/80" />
+            </HeroOrbit>
+            <HeroOrbit size={750} rotation={97}>
+                <IconAsterisk className="size-8 text-torch-600/80" />
+            </HeroOrbit>
+            <HeroOrbit size={750} rotation={140}>
+                <IconMailDollar className="size-8 text-torch-600/80" />
+            </HeroOrbit>
+            <HeroOrbit size={910} rotation={-50}>
+                <IconMailCheck className="size-12 text-torch-600/80" />
+            </HeroOrbit>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[430px] ">
+                <div className="animate-spin size-[430px] [animation-duration:150s]">
+                    <div className="inline-flex animate-spin [animation-duration:3s]">
+                        <IconMail className="size-12 text-torch-600/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[680px] ">
+                <div className="animate-spin size-[680px] [animation-duration:30s]">
+                    <div className="inline-flex animate-spin [animation-duration:8s]">
+                        <IconMail className="size-28 text-torch-600/80"/>
+                    </div>
+                </div>
+            </div>   
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[850px] ">
+                <div className="animate-spin size-[850px] [animation-duration:50s]">
+                    <div className="inline-flex animate-spin [animation-duration:10s]">
+                        <div className="size-4 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[650px] ">
+                <div className="animate-spin size-[650px] [animation-duration:10s]">
+                    <div className="inline-flex animate-spin [animation-duration:10s]">
+                        <div className="size-4 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[455px] ">
+                <div className="animate-spin size-[455px] [animation-duration:20s]">
+                    <div className="inline-flex animate-spin [animation-duration:10s]">
+                        <div className="size-2 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[880px] ">
+                <div className="animate-spin size-[880px] [animation-duration:20s]">
+                    <div className="inline-flex animate-spin [animation-duration:10s]">
+                        <div className="size-5 rounded-full bg-torch-900/80"/>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[730px] ">
+                <div className="animate-spin size-[730px] [animation-duration:150s]">
+                    <div className="inline-flex animate-spin [animation-duration:8s]">
+                        <IconMailbox className="size-12 text-torch-600/80"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div className="container">
+            <div className="flex flex-col items-center">
+                
+                <div className="bg-gray-950 border rounded-sm border-gray-800 px-4 py-1.5 inline-flex gap-4 mx-auto">
+                    <div className="bg-green-500 size-2.5 rounded-full"><div/>
+                    <div className="text-sm font-medium">
+                        Online
+                    </div>
+                </div>
+            </div>
+            <div className="max-w-lg mx-auto">    
+                <h1 className="font-bold tracking-tight text-3xl md:text-4xl text-center mt-8">
+                    Newsletters into SEO Powerhouses
+                </h1>
+                <p className="mt-4 text-center text-[#2e2e2e] dark:text-[#ccc] md:text-lg">
+                    Newslettermonster makes your newsletters go into next level SEO
+                </p>
+            </div> 
+            <div className="flex flex-row md:flex-row justify-center items-center gap-2 mt-4">
+                <Button radius="md" variant="shadow" className="bg-torch-600 text-white inline-flex items-center gap-2 px-6" endContent={<IconRocket/>}>
+                SignUp Now
+                </Button>
+                <Button radius="md" variant="bordered" className="dark:text-[#ccc] text-[#2e2e2e]/70 border-[#2e2e2e]/70 text-bold" endContent={<IconRobot className="dark:text-color[#ccc] text-[#2e2e2e]/70"/>}>
+                Find out more
+                </Button>
+            </div>
+        </div>
+    </div>
+    </div>
+);
+};

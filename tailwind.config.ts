@@ -139,7 +139,7 @@ const config: Config = {
         "4xs": ["0.375rem", { lineHeight: "1.6" }],
       },
       fontFamily: {
-        sans: ["'Inter Tight'", "sans-serif"],
+        sans: ["Inter", "sans-serif"],
       },
       animation: {
         move: "move 5s linear infinite",

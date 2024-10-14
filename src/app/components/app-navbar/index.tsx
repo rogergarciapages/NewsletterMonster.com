@@ -53,7 +53,7 @@ export default function AppNavbar() {
         <NavbarContent className="hidden gap-4 sm:flex" justify="center">
           {menuItems.map((item, index) => (
             <NavbarItem key={`${item.label}-${index}`}>
-              <Link className="w-full" href={item.href} size="lg">
+              <Link className="w-full" href={item.href} size="md">
                 {item.label}
               </Link>
             </NavbarItem>

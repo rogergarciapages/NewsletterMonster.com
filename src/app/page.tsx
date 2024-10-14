@@ -1,8 +1,11 @@
 "use client";
 
+// Supports weights 100-900
+import "@fontsource-variable/inter";
 import { Button, Card, CardBody } from "@nextui-org/react";
 import { signOut } from "next-auth/react";
-import { HeroSection } from "./components/hero-section";
+import { HeroSection } from "./components/hero/hero-section";
+
 
 export default function Home() {
   return (
