@@ -153,7 +153,7 @@ const config: Config = {
     },
   },
   darkMode: "class",
-  plugins: [nextui()],
+  plugins: [require('daisyui'),nextui()],
 };
 
 export default config;

@@ -1,6 +1,6 @@
 import grainImage from "@/assets/grain.jpg";
 import { Button } from "@nextui-org/react";
-import { IconAsterisk, IconMail, IconMailBolt, IconMailbox, IconMailCheck, IconMailDollar, IconRobot, IconRocket } from "@tabler/icons-react";
+import { IconAsterisk, IconCircleDotFilled, IconMail, IconMailBolt, IconMailbox, IconMailCheck, IconMailDollar, IconRobot, IconRocket } from "@tabler/icons-react";
 import { HeroOrbit } from "./hero-orbit";
 
 export const HeroSection = () => {
@@ -96,21 +96,21 @@ export const HeroSection = () => {
                 </div>
             </div>
         </div>
-        <div className="container">
-            <div className="flex flex-col items-center">
-                
-                <div className="bg-gray-950 border rounded-sm border-gray-800 px-4 py-1.5 inline-flex gap-4 mx-auto">
-                    <div className="bg-green-500 size-2.5 rounded-full"><div/>
-                    <div className="text-sm font-medium">
-                        Online
-                    </div>
-                </div>
-            </div>
+        <div className="container mx-auto">
+
+        <div className="flex flex-col items-center mx-auto">
+        <div className="bg-gray-950/80 border w-30 rounded-md border-gray-800 px-3 py-1.5 flex items-center mx-auto">
+          <IconCircleDotFilled className="text-green-600 size-3 animate-pulse" />
+          <div className="text-xs font-medium text-[#ccc] px-2">
+            Systems Online
+          </div>
+        </div>
+      </div>
             <div className="max-w-lg mx-auto">    
                 <h1 className="font-bold tracking-tight text-3xl md:text-4xl text-center mt-8">
-                    Newsletters into SEO Powerhouses
+                    Turn your Newsletters into SEO Powerhouses.
                 </h1>
-                <p className="mt-4 text-center text-[#2e2e2e] dark:text-[#ccc] md:text-lg">
+                <p className="mt-4 text-center text-[#2e2e2e] dark:text-[#ccc] md:text-lg lg:base sm:base">
                     Newslettermonster makes your newsletters go into next level SEO
                 </p>
             </div> 
@@ -118,12 +118,11 @@ export const HeroSection = () => {
                 <Button radius="md" variant="shadow" className="bg-torch-600 text-white inline-flex items-center gap-2 px-6" endContent={<IconRocket/>}>
                 SignUp Now
                 </Button>
-                <Button radius="md" variant="bordered" className="dark:text-[#ccc] text-[#2e2e2e]/70 border-[#2e2e2e]/70 text-bold" endContent={<IconRobot className="dark:text-color[#ccc] text-[#2e2e2e]/70"/>}>
+                <Button radius="md" variant="bordered" className="dark:text-[#ccc] text-[#2e2e2e]/70 dark:border-[#ccc]/80 border-[#2e2e2e]/70 text-bold" endContent={<IconRobot className="text-[#2e2e2e]/70 dark:text-[#ccc]/80"/>}>
                 Find out more
                 </Button>
             </div>
         </div>
-    </div>
     </div>
 );
 };
