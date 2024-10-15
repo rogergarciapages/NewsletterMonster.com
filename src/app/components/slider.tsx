@@ -6,6 +6,7 @@ interface HeroLandingProps {
   images: string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function HeroLanding({ currentImageIndex, images }: HeroLandingProps) {
   return (
     <section className="w-8/12 mx-auto py-12 md:py-24 lg:py-32">

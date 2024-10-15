@@ -150,6 +150,7 @@ const Footer = () => {
           </ul>
 
           <div className="text-sm mr-4 text-white">
+
             <img className="w-5 h-5 md:w-6 md:h-6 md:-mt-0.5 bg-cover mr-1.5 rtl:mr-0 rtl:ml-1.5 float-left rtl:float-right rounded-sm" src="https://nlmr1.s3.eu-central-1.amazonaws.com/logomonster.png" alt="onWidget logo" loading="lazy" />
             Made by YOU & <a className="text-[#fc0036] underline dark:text-[#fc0036]" href="https://newslettermonster.com/">Monster Industries ltd.</a> · Some rights reserved.
           </div>
@@ -157,6 +158,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;

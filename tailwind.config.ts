@@ -153,7 +153,8 @@ const config: Config = {
     },
   },
   darkMode: "class",
-  plugins: [require('daisyui'),nextui()],
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  plugins: [require("daisyui"),nextui()],
 };
 
 export default config;
