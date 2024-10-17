@@ -24,8 +24,7 @@ export default function SaveNewsletters() {
         <div className="md:col-span-6 order-1 md:order-2 space-y-4">
           <h2 className="text-5xl font-bold tracking-tighter">Save Your Favorite Newsletters</h2>
           <p className="text-base md:text-base lg:text-base xl:text-base dark:text-white">
-            Never miss important updates again. Our newsletter saving feature allows you to archive and organize your 
-            favorite newsletters in one place. Easily access past issues, highlight key information, and stay on top of 
+            Never miss important updates again. Archive and organize your favorite newsletters in one place. Easily access past issues, highlight key information, and stay on top of 
             your subscriptions.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
