@@ -7,7 +7,7 @@ interface HeroLandingProps {
 
 export function HeroLanding({  }: HeroLandingProps) {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-8 py-24 max-w-7xl">
       <div className="grid grid-cols-1 md:grid-cols-10 gap-12 items-start">
         <div className="md:col-span-5 order-1 space-y-4">
           <p className="text-base text-center text-torch-600 font-bold tracking-wide uppercase">
