@@ -1,7 +1,7 @@
 
 const Mission = () => {
   return (
-  <div className="my-16 md:mx-auto md:mb-24 text-center max-w-4xl"  >
+  <div className="my-16 md:mx-auto md:mb-24 text-center max-w-4xl transit"  >
     <p className="text-base text-torch-600 dark:text-torch-600 font-bold tracking-wide uppercase">
     The Mission:
     </p>

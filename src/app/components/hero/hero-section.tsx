@@ -107,10 +107,10 @@ export const HeroSection = () => {
         </div>
       </div>
             <div className="max-w-lg mx-auto">    
-                <h1 className="font-bold tracking-tight text-3xl md:text-4xl text-center mt-8">
+                <h1 className="font-bold tracking-tight leading-[2.90rem] text-5xl md:text-4xl text-center mt-8">
                     Turn your Newsletters into SEO Powerhouses.
                 </h1>
-                <p className="mt-4 text-center text-[#2e2e2e] dark:text-[#ccc] md:text-lg lg:base sm:base">
+                <p className="mt-4 text-center leading-snug text-[#2e2e2e] dark:text-[#ccc] text-lg md:text-lg lg:base sm:base">
                     Newslettermonster makes your newsletters go into next level SEO
                 </p>
             </div> 

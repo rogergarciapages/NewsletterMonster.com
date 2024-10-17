@@ -148,6 +148,7 @@ const config: Config = {
         move: {
           "0%": { transform: "translateX(-200px)" },
           "100%": { transform: "translateX(200px)" },
+          
         },
       },
     },
