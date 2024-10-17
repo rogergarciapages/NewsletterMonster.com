@@ -9,6 +9,7 @@ import { HeroSection } from "./components/hero/hero-section";
 import PricingWrapper from "./components/pricing";
 import SaveNewsletters from "./components/save-newsletters";
 import { HeroLanding } from "./components/slider";
+import Statement from "./components/statement";
 
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
     <HeroSection />
     <HeroLanding currentImageIndex={0} images={[]} />
     <SaveNewsletters />
+    <Statement />
     <Companies />
     <PricingWrapper />
 
