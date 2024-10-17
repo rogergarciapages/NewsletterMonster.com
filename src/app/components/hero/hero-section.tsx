@@ -39,6 +39,13 @@ export const HeroSection = () => {
                     </div>
                 </div>
             </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[360px] ">
+                <div className="animate-spin size-[360px] [animation-duration:10s]">
+                    <div className="inline-flex animate-spin [animation-duration:20s]">
+                        <IconMail className="size-6 text-torch-600/80"/>
+                    </div>
+                </div>
+            </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[680px] ">
                 <div className="animate-spin size-[680px] [animation-duration:30s]">
                     <div className="inline-flex animate-spin [animation-duration:4s]">
