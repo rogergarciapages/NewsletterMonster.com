@@ -5,7 +5,7 @@ import { Parallax, ParallaxProvider } from "react-scroll-parallax"; // Parallax 
 const Statement = () => {
   return (
     <ParallaxProvider>
-      <div className="relative w-full bg-torch-800 py-16 overflow-hidden"> {/* Parent div spanning full width */}
+      <div className="relative w-full bg-torch-950 py-16 overflow-hidden"> {/* Parent div spanning full width */}
         {/* Parallax Background Icon */}
         <Parallax speed={-45}> {/* Adjust the speed for a smoother effect */}
           <IconArrowBigUpLineFilled
