@@ -5,8 +5,8 @@ export const Companies = () => {
       <div className="flex flex-col">
         <div className="container my-24 mx-auto md:px-6 pt-5">
 
-  <section className="mb-32 text-center text-gray-900">
-    <h2 className="mb-16 max-w-5xl mx-auto text-center tracking-tight text-5xl text-gray-900 font-light dark:text-gray-300">
+  <section className="mb-32 text-center">
+    <h2 className="mb-16 max-w-5xl mx-auto text-center tracking-tight text-5xl">
       We chomped over <span className="font-extrabold">2.000.000+ emails</span> and we will never stop!
     </h2>
 

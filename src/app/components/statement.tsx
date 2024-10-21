@@ -1,4 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
+
+"use client";
+
 import { IconArrowBigUpLineFilled } from "@tabler/icons-react"; // Import the Tabler icon
 import { Parallax, ParallaxProvider } from "react-scroll-parallax"; // Parallax effect
 

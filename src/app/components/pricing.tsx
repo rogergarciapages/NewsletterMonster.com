@@ -33,10 +33,10 @@ const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
     <div className="max-w-7xl mx-auto my-8">
       <div className="text-center mb-12">
         <h2 className="text-5xl font-bold tracking-tighter text-torch-700">{title}</h2>
-        <p className="text-xl dark:text-gray-100">{subtitle}</p>
+        <p className="text-xl">{subtitle}</p>
       </div>
       <div className="flex items-stretch justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-[#111]">
           {prices.map(
             ({
               title,
@@ -53,7 +53,7 @@ const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
                 className="relative p-6 bg-white dark:bg-[#2e2e2e] border border-gray-200 dark:border-[#2e2e2e] rounded-lg shadow flex flex-col justify-between text-center"
               >
                 {hasRibbon && ribbonTitle && (
-                  <div className="absolute right-0 top-0 z-10 p-2 bg-green-700 text-white font-bold rounded-bl-lg">
+                  <div className="absolute right-0 top-0 z-10 p-2 bg-green-700 text-white font-bold rounded-bl-lg rounded-tr-lg">
                     {ribbonTitle}
                   </div>
                 )}
@@ -81,7 +81,7 @@ const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
                     href={callToAction.href}
                     target={callToAction.target}
                     className={`px-4 py-2 font-semibold text-white rounded ${
-                      hasRibbon ? "bg-primary border-gray-100" : "bg-gray-800  border-gray-100"
+                      hasRibbon ? "bg-torch-700 border-gray-100" : "bg-gray-800  border-gray-100"
                     } hover:${hasRibbon ? "bg-green-800" : "bg-blue-700"}`}
                   >
                     {callToAction.text}
