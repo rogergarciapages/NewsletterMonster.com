@@ -1,20 +1,17 @@
-// src/app/api/newsletters/trending.ts
-console.log("Trending API called");
-
-
+// src/app/api/newsletters/trending/route.ts
 import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { skip = 0, take = 10 } = req.query;
-
+export async function GET(request: Request) {
   try {
-    console.log("Fetching trending newsletters with conditions:", {
-      skip: Number(skip),
-      take: Number(take),
-    });
+    // Get URL parameters
+    const { searchParams } = new URL(request.url);
+    const skip = parseInt(searchParams.get('skip') || '0');
+    const take = parseInt(searchParams.get('take') || '10');
+
+    console.log("Fetching trending newsletters with conditions:", { skip, take });
 
     const newsletters = await prisma.newsletter.findMany({
       where: {
@@ -24,12 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ],
       },
       orderBy: [
-        { likes_count: "desc" },
-        { you_rocks_count: "desc" },
-        { created_at: "desc" },
+        { likes_count: 'desc' },
+        { you_rocks_count: 'desc' },
+        { created_at: 'desc' },
       ],
-      skip: Number(skip),
-      take: Number(take),
+      skip,
+      take,
       select: {
         newsletter_id: true,
         subject: true,
@@ -47,9 +44,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log("Fetched newsletters:", newsletters);
 
-    res.status(200).json(newsletters);
+    return NextResponse.json(newsletters);
   } catch (error) {
     console.error("Error fetching newsletters:", error);
-    res.status(500).json({ error: "Error fetching newsletters" });
+    return NextResponse.json(
+      { error: "Error fetching newsletters" },
+      { status: 500 }
+    );
   }
 }

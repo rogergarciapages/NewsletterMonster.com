@@ -5,7 +5,7 @@ import { Plusicon } from "../../assets/svg";
 
 const RightSidebar = () => {
   return (
-    <div className="w-full lg:w-1/5 p-6 dark:bg-[#222]">
+    <div className="w-full lg:w-1/5 p-6">
       <div className="sticky top-[64px] grid gap-6"> {/* Adjust top value */}
         <div>
           <h3 className="text-lg font-bold">Who to follow</h3>
