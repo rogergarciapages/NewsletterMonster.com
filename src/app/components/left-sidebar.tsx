@@ -23,11 +23,11 @@ const LeftSidebar: React.FC = () => {
   };
 
   const menuItems = [
-    { icon: IconHome, label: "Feed", path: "/dashboard/userfeed" },
+    { icon: IconHome, label: "Feed", path: "/userfeed" },
     { icon: IconUser, label: "Profile", path: `/user/user-profile/${session?.user?.user_id}` },
-    { icon: IconMessageCircle2, label: "Messages", path: "/dashboard/messages" },
-    { icon: IconList, label: "Lists", path: "/dashboard/lists" },
-    { icon: IconTrendingUp, label: "Trending", path: "/dashboard/trending" },
+    { icon: IconMessageCircle2, label: "Messages", path: "#" },
+    { icon: IconList, label: "Lists", path: "#" },
+    { icon: IconTrendingUp, label: "Trending", path: "/trending" },
     { icon: IconBell, label: "Notifications", path: "#" },
     { icon: IconBookmark, label: "Bookmarks", path: "#" },
     { icon: IconMovie, label: "Cinema Mode!", path: "#" },
