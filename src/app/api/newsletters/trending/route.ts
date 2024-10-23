@@ -8,8 +8,8 @@ export async function GET(request: Request) {
   try {
     // Get URL parameters
     const { searchParams } = new URL(request.url);
-    const skip = parseInt(searchParams.get('skip') || '0');
-    const take = parseInt(searchParams.get('take') || '10');
+    const skip = parseInt(searchParams.get("skip") || "0");
+    const take = parseInt(searchParams.get("take") || "10");
 
     console.log("Fetching trending newsletters with conditions:", { skip, take });
 
@@ -21,9 +21,9 @@ export async function GET(request: Request) {
         ],
       },
       orderBy: [
-        { likes_count: 'desc' },
-        { you_rocks_count: 'desc' },
-        { created_at: 'desc' },
+        { likes_count: "desc" },
+        { you_rocks_count: "desc" },
+        { created_at: "desc" },
       ],
       skip,
       take,

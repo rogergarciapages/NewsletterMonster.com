@@ -1,11 +1,11 @@
 "use client";
 
-import HeartFullIcon from '@/assets/svg/Heartfull.svg';
-import YouRockIcon from '@/assets/svg/Yourockicon.svg';
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card';
-import { slugify } from '@/utils/slugify';
+import HeartFullIcon from "@/assets/svg/Heartfull.svg";
+import YouRockIcon from "@/assets/svg/Yourockicon.svg";
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import { slugify } from "@/utils/slugify";
 import axios from "axios";
-import Link from 'next/link';
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Newsletter } from "../../types";
 import ThreeColumnLayout from "../components/layouts/three-column-layout";
@@ -53,10 +53,10 @@ const TrendingNewslettersPage: React.FC = () => {
                 className="relative p-4 rounded-xl flex-grow flex flex-col justify-between"
                 style={{
                   backgroundImage: `url(${newsletter.top_screenshot_url})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  margin: '15px',
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  margin: "15px",
                 }}
               >
                 <div className="absolute inset-0 bg-torch-700 rounded-lg text-white opacity-0 group-hover:opacity-85 transition-opacity duration-300" />
@@ -68,7 +68,7 @@ const TrendingNewslettersPage: React.FC = () => {
                     href={`/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`}
                   >
                     <CardTitle className="text-[#ccc] strong leading-tight tracking-tight text-4xl text-pretty mb-6 p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {newsletter.subject || 'No Subject'}
+                      {newsletter.subject || "No Subject"}
                     </CardTitle>
                   </Link>
                   <div className="flex justify-between items-center w-full mt-2">
@@ -90,7 +90,7 @@ const TrendingNewslettersPage: React.FC = () => {
                       href={`/${slugify(newsletter.sender || "")}`}
                     >
                       <CardDescription className="text-white text-sm truncate bg-aquamarine-700 px-3 py-1 inline-block rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        {newsletter.sender || 'Unknown Sender'}
+                        {newsletter.sender || "Unknown Sender"}
                       </CardDescription>
                     </Link>
                   </div>

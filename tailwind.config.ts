@@ -170,9 +170,12 @@ const config: Config = {
   },
   darkMode: ["class"], // Fixed duplicate value
   plugins: [
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("@tailwindcss/typography"),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("daisyui"),
     nextui(),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("tailwindcss-animate")
   ],
 };
