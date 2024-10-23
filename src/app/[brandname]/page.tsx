@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma-client";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import BrandProfileHeader from "../components/brand-profile-header";
 
 type BrandNewsletter = {
   newsletter_id: number;
@@ -14,7 +15,8 @@ type BrandNewsletter = {
   you_rocks_count: number | null;
   created_at: Date | null;
   summary: string | null;
-}
+  user_id: string | null;
+};
 
 export async function generateMetadata({ 
   params 
@@ -31,8 +33,9 @@ export async function generateMetadata({
   };
 }
 
-async function getBrandNewsletters(brandname: string): Promise<BrandNewsletter[]> {
+async function getBrandData(brandname: string) {
   try {
+    // Get newsletters
     const newsletters = await prisma.newsletter.findMany({
       where: {
         sender: {
@@ -52,17 +55,43 @@ async function getBrandNewsletters(brandname: string): Promise<BrandNewsletter[]
         you_rocks_count: true,
         created_at: true,
         summary: true,
+        user_id: true,
       },
     });
 
     if (!newsletters.length) {
-      return [];
+      return null;
     }
 
-    return newsletters;
+    // Get user data if the profile is claimed
+    let user = null;
+    const claimedNewsletter = newsletters.find(n => n.user_id);
+    if (claimedNewsletter?.user_id) {
+      user = await prisma.user.findUnique({
+        where: {
+          user_id: claimedNewsletter.user_id
+        }
+      });
+    }
+
+    // Get followers count if the profile is claimed
+    let followersCount = 0;
+    if (user) {
+      followersCount = await prisma.follower.count({
+        where: {
+          user_id: user.user_id
+        }
+      });
+    }
+
+    return {
+      newsletters,
+      user,
+      followersCount
+    };
   } catch (error) {
-    console.error("Error fetching brand newsletters:", error);
-    throw new Error("Failed to fetch brand newsletters");
+    console.error("Error fetching brand data:", error);
+    return null;
   }
 }
 
@@ -71,75 +100,82 @@ export default async function BrandPage({
 }: { 
   params: { brandname: string } 
 }) {
-  const newsletters = await getBrandNewsletters(params.brandname);
+  const data = await getBrandData(params.brandname);
+  
+  if (!data) {
+    notFound();
+  }
+
+  const { newsletters, user, followersCount } = data;
   const brandDisplayName = params.brandname.split("-").map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(" ");
 
-  if (!newsletters.length) {
-    notFound();
-  }
-
   return (
     <ThreeColumnLayout>
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{brandDisplayName}</h1>
-          <p className="text-gray-600">
-            {newsletters.length} {newsletters.length === 1 ? "newsletter" : "newsletters"} available
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 gap-6">
-          {newsletters.map((newsletter) => (
-            <article 
-              key={newsletter.newsletter_id}
-              className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              {newsletter.top_screenshot_url && (
-                <div className="relative aspect-video">
-                  <img
-                    src={newsletter.top_screenshot_url}
-                    alt={newsletter.subject || "Newsletter preview"}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-2">
-                  <Link 
-                    href={`/${params.brandname}/${newsletter.newsletter_id}`}
-                    className="hover:text-blue-600 transition-colors"
-                  >
-                    {newsletter.subject || "Untitled Newsletter"}
+      <div className="w-ful text-[#111]">
+        <BrandProfileHeader 
+          brandName={brandDisplayName}
+          user={user}
+          newsletterCount={newsletters.length}
+          followersCount={followersCount}
+        />
+        
+        <div className="max-w-6xl mx-auto px-1 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {newsletters.map((newsletter) => (
+              <article 
+                key={newsletter.newsletter_id}
+                className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              >
+                {newsletter.top_screenshot_url && (
+                  <Link href={`/${params.brandname}/${newsletter.newsletter_id}`}>
+                    <div className="relative aspect-video">
+                      <img
+                        src={newsletter.top_screenshot_url}
+                        alt={newsletter.subject || "Newsletter preview"}
+                        className="w-full h-full object-cover rounded-xl p-4 min-h-[400px] object-top"
+                      />
+                    </div>
                   </Link>
-                </h2>
-
-                {newsletter.summary && (
-                  <p className="text-gray-600 mb-4 line-clamp-3">{newsletter.summary}</p>
                 )}
+                
+                <div className="p-4">
+                  <Link href={`/${params.brandname}/${newsletter.newsletter_id}`}>
+                    <h2 className="text-xl font-bold tracking-tight leading-[1em] mb-2 dark:text-white hover:text-torch-600 dark:hover:text-torch-600 transition-colors">
+                      {newsletter.subject || "Untitled Newsletter"}
+                    </h2>
+                  </Link>
 
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  {newsletter.created_at && (
-                    <time dateTime={newsletter.created_at.toISOString()}>
-                      {newsletter.created_at.toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                      })}
-                    </time>
+                  {newsletter.summary && (
+                    <p className="text-gray-800 dark:text-gray-300 align-bottom text-sm mb-4 line-clamp-3">
+                      {newsletter.summary}
+                    </p>
                   )}
-                  {newsletter.likes_count !== null && (
-                    <span>{newsletter.likes_count} likes</span>
-                  )}
-                  {newsletter.you_rocks_count !== null && (
-                    <span>{newsletter.you_rocks_count} rocks</span>
-                  )}
+
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      {newsletter.likes_count !== null && (
+                        <span>{newsletter.likes_count} likes</span>
+                      )}
+                      {newsletter.you_rocks_count !== null && (
+                        <span>{newsletter.you_rocks_count} rocks</span>
+                      )}
+                    </div>
+                    {newsletter.created_at && (
+                      <time dateTime={newsletter.created_at.toISOString()}>
+                        {new Date(newsletter.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </time>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </ThreeColumnLayout>
