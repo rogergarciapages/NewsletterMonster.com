@@ -32,7 +32,7 @@ export default function BrandNewsletterList({ newsletters, brandname }: BrandNew
           className="relative min-h-[400px] flex flex-col group hover:shadow-lg transition-shadow duration-300"
         >
           <div
-            className="relative p-4 rounded-xl flex-grow flex flex-col justify-between"
+            className="relative p-4 rounded-md flex-grow flex flex-col justify-between"
             style={{
               backgroundImage: `url(${newsletter.top_screenshot_url})`,
               backgroundSize: "cover",
