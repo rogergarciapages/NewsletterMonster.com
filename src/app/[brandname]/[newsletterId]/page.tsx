@@ -222,7 +222,7 @@ export default async function NewsletterPage({
               <h2 className="text-xl text-[#111] dark:text-white font-semibold mb-4">
                 Quick summary of this {brandDisplayName} newsletter
               </h2>
-              <p>{newsletter.summary}</p>
+              <p className="text-[#111] dark:[#ccc]">{newsletter.summary}</p>
             </div>
           )}
 
