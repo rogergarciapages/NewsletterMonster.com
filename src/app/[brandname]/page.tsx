@@ -133,28 +133,29 @@ export default async function BrandPage({
         {/* Image Section */}
         {newsletter.top_screenshot_url && (
   <Link href={`/${params.brandname}/${newsletter.newsletter_id}`}>
-    <div className="relative w-full h-[400px] group"> {/* Added group class */}
-      <div className="absolute inset-0 p-4">
-        <div className="relative w-full h-full rounded-md overflow-hidden">
-          <Image
-            src={newsletter.top_screenshot_url || ""}
-            alt={newsletter.subject || "Newsletter preview"}
-            fill
-            className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={false}
-          />
-          {/* Overlay with text and icon */}
-          <div className="absolute inset-0 bg-torch-600/0 group-hover:bg-torch-600/90 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
-            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex flex-col items-center gap-3">
-              <IconMailOpened
- 
-                className="w-12 h-12 text-white" 
-                strokeWidth={2}
-              />
-              <span className="text-white font-bold text-xl tracking-tight">
-                Open it!
-              </span>
+    <div className="relative group">
+      <div className="aspect-[680/900] w-full"> {/* Fixed aspect ratio container */}
+        <div className="absolute inset-0 p-4">
+          <div className="relative w-full h-full rounded-md overflow-hidden">
+            <Image
+              src={newsletter.top_screenshot_url || ""}
+              alt={newsletter.subject || "Newsletter preview"}
+              fill
+              className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={false}
+            />
+            {/* Overlay with text and icon */}
+            <div className="absolute inset-0 bg-torch-600/0 group-hover:bg-torch-600/90 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
+              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex flex-col items-center gap-3">
+                <IconMailOpened 
+                  className="w-16 h-16 text-white" 
+                  strokeWidth={2}
+                />
+                <span className="text-white tracking-tighter font-bold text-xl">
+                  Open It!
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -207,7 +208,7 @@ export default async function BrandPage({
   {newsletter.created_at && (
     <time 
       dateTime={newsletter.created_at.toISOString()}
-      className="text-gray-500"
+      className="text-zinc-500"
     >
       {new Date(newsletter.created_at).toLocaleDateString("en-US", {
         month: "short",
