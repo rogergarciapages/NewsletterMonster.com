@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@nextui-org/react";
-import type { User } from "@prisma/client";
 import {
     IconBrandInstagram,
     IconBrandLinkedin,
@@ -10,58 +9,139 @@ import {
     IconBrandYoutube,
     IconBrandYoutubeFilled,
     IconBriefcase,
-    IconSquareCheckFilled,
-    IconSquareRoundedPlusFilled,
     IconWorld,
     IconWorldUpload
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { useState } from "react";
+import FollowButton from "./follow-button";
+
+interface BrandUser {
+  user_id: string;
+  name: string;
+  surname: string | null;
+  company_name: string | null;
+  username: string | null;
+  email: string;
+  profile_photo: string | null;
+  bio: string | null;
+  website: string | null;
+  twitter_username: string | null;
+  instagram_username: string | null;
+  youtube_channel: string | null;
+  linkedin_profile: string | null;
+  role: string | null;
+}
 
 interface BrandProfileHeaderProps {
   brandName: string;
-  user: User | null;
+  user: BrandUser | null;
   newsletterCount: number;
   followersCount: number;
   isFollowing?: boolean;
   onFollow?: () => void;
   onClaimProfile?: () => void;
+  onFollowChange?: (count: number) => void;
+}
+
+interface SocialLinkProps {
+    type: string;
+    url?: string | null;
+    display?: string | null;
+    icon: React.ReactNode;
+    onHover: () => void;
+    onLeave: () => void;
+  }
+  
+  function SocialLink({ type, url, display, icon, onHover, onLeave }: SocialLinkProps) {
+  const getHoverColor = (type: string) => {
+    switch (type) {
+      case "twitter": return "text-[#1DA1F2]";
+      case "instagram": return "text-[#E4405F]";
+      case "linkedin": return "text-[#0A66C2]";
+      case "youtube": return "text-[#FF0000]";
+      case "website": return "text-torch-600";
+      default: return "";
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <div 
+        className="transition-colors"
+        onMouseEnter={onHover}
+        onMouseLeave={onLeave}
+      >
+        {icon}
+      </div>
+      <span className="text-sm">
+        {url ? (
+          <a 
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`hover:${getHoverColor(type)} transition-colors`}
+            onMouseEnter={onHover}
+            onMouseLeave={onLeave}
+          >
+            {display || type.charAt(0).toUpperCase() + type.slice(1)}
+          </a>
+        ) : "-"}
+      </span>
+    </div>
+  );
 }
 
 export default function BrandProfileHeader({
-  brandName,
-  user,
-  newsletterCount,
-  followersCount,
-  isFollowing = false,
-  onFollow,
-  onClaimProfile,
-}: BrandProfileHeaderProps) {
-  const [isHoveringFollow, setIsHoveringFollow] = useState(false);
-  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
-
+    brandName,
+    user,
+    newsletterCount,
+    followersCount,
+    isFollowing = false,
+    onFollow,
+    onClaimProfile,
+    onFollowChange,
+  }: BrandProfileHeaderProps) {
+    const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+    const [localFollowersCount, setLocalFollowersCount] = useState(followersCount);
 
   return (
     <div className="p-8 border-b bg-white dark:bg-zinc-800 m-1 rounded-lg">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-          {/* Profile Image */}
-          <div className="w-32 h-32 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden relative">
-  {user?.profile_photo ? (
-    <Image
-      src={user.profile_photo}
-      alt={`${user.name}'s profile`}
-      fill
-      className="object-cover"
-      sizes="128px"
-      priority
-    />
-  ) : (
-    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
-      <IconBriefcase size={72} />
-    </div>
-  )}
-</div>
+          <div className="flex flex-col items-center gap-4">
+            {/* Profile Image */}
+            <div className="w-32 h-32 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden relative">
+              {user?.profile_photo ? (
+                <Image
+                  src={user.profile_photo}
+                  alt={`${user.name}'s profile`}
+                  fill
+                  className="object-cover"
+                  sizes="128px"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 dark:bg-zinc-700 dark:text-gray-500">
+                  <IconBriefcase size={72} />
+                </div>
+              )}
+            </div>
+            
+            {/* Follow Button */}
+            {user && (
+              <FollowButton 
+                brandId={user.user_id}
+                initialIsFollowing={isFollowing}
+                onFollowStateChange={(newState) => {
+                  const newCount = newState ? localFollowersCount + 1 : localFollowersCount - 1;
+                  setLocalFollowersCount(newCount);
+                  onFollowChange?.(newCount);
+                  if (onFollow) onFollow();
+                }}
+              />
+            )}
+          </div>
 
           {/* Profile Info */}
           <div className="flex-grow">
@@ -70,25 +150,7 @@ export default function BrandProfileHeader({
                 {brandName}
               </h1>
               <div className="flex gap-2">
-                {user ? (
-                  <Button
-                    color={isFollowing ? "default" : "primary"}
-                    variant={isFollowing ? "bordered" : "solid"}
-                    size="sm"
-                    onMouseEnter={() => setIsHoveringFollow(true)}
-                    onMouseLeave={() => setIsHoveringFollow(false)}
-                    onClick={onFollow}
-                    startContent={
-                      isFollowing ? 
-                        <IconSquareCheckFilled size={20} /> : 
-                        <IconSquareRoundedPlusFilled size={20} />
-                    }
-                  >
-                    {isFollowing 
-                      ? (isHoveringFollow ? "Unfollow" : "Following") 
-                      : "Follow"}
-                  </Button>
-                ) : (
+                {!user && (
                   <Button
                     color="warning"
                     variant="solid"
@@ -113,7 +175,7 @@ export default function BrandProfileHeader({
               </div>
               <div>
                 <span className="font-semibold text-gray-800 dark:text-white">
-                  {followersCount}
+                  {localFollowersCount}
                 </span>
                 <span className="text-gray-800 dark:text-white/90 ml-1">
                   followers
@@ -128,169 +190,57 @@ export default function BrandProfileHeader({
               </p>
             </div>
 
-  {/* Social Links Section */}
-  <div className="flex flex-wrap gap-4 text-gray-800 dark:text-white">
-    <div className="flex items-center gap-1">
-      <div 
-        className="transition-colors" 
-        onMouseEnter={() => setHoveredIcon("website")}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        {hoveredIcon === "website" ? (
-          <IconWorldUpload 
-            size={20} 
-            stroke={1.5} 
-            className="text-torch-600"
-          />
-        ) : (
-          <IconWorld 
-            size={20} 
-            stroke={1.5}
-          />
-        )}
-      </div>
-      <span className="text-sm">
-        {user?.website ? (
-          <a 
-            href={user.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-torch-600 transition-colors"
-            onMouseEnter={() => setHoveredIcon("website")}
-            onMouseLeave={() => setHoveredIcon(null)}
-          >
-            Website
-          </a>
-        ) : "-"}
-      </span>
-    </div>
+            {/* Social Links */}
+            <div className="flex flex-wrap gap-4 text-gray-800 dark:text-white">
+              <SocialLink
+                type="website"
+                url={user?.website || null}
+                icon={hoveredIcon === "website" ? <IconWorldUpload size={20} stroke={1.5} /> : <IconWorld size={20} stroke={1.5} />}
+                isHovered={hoveredIcon === "website"}
+                onHover={() => setHoveredIcon("website")}
+                onLeave={() => setHoveredIcon(null)}
+              />
 
-    <div className="flex items-center gap-1">
-      <div 
-        className="transition-colors"
-        onMouseEnter={() => setHoveredIcon("twitter")}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        {hoveredIcon === "twitter" ? (
-          <IconBrandXFilled 
-            size={20} 
-            stroke={1.5} 
-            className="text-[#1DA1F2]"
-          />
-        ) : (
-          <IconBrandX 
-            size={20} 
-            stroke={1.5}
-          />
-        )}
-      </div>
-      <span className="text-sm">
-        {user?.twitter_username ? (
-          <a 
-            href={`https://twitter.com/${user.twitter_username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[#1DA1F2] transition-colors"
-            onMouseEnter={() => setHoveredIcon("twitter")}
-            onMouseLeave={() => setHoveredIcon(null)}
-          >
-            @{user.twitter_username}
-          </a>
-        ) : "-"}
-      </span>
-    </div>
+              <SocialLink
+                type="twitter"
+                url={user?.twitter_username ? `https://twitter.com/${user.twitter_username}` : null}
+                display={user?.twitter_username ? `@${user.twitter_username}` : null}
+                icon={hoveredIcon === "twitter" ? <IconBrandXFilled size={20} stroke={1.5} /> : <IconBrandX size={20} stroke={1.5} />}
+                isHovered={hoveredIcon === "twitter"}
+                onHover={() => setHoveredIcon("twitter")}
+                onLeave={() => setHoveredIcon(null)}
+              />
 
-    <div className="flex items-center gap-1">
-      <div 
-        className="transition-colors"
-        onMouseEnter={() => setHoveredIcon("instagram")}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        <IconBrandInstagram 
-          size={20} 
-          stroke={1.5}
-          className={hoveredIcon === "instagram" ? "text-[#E4405F]" : ""}
-        />
-      </div>
-      <span className="text-sm">
-        {user?.instagram_username ? (
-          <a 
-            href={`https://instagram.com/${user.instagram_username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[#E4405F] transition-colors"
-            onMouseEnter={() => setHoveredIcon("instagram")}
-            onMouseLeave={() => setHoveredIcon(null)}
-          >
-            @{user.instagram_username}
-          </a>
-        ) : "-"}
-      </span>
-    </div>
+              <SocialLink
+                type="instagram"
+                url={user?.instagram_username ? `https://instagram.com/${user.instagram_username}` : null}
+                display={user?.instagram_username ? `@${user.instagram_username}` : null}
+                icon={<IconBrandInstagram size={20} stroke={1.5} className={hoveredIcon === "instagram" ? "text-[#E4405F]" : ""} />}
+                isHovered={hoveredIcon === "instagram"}
+                onHover={() => setHoveredIcon("instagram")}
+                onLeave={() => setHoveredIcon(null)}
+              />
 
-    <div className="flex items-center gap-1">
-      <div 
-        className="transition-colors"
-        onMouseEnter={() => setHoveredIcon("linkedin")}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        <IconBrandLinkedin 
-          size={20} 
-          stroke={1.5}
-          className={hoveredIcon === "linkedin" ? "text-[#0A66C2]" : ""}
-        />
-      </div>
-      <span className="text-sm">
-        {user?.linkedin_profile ? (
-          <a 
-            href={user.linkedin_profile}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[#0A66C2] transition-colors"
-            onMouseEnter={() => setHoveredIcon("linkedin")}
-            onMouseLeave={() => setHoveredIcon(null)}
-          >
-            LinkedIn
-          </a>
-        ) : "-"}
-      </span>
-    </div>
+              <SocialLink
+                type="linkedin"
+                url={user?.linkedin_profile || null}
+                icon={<IconBrandLinkedin size={20} stroke={1.5} className={hoveredIcon === "linkedin" ? "text-[#0A66C2]" : ""} />}
+                isHovered={hoveredIcon === "linkedin"}
+                onHover={() => setHoveredIcon("linkedin")}
+                onLeave={() => setHoveredIcon(null)}
+              />
 
-    <div className="flex items-center gap-1">
-      <div 
-        className="transition-colors"
-        onMouseEnter={() => setHoveredIcon("youtube")}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        {hoveredIcon === "youtube" ? (
-          <IconBrandYoutubeFilled 
-            size={20} 
-            stroke={1.5} 
-            className="text-[#FF0000]"
-          />
-        ) : (
-          <IconBrandYoutube 
-            size={20} 
-            stroke={1.5}
-          />
-        )}
-      </div>
-      <span className="text-sm">
-        {user?.youtube_channel ? (
-          <a 
-            href={user.youtube_channel}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[#FF0000] transition-colors"
-            onMouseEnter={() => setHoveredIcon("youtube")}
-            onMouseLeave={() => setHoveredIcon(null)}
-          >
-            YouTube
-          </a>
-        ) : "-"}
-      </span>
-    </div>
-  </div>
+              <SocialLink
+                type="youtube"
+                url={user?.youtube_channel || null}
+                icon={hoveredIcon === "youtube" ? 
+                  <IconBrandYoutubeFilled size={20} stroke={1.5} /> : 
+                  <IconBrandYoutube size={20} stroke={1.5} />}
+                isHovered={hoveredIcon === "youtube"}
+                onHover={() => setHoveredIcon("youtube")}
+                onLeave={() => setHoveredIcon(null)}
+              />
+            </div>
           </div>
         </div>
       </div>

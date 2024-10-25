@@ -4,6 +4,7 @@
 import "@fontsource-variable/inter";
 import { Button, Card, CardBody } from "@nextui-org/react";
 import { signOut } from "next-auth/react";
+import Benefits from "./components/benefits";
 import Companies from "./components/companies";
 import { HeroSection } from "./components/hero/hero-section";
 import PricingWrapper from "./components/pricing";
@@ -20,6 +21,7 @@ export default function Home() {
     <SaveNewsletters />
     <Statement />
     <Companies />
+    <Benefits />
     <PricingWrapper />
 
     <Card className="w-10/12 m-auto">

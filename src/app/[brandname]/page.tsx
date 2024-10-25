@@ -1,34 +1,25 @@
-// app/[brandname]/page.tsx
+import NewsletterCard from "@/app/components/brand/newsletter/card";
+import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { prisma } from "@/lib/prisma-client";
-import { IconHandLoveYou, IconHeartFilled, IconMailOpened } from "@tabler/icons-react";
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import BrandProfileHeader from "../components/brand-profile-header";
+import { Newsletter } from "../components/brand/newsletter/types";
+import { BrandUser } from "../components/brand/profile/types";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type BrandNewsletter = {
-  newsletter_id: number;
-  sender: string | null;
-  subject: string | null;
-  top_screenshot_url: string | null;
-  likes_count: number | null;
-  you_rocks_count: number | null;
-  created_at: Date | null;
-  summary: string | null;
-  user_id: string | null;
-};
+
+interface BrandData {
+  newsletters: Newsletter[];
+  user: BrandUser | null;
+  followersCount: number;
+}
 
 export async function generateMetadata({ 
   params 
 }: { 
   params: { brandname: string } 
 }): Promise<Metadata> {
-  const displayName = params.brandname.split("-").map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(" ");
+  const displayName = formatBrandName(params.brandname);
 
   return {
     title: `${displayName} Newsletters | Your Platform Name`,
@@ -36,15 +27,54 @@ export async function generateMetadata({
   };
 }
 
-async function getBrandData(brandname: string) {
+function formatBrandName(brandname: string): string {
+  return brandname.split("-").map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(" ");
+}
+
+async function getBrandData(brandname: string): Promise<BrandData | null> {
   try {
-    // Get newsletters
+    // First try to find a user that matches the brand name
+    const brandUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { company_name: { contains: brandname.replace(/-/g, " "), mode: "insensitive" } },
+          { username: { equals: brandname, mode: "insensitive" } }
+        ]
+      },
+      select: {
+        user_id: true,
+        name: true,
+        surname: true,
+        company_name: true,
+        username: true,
+        email: true,
+        profile_photo: true,
+        bio: true,
+        website: true,
+        twitter_username: true,
+        instagram_username: true,
+        youtube_channel: true,
+        linkedin_profile: true,
+        role: true
+      }
+    });
+
+    // Then get newsletters
     const newsletters = await prisma.newsletter.findMany({
       where: {
-        sender: {
-          contains: brandname.replace(/-/g, " "),
-          mode: "insensitive",
-        },
+        OR: [
+          {
+            sender: {
+              contains: brandname.replace(/-/g, " "),
+              mode: "insensitive",
+            }
+          },
+          {
+            user_id: brandUser?.user_id
+          }
+        ]
       },
       orderBy: {
         created_at: "desc",
@@ -66,30 +96,19 @@ async function getBrandData(brandname: string) {
       return null;
     }
 
-    // Get user data if the profile is claimed
-    let user = null;
-    const claimedNewsletter = newsletters.find(n => n.user_id);
-    if (claimedNewsletter?.user_id) {
-      user = await prisma.user.findUnique({
-        where: {
-          user_id: claimedNewsletter.user_id
-        }
-      });
-    }
-
-    // Get followers count if the profile is claimed
+    // Get followers count
     let followersCount = 0;
-    if (user) {
+    if (brandUser) {
       followersCount = await prisma.follower.count({
         where: {
-          user_id: user.user_id
+          user_id: brandUser.user_id
         }
       });
     }
 
     return {
       newsletters,
-      user,
+      user: brandUser,
       followersCount
     };
   } catch (error) {
@@ -99,132 +118,42 @@ async function getBrandData(brandname: string) {
 }
 
 export default async function BrandPage({ 
-  params 
-}: { 
-  params: { brandname: string } 
-}) {
-  const data = await getBrandData(params.brandname);
+    params 
+  }: { 
+    params: { brandname: string } 
+  }) {
+    const data = await getBrandData(params.brandname);
+    
+    if (!data) {
+      notFound();
+    }
   
-  if (!data) {
-    notFound();
-  }
-
-  const { newsletters, user, followersCount } = data;
-  const brandDisplayName = params.brandname.split("-").map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(" ");
-
-  return (
-    <ThreeColumnLayout>
-      <div className="w-ful text-[#111]">
-        <BrandProfileHeader 
-          brandName={brandDisplayName}
-          user={user}
-          newsletterCount={newsletters.length}
-          followersCount={followersCount}
-        />
-<div className="max-w-6xl mx-auto px-1 py-8">
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-    {newsletters.map((newsletter) => (
-      <article 
-        key={newsletter.newsletter_id}
-        className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
-      >
-        {/* Image Section */}
-        {newsletter.top_screenshot_url && (
-  <Link href={`/${params.brandname}/${newsletter.newsletter_id}`}>
-    <div className="relative group">
-      <div className="aspect-[680/900] w-full"> {/* Fixed aspect ratio container */}
-        <div className="absolute inset-0 p-4">
-          <div className="relative w-full h-full rounded-md overflow-hidden">
-            <Image
-              src={newsletter.top_screenshot_url || ""}
-              alt={newsletter.subject || "Newsletter preview"}
-              fill
-              className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority={false}
-            />
-            {/* Overlay with text and icon */}
-            <div className="absolute inset-0 bg-torch-600/0 group-hover:bg-torch-600/90 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
-              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex flex-col items-center gap-3">
-                <IconMailOpened 
-                  className="w-16 h-16 text-white" 
-                  strokeWidth={2}
+    const { newsletters, user, followersCount } = data;
+    const brandDisplayName = formatBrandName(params.brandname);
+  
+    return (
+      <ThreeColumnLayout>
+        <div className="w-full text-[#111]">
+        <BrandProfileHeaderWrapper 
+  brandName={brandDisplayName}
+  user={user}
+  newsletterCount={newsletters.length}
+  followersCount={followersCount}
+  isFollowing={false}
+/>
+          
+          <div className="max-w-6xl mx-auto px-1 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {newsletters.map((newsletter) => (
+                <NewsletterCard
+                  key={newsletter.newsletter_id}
+                  newsletter={newsletter}
+                  brandname={params.brandname}
                 />
-                <span className="text-white tracking-tighter font-bold text-xl">
-                  Open It!
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </Link>
-)}
-        
-        {/* Content Section */}
-        <div className="px-4 py-2 flex flex-col" style={{ height: "180px" }}>
-          {/* Title */}
-          <Link href={`/${params.brandname}/${newsletter.newsletter_id}`}>
-            <h2 className="text-xl font-bold tracking-tight leading-[1em] mb-2 dark:text-white hover:text-torch-600 dark:hover:text-torch-600 transition-colors line-clamp-2">
-              {newsletter.subject || "Untitled Newsletter"}
-            </h2>
-          </Link>
-
-          {/* Bottom Content - Fixed to bottom */}
-          <div className="flex flex-col mt-auto">
-            {/* Summary */}
-            {newsletter.summary && (
-              <p className="text-gray-800 dark:text-gray-300 text-sm line-clamp-2 mb-3">
-                {newsletter.summary}
-              </p>
-            )}
-
-            {/* Metadata */}
-            <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-2 pb-2">
-  <div className="flex items-center gap-3">
-    {newsletter.likes_count !== null && (
-      <div className="flex items-center gap-1.5">
-        <IconHeartFilled 
-          size={24} 
-          className="text-torch-700" 
-        />
-        <span className="font-medium text-medium text-gray-900 dark:text-white/80">{newsletter.likes_count}</span>
-      </div>
-    )}
-    {newsletter.you_rocks_count !== null && (
-      <div className="flex items-center gap-1.5">
-        <IconHandLoveYou 
-          size={24} 
-          strokeWidth={2}
-          className="text-gray-900 dark:text-white" 
-        />
-        <span className="font-medium text-medium text-gray-900 dark:text-white/80">{newsletter.you_rocks_count}</span>
-      </div>
-    )}
-  </div>
-  {newsletter.created_at && (
-    <time 
-      dateTime={newsletter.created_at.toISOString()}
-      className="text-zinc-500"
-    >
-      {new Date(newsletter.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      })}
-    </time>
-  )}
-</div>
-          </div>
-        </div>
-      </article>
-    ))}
-  </div>
-</div>
-      </div>
-    </ThreeColumnLayout>
-  );
-}
+      </ThreeColumnLayout>
+    );
+  }

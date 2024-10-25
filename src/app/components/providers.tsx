@@ -9,15 +9,20 @@ import { ReactNode } from "react";
 export default function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
 
+  // Create a type-safe navigation function
+  const navigate = (path: string) => {
+    router.push(path as never);  // Type assertion to handle Next.js 14 types
+  };
+
   return (
     <SessionProvider>
       <NextUIProvider
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        navigate={router.push}
+        navigate={navigate}
         className="flex h-full w-full flex-col"
       >
-        <NextThemesProvider attribute="class">{children}</NextThemesProvider>
+        <NextThemesProvider attribute="class">
+          {children}
+        </NextThemesProvider>
       </NextUIProvider>
     </SessionProvider>
   );
