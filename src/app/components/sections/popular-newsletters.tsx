@@ -64,8 +64,15 @@ export const PopularNewsletters = () => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
-      <h2 className="text-3xl font-bold text-center mb-8">Popular Newsletters</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="text-center mb-8">
+        <h2 className="text-5xl font-bold mb-3 tracking-tight">Popular Newsletters</h2>
+        <p className="text-gray-[#111] tracking-tight dark:text-white max-w-2xl mx-auto text-lg leading-tight mb-16">
+          Discover most engaging newsletters, curated based on reader engagement and appreciation. 
+          These top picks showcase the best content from our community, featuring insights, analysis, and unique perspectives.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
           Array.from({ length: 12 }).map((_, index) => (
             <PopularNewsletterSkeleton key={`skeleton-${index}`} />
@@ -74,11 +81,11 @@ export const PopularNewsletters = () => {
           newsletters.map((newsletter) => (
             <Card 
               key={newsletter.newsletter_id}
-              className="relative h-[400px] flex flex-col text-white group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
+              className="relative h-[450px] flex flex-col text-white group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               onClick={() => handleCardClick(newsletter)}
             >
               <div
-                className="relative p-3 rounded-xl flex-grow flex flex-col justify-between h-full"
+                className="relative p-2 rounded-xl flex-grow flex flex-col justify-between h-full"
                 style={{
                   backgroundImage: `url(${newsletter.top_screenshot_url})`,
                   backgroundSize: "cover",
@@ -94,7 +101,7 @@ export const PopularNewsletters = () => {
                 </CardContent>
 
                 <CardFooter className="relative z-10 flex flex-col items-start w-full">
-                  <CardTitle className="text-[#ccc] strong leading-tight tracking-tight text-2xl text-pretty mb-4 p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white line-clamp-2">
+                  <CardTitle className="text-[#ccc] strong leading-[10px] tracking-tight text-2xl text-pretty mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white">
                     {newsletter.subject || "No Subject"}
                   </CardTitle>
 
