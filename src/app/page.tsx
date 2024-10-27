@@ -9,6 +9,7 @@ import Companies from "./components/companies";
 import { HeroSection } from "./components/hero/hero-section";
 import PricingWrapper from "./components/pricing";
 import SaveNewsletters from "./components/save-newsletters";
+import { PopularNewsletters } from "./components/sections/popular-newsletters";
 import { HeroLanding } from "./components/slider";
 import Statement from "./components/statement";
 
@@ -22,6 +23,7 @@ export default function Home() {
     <Statement />
     <Companies />
     <Benefits />
+    <PopularNewsletters />
     <PricingWrapper />
 
     <Card className="w-10/12 m-auto">
