@@ -1,14 +1,14 @@
 import {
-    Button,
-    Checkbox,
-    Divider,
-    Input,
-    Link,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
+  Button,
+  Checkbox,
+  Divider,
+  Input,
+  Link,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "@nextui-org/react";
 import { IconBrandDiscord, IconBrandGithub, IconBrandGoogle, IconBrandLinkedin, IconLock, IconMail } from "@tabler/icons-react";
 import { signIn } from "next-auth/react";
@@ -20,6 +20,7 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
   interface LoginModalProps {
     isOpen: boolean;
     onOpenChange: () => void;
+    onSuccess?: () => void; 
   }
   
   const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange }) => {

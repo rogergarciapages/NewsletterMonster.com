@@ -1,3 +1,4 @@
+// src/app/components/left-sidebar.tsx
 "use client";
 
 import { Accordion, AccordionItem, Button } from "@nextui-org/react";
@@ -13,18 +14,32 @@ import {
 } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import LoginModal from "./login-modal";
+
+interface MenuItem {
+  icon: typeof IconHome;
+  label: string;
+  path: string;
+  requiresAuth?: boolean;
+}
 
 const LeftSidebar: React.FC = () => {
   useTheme();
+  const router = useRouter();
   const { data: session } = useSession();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [lastAttemptedPath, setLastAttemptedPath] = useState<string | null>(null);
 
-  const handleNavigation = (path: string) => {
-    window.location.href = path;
-  };
-
-  const menuItems = [
-    { icon: IconHome, label: "Feed", path: "/userfeed" },
-    { icon: IconUser, label: "Profile", path: `/user/user-profile/${session?.user?.user_id}` },
+  const menuItems: MenuItem[] = [
+    { icon: IconHome, label: "Feed", path: "/userfeed", requiresAuth: true },
+    { 
+      icon: IconUser, 
+      label: "Profile", 
+      path: session?.user?.user_id ? `/user/user-profile/${session.user.user_id}` : "#",
+      requiresAuth: true 
+    },
     { icon: IconMessageCircle2, label: "Messages", path: "#" },
     { icon: IconList, label: "Lists", path: "#" },
     { icon: IconTrendingUp, label: "Trending", path: "/trending" },
@@ -33,12 +48,34 @@ const LeftSidebar: React.FC = () => {
     { icon: IconMovie, label: "Cinema Mode!", path: "#" },
   ];
 
-  const renderMenuItem = (item: typeof menuItems[0]) => (
+  const handleNavigation = (item: MenuItem) => {
+    if (item.requiresAuth && !session) {
+      setLastAttemptedPath(item.path);
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (item.path === "#") {
+      return;
+    }
+
+    router.push(item.path as never); // Type assertion for Next.js 14
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoginModalOpen(false);
+    if (lastAttemptedPath && lastAttemptedPath !== "#") {
+      router.push(lastAttemptedPath as never); // Type assertion for Next.js 14
+      setLastAttemptedPath(null);
+    }
+  };
+
+  const renderMenuItem = (item: MenuItem) => (
     <Button
       key={item.label}
       variant="light"
       className="w-full justify-start"
-      onClick={() => handleNavigation(item.path)}
+      onClick={() => handleNavigation(item)}
       startContent={<item.icon className="h-4 w-4" />}
     >
       {item.label}
@@ -46,23 +83,31 @@ const LeftSidebar: React.FC = () => {
   );
 
   return (
-    <div className="w-full lg:w-1/5 p-6 bg-background">
-      <div className="sticky top-0 flex flex-col gap-6">
-        <nav className="grid gap-2">
-          <div className="block lg:hidden">
-            <Accordion>
-              <AccordionItem key="1" aria-label="Menu" title="Menu">
-                {menuItems.map(renderMenuItem)}
-              </AccordionItem>
-            </Accordion>
-          </div>
+    <>
+      <div className="w-full bg-background">
+        <div className="flex flex-col gap-6">
+          <nav className="grid gap-2">
+            <div className="block lg:hidden">
+              <Accordion>
+                <AccordionItem key="1" aria-label="Menu" title="Menu">
+                  {menuItems.map(renderMenuItem)}
+                </AccordionItem>
+              </Accordion>
+            </div>
 
-          <div className="hidden lg:block">
-            {menuItems.map(renderMenuItem)}
-          </div>
-        </nav>
+            <div className="hidden lg:block">
+              {menuItems.map(renderMenuItem)}
+            </div>
+          </nav>
+        </div>
       </div>
-    </div>
+
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onOpenChange={() => setIsLoginModalOpen(false)}
+        onSuccess={handleLoginSuccess}
+      />
+    </>
   );
 };
 

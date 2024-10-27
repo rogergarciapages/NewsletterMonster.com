@@ -4,7 +4,6 @@ import Footer from "./components/footer";
 import Providers from "./components/providers";
 import "./globals.css";
 
-
 export const metadata: Metadata = {
   title: "Next.js Starter App",
   description: "A basic starter for next.js",
@@ -25,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className="w-full m-auto antialiased selection:bg-torch-700/80 selection:text-space-950 dark:selection:bg-torch-900/10 dark:selection:text-torch-600">
         <Providers>
-          <AppNavbar />
+          <div className="sticky top-0 z-50">
+            <AppNavbar />
+          </div>
           <main className="flex-grow">
             {children}
           </main>
