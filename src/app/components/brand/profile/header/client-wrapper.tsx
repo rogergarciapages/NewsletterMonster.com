@@ -10,19 +10,19 @@ export default function BrandProfileHeaderWrapper({
   brandName,
   user,
   newsletterCount,
-  followersCount: initialFollowersCount,  // Renamed to avoid conflict
+  followersCount: initialFollowersCount,
   isFollowing: initialIsFollowing = false,
 }: BrandProfileWrapperOmitProps) {
   const [currentFollowersCount, setFollowersCount] = useState(initialFollowersCount);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
 
   const handleFollowChange = async (newState: boolean) => {
-    if (!user?.user_id) return;
+    if (!user?.user_id && !brandName) return;
 
     try {
-      const response = await fetch(`/api/follow/count?brandId=${user.user_id}`);
-      const data = await response.json();
+      const response = await fetch(`/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user}`);
       if (response.ok) {
+        const data = await response.json();
         setFollowersCount(data.count);
         setIsFollowing(newState);
       }

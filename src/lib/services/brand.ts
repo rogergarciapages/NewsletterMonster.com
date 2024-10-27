@@ -45,16 +45,34 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
           you_rocks_count: true,
         },
       },
+      followers: {
+        select: {
+          follower_id: true,
+        },
+        where: {
+          following_id: { not: null } // Only count claimed profile follows
+        }
+      },
+      following: {
+        select: {
+          following_id: true,
+          following_name: true,
+        }
+      },
       _count: {
         select: {
-          Follow_Follow_follower_idToUser: true,
-          Follow_Follow_following_idToUser: true,
+          followers: true,
+          following: true
         }
       }
     }
   });
 
   if (!user) return null;
+
+  // Count both claimed and unclaimed follows
+  const followersCount = user._count.followers;
+  const followingCount = user._count.following;
 
   return {
     user_id: user.user_id,
@@ -67,7 +85,7 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
     youtube_channel: user.youtube_channel,
     linkedin_profile: user.linkedin_profile,
     newsletters: user.Newsletter,
-    followers_count: user._count.Follow_Follow_follower_idToUser,
-    following_count: user._count.Follow_Follow_following_idToUser
+    followers_count: followersCount,
+    following_count: followingCount
   };
 }

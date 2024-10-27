@@ -5,13 +5,13 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
+import { Toaster } from 'sonner';
 
 export default function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  // Create a type-safe navigation function
   const navigate = (path: string) => {
-    router.push(path as never);  // Type assertion to handle Next.js 14 types
+    router.push(path as never);
   };
 
   return (
@@ -22,6 +22,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       >
         <NextThemesProvider attribute="class">
           {children}
+          <Toaster position="bottom-right" richColors />
         </NextThemesProvider>
       </NextUIProvider>
     </SessionProvider>

@@ -17,7 +17,7 @@ export async function GET(req: Request) {
           { following_id: isUnclaimed ? undefined : targetId },
           { following_name: isUnclaimed ? targetId : undefined }
         ]
-      },
+      }
     });
 
     return NextResponse.json({ count });

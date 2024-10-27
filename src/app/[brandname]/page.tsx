@@ -1,3 +1,4 @@
+// src/app/[brandname]/page.tsx
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
@@ -6,7 +7,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Newsletter } from "../components/brand/newsletter/types";
 import { BrandUser } from "../components/brand/profile/types";
-
 
 interface BrandData {
   newsletters: Newsletter[];
@@ -22,7 +22,7 @@ export async function generateMetadata({
   const displayName = formatBrandName(params.brandname);
 
   return {
-    title: `${displayName} Newsletters | Your Platform Name`,
+    title: `${displayName} Newsletters | NewsletterMonster`,
     description: `Browse all newsletters from ${displayName}. Get the latest updates and insights.`,
   };
 }
@@ -96,12 +96,22 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
       return null;
     }
 
-    // Get followers count
+    // Get followers count using the follow table
     let followersCount = 0;
     if (brandUser) {
-      followersCount = await prisma.follower.count({
+      followersCount = await prisma.follow.count({
         where: {
-          user_id: brandUser.user_id
+          OR: [
+            { following_id: brandUser.user_id },
+            { following_name: brandname }
+          ]
+        }
+      });
+    } else {
+      // If no user found, count followers for unclaimed brand
+      followersCount = await prisma.follow.count({
+        where: {
+          following_name: brandname
         }
       });
     }
@@ -118,42 +128,42 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
 }
 
 export default async function BrandPage({ 
-    params 
-  }: { 
-    params: { brandname: string } 
-  }) {
-    const data = await getBrandData(params.brandname);
-    
-    if (!data) {
-      notFound();
-    }
+  params 
+}: { 
+  params: { brandname: string } 
+}) {
+  const data = await getBrandData(params.brandname);
   
-    const { newsletters, user, followersCount } = data;
-    const brandDisplayName = formatBrandName(params.brandname);
-  
-    return (
-      <ThreeColumnLayout>
-        <div className="w-full text-[#111]">
+  if (!data) {
+    notFound();
+  }
+
+  const { newsletters, user, followersCount } = data;
+  const brandDisplayName = formatBrandName(params.brandname);
+
+  return (
+    <ThreeColumnLayout>
+      <div className="w-full text-[#111]">
         <BrandProfileHeaderWrapper 
-  brandName={brandDisplayName}
-  user={user}
-  newsletterCount={newsletters.length}
-  followersCount={followersCount}
-  isFollowing={false}
-/>
-          
-          <div className="max-w-6xl mx-auto px-1 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {newsletters.map((newsletter) => (
-                <NewsletterCard
-                  key={newsletter.newsletter_id}
-                  newsletter={newsletter}
-                  brandname={params.brandname}
-                />
-              ))}
-            </div>
+          brandName={brandDisplayName}
+          user={user}
+          newsletterCount={newsletters.length}
+          followersCount={followersCount}
+          isFollowing={false} // This will be handled by the client component
+        />
+        
+        <div className="max-w-6xl mx-auto px-1 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {newsletters.map((newsletter) => (
+              <NewsletterCard
+                key={newsletter.newsletter_id}
+                newsletter={newsletter}
+                brandname={params.brandname}
+              />
+            ))}
           </div>
         </div>
-      </ThreeColumnLayout>
-    );
-  }
+      </div>
+    </ThreeColumnLayout>
+  );
+}

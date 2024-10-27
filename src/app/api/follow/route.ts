@@ -1,3 +1,4 @@
+// src/app/api/follow/route.ts
 import authOptions from "@/config/auth";
 import { prisma } from "@/lib/prisma-client";
 import { getServerSession } from "next-auth";
@@ -11,8 +12,12 @@ export async function POST(req: Request) {
     }
 
     const { targetId, isUnclaimed } = await req.json();
+    
+    if (!targetId) {
+      return NextResponse.json({ error: "Target ID required" }, { status: 400 });
+    }
 
-    // Check if already following
+    // Check if follow already exists
     const existingFollow = await prisma.follow.findFirst({
       where: {
         follower_id: session.user.user_id,
@@ -20,22 +25,21 @@ export async function POST(req: Request) {
           { following_id: isUnclaimed ? undefined : targetId },
           { following_name: isUnclaimed ? targetId : undefined }
         ]
-      },
+      }
     });
 
     if (existingFollow) {
       return NextResponse.json({ error: "Already following" }, { status: 400 });
     }
 
-    // Create follow relationship
+    // Create follow
     const follow = await prisma.follow.create({
       data: {
         follower_id: session.user.user_id,
-        ...(isUnclaimed 
+        ...(isUnclaimed
           ? { following_name: targetId }
-          : { following_id: targetId }
-        )
-      },
+          : { following_id: targetId })
+      }
     });
 
     return NextResponse.json({ success: true, follow });
@@ -52,24 +56,36 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const targetId = searchParams.get("targetId");
-    const isUnclaimed = searchParams.get("isUnclaimed") === "true";
+    // Changed to get data from request body
+    const data = await req.json();
+    const { targetId, isUnclaimed } = data;
 
     if (!targetId) {
       return NextResponse.json({ error: "Target ID required" }, { status: 400 });
     }
 
-    // Delete follow relationship
-    await prisma.follow.deleteMany({
+    console.log('Attempting to unfollow:', { 
+      follower_id: session.user.user_id, 
+      targetId, 
+      isUnclaimed 
+    });
+
+    // Delete the follow relationship
+    const result = await prisma.follow.deleteMany({
       where: {
         follower_id: session.user.user_id,
         OR: [
           { following_id: isUnclaimed ? undefined : targetId },
           { following_name: isUnclaimed ? targetId : undefined }
         ]
-      },
+      }
     });
+
+    console.log('Unfollow result:', result);
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Follow not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

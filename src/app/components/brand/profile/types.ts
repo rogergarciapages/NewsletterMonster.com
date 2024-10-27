@@ -26,8 +26,8 @@ export interface BrandUser {
   }
   
   export interface FollowButtonProps {
-    brandId: string;
-    isUnclaimed: boolean;  // Changed from isUnclaimedProfile
-    initialIsFollowing: boolean;
-    onFollowStateChange: (isFollowing: boolean) => void;
+    targetId: string;
+    isUnclaimed?: boolean;
+    initialIsFollowing?: boolean;
+    onFollowStateChange?: (isFollowing: boolean) => void;
   }

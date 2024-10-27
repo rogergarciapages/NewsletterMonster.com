@@ -1,3 +1,4 @@
+// src/app/components/brand/profile/header/social-links.tsx
 "use client";
 
 import {
@@ -20,13 +21,12 @@ interface SocialLinksProps {
 export default function SocialLinks({ user }: SocialLinksProps) {
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
-  if (!user) return null;
-
+  // Show placeholder links if no user
   return (
     <div className="flex flex-wrap gap-4 text-gray-800 dark:text-white">
       <SocialLink
         type="website"
-        url={user.website}
+        url={user?.website || null}
         icon={hoveredIcon === "website" ? <IconWorldUpload size={20} stroke={1.5} /> : <IconWorld size={20} stroke={1.5} />}
         isHovered={hoveredIcon === "website"}
         onHover={() => setHoveredIcon("website")}
@@ -35,8 +35,8 @@ export default function SocialLinks({ user }: SocialLinksProps) {
 
       <SocialLink
         type="twitter"
-        url={user.twitter_username ? `https://twitter.com/${user.twitter_username}` : null}
-        display={user.twitter_username ? `@${user.twitter_username}` : null}
+        url={user?.twitter_username ? `https://twitter.com/${user.twitter_username}` : null}
+        display={user?.twitter_username ? `@${user.twitter_username}` : null}
         icon={hoveredIcon === "twitter" ? <IconBrandXFilled size={20} stroke={1.5} /> : <IconBrandX size={20} stroke={1.5} />}
         isHovered={hoveredIcon === "twitter"}
         onHover={() => setHoveredIcon("twitter")}
@@ -45,8 +45,8 @@ export default function SocialLinks({ user }: SocialLinksProps) {
 
       <SocialLink
         type="instagram"
-        url={user.instagram_username ? `https://instagram.com/${user.instagram_username}` : null}
-        display={user.instagram_username ? `@${user.instagram_username}` : null}
+        url={user?.instagram_username ? `https://instagram.com/${user.instagram_username}` : null}
+        display={user?.instagram_username ? `@${user.instagram_username}` : null}
         icon={<IconBrandInstagram size={20} stroke={1.5} className={hoveredIcon === "instagram" ? "text-[#E4405F]" : ""} />}
         isHovered={hoveredIcon === "instagram"}
         onHover={() => setHoveredIcon("instagram")}
@@ -55,7 +55,7 @@ export default function SocialLinks({ user }: SocialLinksProps) {
 
       <SocialLink
         type="linkedin"
-        url={user.linkedin_profile}
+        url={user?.linkedin_profile || null}
         icon={<IconBrandLinkedin size={20} stroke={1.5} className={hoveredIcon === "linkedin" ? "text-[#0A66C2]" : ""} />}
         isHovered={hoveredIcon === "linkedin"}
         onHover={() => setHoveredIcon("linkedin")}
@@ -64,7 +64,7 @@ export default function SocialLinks({ user }: SocialLinksProps) {
 
       <SocialLink
         type="youtube"
-        url={user.youtube_channel}
+        url={user?.youtube_channel || null}
         icon={hoveredIcon === "youtube" ? 
           <IconBrandYoutubeFilled size={20} stroke={1.5} /> : 
           <IconBrandYoutube size={20} stroke={1.5} />}

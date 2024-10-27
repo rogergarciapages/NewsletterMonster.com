@@ -1,75 +1,50 @@
 "use client";
 
+import { useFollow } from "@/hooks/useFollow";
 import { Button } from "@nextui-org/react";
-import { IconSquareCheckFilled, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FollowButtonProps } from "../types";
 
+interface ExtendedFollowButtonProps extends FollowButtonProps {
+  onNeedsLogin: () => void;
+  onCountUpdate: (count: number) => void;
+}
+
 export default function FollowButton({
-  brandId,
-  isUnclaimed,  // Changed from isUnclaimedProfile
-  initialIsFollowing,
-  onFollowStateChange
-}: FollowButtonProps) {
-  const { data: session, status } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
+  targetId,
+  isUnclaimed = false,
+  initialIsFollowing = false,
+  onFollowStateChange,
+  onNeedsLogin,
+  onCountUpdate
+}: ExtendedFollowButtonProps) {
+  const { data: session } = useSession();
   const [isHovering, setIsHovering] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  
+  const { isFollowing, isLoading, error, toggleFollow } = useFollow({
+    targetId,
+    isUnclaimed,
+    initialIsFollowing,
+    onCountUpdate
+  });
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      checkFollowStatus();
-    } else {
-      setIsLoading(false);
+  const handleClick = async () => {
+    if (!session) {
+      onNeedsLogin();
+      return;
     }
-  }, [status, brandId]);
 
-  const checkFollowStatus = async () => {
-    try {
-      const response = await fetch(
-        `/api/follow/check?targetId=${brandId}&isUnclaimed=${isUnclaimed}`
-      );
-      const data = await response.json();
-      setIsFollowing(data.isFollowing);
-    } catch (error) {
-      console.error("Error checking follow status:", error);
-    } finally {
-      setIsLoading(false);
+    if (session.user.user_id === targetId) {
+      return;
     }
-  };
 
-  const handleFollowClick = async () => {
-    if (!session?.user) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/follow', {
-        method: isFollowing ? 'DELETE' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          targetId: brandId,
-          isUnclaimed
-        }),
-      });
-
-      if (response.ok) {
-        const newFollowState = !isFollowing;
-        setIsFollowing(newFollowState);
-        onFollowStateChange(newFollowState);
-      }
-    } catch (error) {
-      console.error("Error updating follow status:", error);
-    } finally {
-      setIsLoading(false);
+    const success = await toggleFollow();
+    if (success) {
+      onFollowStateChange?.(!isFollowing);
     }
   };
-
-  if (!session?.user || session.user.user_id === brandId) {
-    return null;
-  }
 
   return (
     <Button
@@ -78,13 +53,18 @@ export default function FollowButton({
       variant={isFollowing ? "bordered" : "solid"}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={handleFollowClick}
-      className="w-full md:w-auto"
+      onClick={handleClick}
+      className="w-[130px] min-w-[130px]" // Fixed width
+      style={{
+        backgroundColor: isFollowing ? 'rgba(0, 143, 119, 0.1)' : '#008f77', // Muted when following
+        borderColor: '#008f77',
+        color: isFollowing ? '#008f77' : 'white',
+      }}
       startContent={
         !isLoading && (
           isFollowing ? 
-            <IconSquareCheckFilled size={20} /> : 
-            <IconSquareRoundedPlusFilled size={20} />
+            <IconCheck size={20} /> : 
+            <IconPlus size={20} />
         )
       }
     >

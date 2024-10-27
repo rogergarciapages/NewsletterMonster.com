@@ -18,6 +18,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Target ID required" }, { status: 400 });
     }
 
+    // Check if follow exists
     const follow = await prisma.follow.findFirst({
       where: {
         follower_id: session.user.user_id,
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
           { following_id: isUnclaimed ? undefined : targetId },
           { following_name: isUnclaimed ? targetId : undefined }
         ]
-      },
+      }
     });
 
     return NextResponse.json({ isFollowing: !!follow });
