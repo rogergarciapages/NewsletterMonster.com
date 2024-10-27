@@ -5,7 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();

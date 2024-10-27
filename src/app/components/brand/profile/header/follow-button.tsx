@@ -23,6 +23,7 @@ export default function FollowButton({
   const { data: session } = useSession();
   const [isHovering, setIsHovering] = useState(false);
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isFollowing, isLoading, error, toggleFollow } = useFollow({
     targetId,
     isUnclaimed,
@@ -56,9 +57,9 @@ export default function FollowButton({
       onClick={handleClick}
       className="w-[130px] min-w-[130px]" // Fixed width
       style={{
-        backgroundColor: isFollowing ? 'rgba(0, 143, 119, 0.1)' : '#008f77', // Muted when following
-        borderColor: '#008f77',
-        color: isFollowing ? '#008f77' : 'white',
+        backgroundColor: isFollowing ? "rgba(0, 143, 119, 0.1)" : "#008f77", // Muted when following
+        borderColor: "#008f77",
+        color: isFollowing ? "#008f77" : "white",
       }}
       startContent={
         !isLoading && (

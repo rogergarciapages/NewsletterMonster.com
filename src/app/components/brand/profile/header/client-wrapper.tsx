@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BrandProfileProps } from "../types";
 import BrandProfileHeader from "./index";
 
-type BrandProfileWrapperOmitProps = Omit<BrandProfileProps, 'onFollowChange'>;
+type BrandProfileWrapperOmitProps = Omit<BrandProfileProps, "onFollowChange">;
 
 export default function BrandProfileHeaderWrapper({
   brandName,
