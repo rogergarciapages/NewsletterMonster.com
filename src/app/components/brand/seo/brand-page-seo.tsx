@@ -1,6 +1,10 @@
 // src/app/components/brand/seo/brand-page-seo.tsx
 import { Metadata } from "next";
-import { Organization, Person, WithContext } from "schema-dts";
+import {
+  Organization,
+  Person,
+  WithContext
+} from "schema-dts";
 import { Newsletter } from "../newsletter/types";
 import { BrandUser } from "../profile/types";
 
@@ -84,14 +88,12 @@ export function generateBrandMetadata({
 export function generateBrandJsonLd({ 
   brandname,
   displayName,
-  newsletters,
   user,
-  followersCount
+  newsletters 
 }: BrandSEOProps): WithContext<Organization | Person> {
   const baseUrl = `https://newslettermonster.com/${brandname}`;
-  
+
   if (user) {
-    // If there's a user, use Person schema
     return {
       "@context": "https://schema.org",
       "@type": "Person",
@@ -117,23 +119,36 @@ export function generateBrandJsonLd({
     };
   }
 
-  // If no user (unclaimed brand), use Organization schema
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: displayName,
     url: baseUrl,
     "@id": baseUrl,
-    numberOfEmployees: followersCount,
     subOrganization: {
       "@type": "Organization",
       name: "NewsletterMonster",
       url: "https://newslettermonster.com"
-    }
+    },
+    makesOffer: newsletters.map(newsletter => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Article",
+        "@id": `${baseUrl}/newsletter/${newsletter.newsletter_id}`,
+        headline: newsletter.subject || "",
+        datePublished: newsletter.created_at?.toISOString(),
+        description: newsletter.summary || "",
+        image: newsletter.top_screenshot_url || "",
+        publisher: {
+          "@type": "Organization",
+          name: displayName,
+          "@id": baseUrl
+        }
+      }
+    }))
   };
 }
 
-// Utility function to insert JSON-LD into head
 export function BrandStructuredData(props: BrandSEOProps) {
   const jsonLd = generateBrandJsonLd(props);
   

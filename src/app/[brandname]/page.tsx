@@ -7,24 +7,12 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Newsletter } from "../components/brand/newsletter/types";
 import { BrandUser } from "../components/brand/profile/types";
+import { BrandStructuredData, generateBrandMetadata } from "../components/brand/seo/brand-page-seo";
 
 interface BrandData {
   newsletters: Newsletter[];
   user: BrandUser | null;
   followersCount: number;
-}
-
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { brandname: string } 
-}): Promise<Metadata> {
-  const displayName = formatBrandName(params.brandname);
-
-  return {
-    title: `${displayName} Newsletters | NewsletterMonster`,
-    description: `Browse all newsletters from ${displayName}. Get the latest updates and insights.`,
-  };
 }
 
 function formatBrandName(brandname: string): string {
@@ -127,6 +115,25 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
   }
 }
 
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { brandname: string } 
+}): Promise<Metadata> {
+  const data = await getBrandData(params.brandname);
+  if (!data) return notFound();
+
+  const displayName = formatBrandName(params.brandname);
+  
+  return generateBrandMetadata({
+    brandname: params.brandname,
+    displayName,
+    newsletters: data.newsletters,
+    user: data.user,
+    followersCount: data.followersCount
+  });
+}
+
 export default async function BrandPage({ 
   params 
 }: { 
@@ -142,28 +149,39 @@ export default async function BrandPage({
   const brandDisplayName = formatBrandName(params.brandname);
 
   return (
-    <ThreeColumnLayout>
-      <div className="w-full text-[#111]">
-        <BrandProfileHeaderWrapper 
-          brandName={brandDisplayName}
-          user={user}
-          newsletterCount={newsletters.length}
-          followersCount={followersCount}
-          isFollowing={false} // This will be handled by the client component
-        />
-        
-        <div className="max-w-6xl mx-auto px-1 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {newsletters.map((newsletter) => (
-              <NewsletterCard
-                key={newsletter.newsletter_id}
-                newsletter={newsletter}
-                brandname={params.brandname}
-              />
-            ))}
-          </div>
+    <>
+      <BrandStructuredData
+        brandname={params.brandname}
+        displayName={brandDisplayName}
+        newsletters={newsletters}
+        user={user}
+        followersCount={followersCount}
+      />
+      
+      <ThreeColumnLayout>
+        <div className="w-full text-[#111]">
+          <BrandProfileHeaderWrapper 
+            brandName={brandDisplayName}
+            user={user}
+            newsletterCount={newsletters.length}
+            followersCount={followersCount}
+            isFollowing={false}
+          />
+          
+          <main className="max-w-6xl mx-auto px-1 py-8">
+            <h1 className="sr-only">{brandDisplayName} Newsletters</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {newsletters.map((newsletter) => (
+                <NewsletterCard
+                  key={newsletter.newsletter_id}
+                  newsletter={newsletter}
+                  brandname={params.brandname}
+                />
+              ))}
+            </div>
+          </main>
         </div>
-      </div>
-    </ThreeColumnLayout>
+      </ThreeColumnLayout>
+    </>
   );
 }
