@@ -53,7 +53,7 @@ export default function FollowButton({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
-      className="w-[130px] min-w-[130px]"
+      className="w-[140px] min-w-[140px]"
       style={{
         backgroundColor: isFollowing ? "rgba(0, 143, 119, 0.1)" : "#008f77",
         borderColor: "#008f77",
