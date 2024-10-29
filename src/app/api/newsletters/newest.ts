@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import { NextApiRequest, NextApiResponse } from "next";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const newsletters = await prisma.newsletter.findMany({
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: "desc" },
       skip: Number(skip),
       take: Number(take),
       select: {
@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json(formattedNewsletters);
   } catch (error) {
-    console.error('Error fetching newsletters:', error);
-    res.status(500).json({ error: 'Error fetching newsletters' });
+    console.error("Error fetching newsletters:", error);
+    res.status(500).json({ error: "Error fetching newsletters" });
   }
 }

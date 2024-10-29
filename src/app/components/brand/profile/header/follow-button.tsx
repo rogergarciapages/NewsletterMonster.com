@@ -1,6 +1,7 @@
+// src/app/components/brand/profile/header/follow-button.tsx
 "use client";
 
-import { useFollow } from "@/hooks/useFollow";
+import { useFollow } from "@/hooks/use-follow";
 import { Button } from "@nextui-org/react";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
@@ -14,7 +15,6 @@ interface ExtendedFollowButtonProps extends FollowButtonProps {
 
 export default function FollowButton({
   targetId,
-  isUnclaimed = false,
   initialIsFollowing = false,
   onFollowStateChange,
   onNeedsLogin,
@@ -23,10 +23,8 @@ export default function FollowButton({
   const { data: session } = useSession();
   const [isHovering, setIsHovering] = useState(false);
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isFollowing, isLoading, error, toggleFollow } = useFollow({
+  const { isFollowing, isLoading, toggleFollow } = useFollow({
     targetId,
-    isUnclaimed,
     initialIsFollowing,
     onCountUpdate
   });
@@ -55,9 +53,9 @@ export default function FollowButton({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
-      className="w-[130px] min-w-[130px]" // Fixed width
+      className="w-[130px] min-w-[130px]"
       style={{
-        backgroundColor: isFollowing ? "rgba(0, 143, 119, 0.1)" : "#008f77", // Muted when following
+        backgroundColor: isFollowing ? "rgba(0, 143, 119, 0.1)" : "#008f77",
         borderColor: "#008f77",
         color: isFollowing ? "#008f77" : "white",
       }}
