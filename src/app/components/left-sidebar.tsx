@@ -36,7 +36,7 @@ const LeftSidebar: React.FC = () => {
     { 
       icon: IconUser, 
       label: "Profile", 
-      path: session?.user?.user_id ? `/user/user-profile/${session.user.user_id}` : "#",
+      path: session?.user?.user_id ? `/user/${session.user.user_id}` : "#",
       requiresAuth: true 
     },
     { icon: IconMessageCircle2, label: "Messages", path: "#" },
@@ -58,13 +58,13 @@ const LeftSidebar: React.FC = () => {
       return;
     }
 
-    router.push(item.path as never); // Type assertion for Next.js 14
+    router.push(item.path as never); 
   };
 
   const handleLoginSuccess = () => {
     setIsLoginModalOpen(false);
     if (lastAttemptedPath && lastAttemptedPath !== "#") {
-      router.push(lastAttemptedPath as never); // Type assertion for Next.js 14
+      router.push(lastAttemptedPath as never); 
       setLastAttemptedPath(null);
     }
   };

@@ -14,6 +14,7 @@ interface UseFollowProps {
 interface FollowState {
   isFollowing: boolean;
   followerCount: number;
+  pendingUpdate: boolean;
 }
 
 export function useFollow({ 
@@ -26,61 +27,48 @@ export function useFollow({
   const [isLoading, setIsLoading] = useState(true);
   const [followState, setFollowState] = useState<FollowState>({
     isFollowing: initialIsFollowing,
-    followerCount: 0
+    followerCount: 0,
+    pendingUpdate: false
   });
 
-  const fetchFollowerCount = useCallback(async () => {
-    if (!targetId) return;
-    
-    try {
-      const response = await fetch(`/api/follow/count?targetId=${encodeURIComponent(targetId)}`);
-      if (!response.ok) throw new Error("Failed to fetch follower count");
-      const data = await response.json();
-      setFollowState(prev => ({ ...prev, followerCount: data.count }));
-      onCountUpdate?.(data.count);
-    } catch (err) {
-      console.error("Error fetching follower count:", err);
-    }
-  }, [targetId, onCountUpdate]);
-
-  // Initial check for follow status and count
   useEffect(() => {
-    const checkFollowStatus = async () => {
+    const initializeState = async () => {
       if (!targetId) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const [followResponse, countResponse] = await Promise.all([
+        const [statusResponse, countResponse] = await Promise.all([
           fetch(`/api/follow/check?targetId=${encodeURIComponent(targetId)}`),
           fetch(`/api/follow/count?targetId=${encodeURIComponent(targetId)}`)
         ]);
-        
-        if (!followResponse.ok) throw new Error("Failed to check follow status");
-        if (!countResponse.ok) throw new Error("Failed to fetch follower count");
-        
-        const [followData, countData] = await Promise.all([
-          followResponse.json(),
+
+        if (!statusResponse.ok || !countResponse.ok) {
+          throw new Error("Failed to fetch initial state");
+        }
+
+        const [statusData, countData] = await Promise.all([
+          statusResponse.json(),
           countResponse.json()
         ]);
 
         setFollowState({
-          isFollowing: followData.isFollowing,
-          followerCount: countData.count
+          isFollowing: statusData.isFollowing,
+          followerCount: countData.count,
+          pendingUpdate: false
         });
-
         onCountUpdate?.(countData.count);
       } catch (err) {
-        console.error("Error checking follow status:", err);
+        console.error("Error initializing follow state:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
-        toast.error("Couldn't check follow status. Please try again later.");
+        toast.error("Couldn't load follow status. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkFollowStatus();
+    initializeState();
   }, [targetId, onCountUpdate]);
 
   const toggleFollow = useCallback(async () => {
@@ -90,16 +78,18 @@ export function useFollow({
     setError(null);
 
     const newFollowState = !followState.isFollowing;
-    const countDelta = newFollowState ? 1 : -1;
+    const prevCount = followState.followerCount;
     
     // Optimistic update
     setFollowState(prev => ({
+      ...prev,
       isFollowing: newFollowState,
-      followerCount: prev.followerCount + countDelta
+      followerCount: newFollowState ? prev.followerCount + 1 : prev.followerCount - 1,
+      pendingUpdate: true
     }));
 
-    // Update UI immediately
-    onCountUpdate?.(followState.followerCount + countDelta);
+    // Immediate UI update
+    onCountUpdate?.(newFollowState ? prevCount + 1 : prevCount - 1);
 
     try {
       const response = await fetch("/api/follow", {
@@ -109,19 +99,28 @@ export function useFollow({
       });
 
       if (!response.ok) throw new Error("Failed to update follow status");
-
-      // Fetch real count to ensure accuracy
-      await fetchFollowerCount();
       
+      const data = await response.json();
+
+      // Update with server count
+      setFollowState(prev => ({
+        ...prev,
+        followerCount: data.count,
+        pendingUpdate: false
+      }));
+      onCountUpdate?.(data.count);
+
       toast.success(newFollowState ? "Successfully followed!" : "Successfully unfollowed!");
       return true;
     } catch (err) {
       // Revert optimistic update
       setFollowState(prev => ({
+        ...prev,
         isFollowing: !newFollowState,
-        followerCount: prev.followerCount - countDelta
+        followerCount: prevCount,
+        pendingUpdate: false
       }));
-      onCountUpdate?.(followState.followerCount);
+      onCountUpdate?.(prevCount);
       
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error("Couldn't update follow status. Please try again.");
@@ -129,14 +128,13 @@ export function useFollow({
     } finally {
       setIsLoading(false);
     }
-  }, [session, targetId, followState, fetchFollowerCount, onCountUpdate]);
+  }, [session, targetId, followState, onCountUpdate]);
 
   return {
     isFollowing: followState.isFollowing,
     followerCount: followState.followerCount,
     isLoading,
     error,
-    toggleFollow,
-    refreshCount: fetchFollowerCount
+    toggleFollow
   };
 }

@@ -20,7 +20,13 @@ export default function Providers({ children }: { children: ReactNode }) {
         navigate={navigate}
         className="flex h-full w-full flex-col"
       >
-        <NextThemesProvider attribute="class">
+        <NextThemesProvider 
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          disableTransitionOnChange
+          storageKey="newsletter-monster-theme"
+        >
           {children}
           <Toaster position="bottom-right" richColors />
         </NextThemesProvider>

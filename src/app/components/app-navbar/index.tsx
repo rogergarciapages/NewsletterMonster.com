@@ -11,78 +11,114 @@ import {
   NavbarMenuToggle,
   useDisclosure,
 } from "@nextui-org/react";
-import React from "react";
+import { useTheme } from "next-themes";
+import NextLink from "next/link"; // Import Next.js Link component
+import React, { useEffect, useState } from "react";
 import LoginModal from "../login-modal";
 import AuthButton from "./auth-button";
-import { ThemeSwitcher } from "./theme-switcher";
-
 import LogoNewsletterMonsterdark from "./logo-newsletter-monster-dark";
 import LogoNewsletterMonsterlight from "./logo-newsletter-monster-light";
+import { ThemeSwitcher } from "./theme-switcher";
 
-import { useTheme } from "next-themes";
+const MENU_ITEMS = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+] as const;
 
 export default function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { theme } = useTheme(); 
+  const { isOpen: isLoginModalOpen, onOpen: onLoginModalOpen, onOpenChange: onLoginModalOpenChange } = useDisclosure();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  const menuItems = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" },
-  ];
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
-      <Navbar onMenuOpenChange={setIsMenuOpen}>
+      <Navbar 
+        onMenuOpenChange={setIsMenuOpen}
+        classNames={{
+          base: "z-50",
+        }}
+      >
         <NavbarContent>
           <NavbarMenuToggle
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             className="sm:hidden"
           />
           <NavbarBrand>
-            {/* Conditionally render logos based on the current theme */}
-            {theme === "dark" ? (
-              <LogoNewsletterMonsterdark />
-            ) : (
-              <LogoNewsletterMonsterlight />
-            )}
+            <NextLink href="/" className="cursor-pointer">
+              <div 
+                className={`transition-opacity duration-300 hover:opacity-80 ${
+                  mounted ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {(!mounted || resolvedTheme === "dark") ? (
+                  <LogoNewsletterMonsterdark aria-label="NewsletterMonster Logo Dark Theme - Home" />
+                ) : (
+                  <LogoNewsletterMonsterlight aria-label="NewsletterMonster Logo Light Theme - Home" />
+                )}
+              </div>
+            </NextLink>
           </NavbarBrand>
         </NavbarContent>
 
+        {/* Rest of the navbar content remains the same */}
         <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-          {menuItems.map((item, index) => (
-            <NavbarItem key={`${item.label}-${index}`}>
-              <Link className="w-full" href={item.href} size="md">
+          {MENU_ITEMS.map((item) => (
+            <NavbarItem key={item.label}>
+              <Link 
+                className={`w-full transition-opacity duration-300 ${
+                  mounted ? "opacity-100" : "opacity-0"
+                }`} 
+                href={item.href} 
+                size="md"
+              >
                 {item.label}
               </Link>
             </NavbarItem>
           ))}
           <NavbarItem>
-            <ThemeSwitcher />
+            <div className={`transition-opacity duration-300 ${
+              mounted ? "opacity-100" : "opacity-0"
+            }`}>
+              <ThemeSwitcher />
+            </div>
           </NavbarItem>
           <NavbarItem>
-            <AuthButton onOpenLoginModal={onOpen} />
+            <div className={`transition-opacity duration-300 ${
+              mounted ? "opacity-100" : "opacity-0"
+            }`}>
+              <AuthButton onOpenLoginModal={onLoginModalOpen} />
+            </div>
           </NavbarItem>
         </NavbarContent>
+
         <NavbarMenu>
           <NavbarMenuItem>
             <ThemeSwitcher showLabel />
           </NavbarMenuItem>
-          {menuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item.label}-${index}`}>
+          {MENU_ITEMS.map((item) => (
+            <NavbarMenuItem key={item.label}>
               <Link className="w-full" href={item.href} size="lg">
                 {item.label}
               </Link>
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem>
-            <AuthButton onOpenLoginModal={onOpen} />
+            <AuthButton onOpenLoginModal={onLoginModalOpen} />
           </NavbarMenuItem>
         </NavbarMenu>
       </Navbar>
 
-      <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} />
+      <LoginModal isOpen={isLoginModalOpen} onOpenChange={onLoginModalOpenChange} />
     </>
   );
 }
