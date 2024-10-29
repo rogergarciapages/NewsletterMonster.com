@@ -20,6 +20,9 @@ export default function BrandProfileHeader({
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [followersCount, setFollowersCount] = useState(initialFollowersCount);
 
+  // Check if this is the user's own profile
+  const isOwnProfile = session?.user?.email === user?.email;
+
   // Update followers count when logged in
   useEffect(() => {
     if (session?.user) {
@@ -48,16 +51,18 @@ export default function BrandProfileHeader({
               </div>
               
               <div className="flex gap-2">
-                <FollowButton 
-                  targetId={user?.user_id || brandName}
-                  isUnclaimed={!user}
-                  initialIsFollowing={isFollowing}
-                  onFollowStateChange={(newState) => {
-                    onFollowChange?.(newState);
-                  }}
-                  onNeedsLogin={() => setIsLoginModalOpen(true)}
-                  onCountUpdate={(count) => setFollowersCount(count)}
-                />
+                {!isOwnProfile && (
+                  <FollowButton 
+                    targetId={user?.user_id || brandName}
+                    isUnclaimed={!user}
+                    initialIsFollowing={isFollowing}
+                    onFollowStateChange={(newState) => {
+                      onFollowChange?.(newState);
+                    }}
+                    onNeedsLogin={() => setIsLoginModalOpen(true)}
+                    onCountUpdate={(count) => setFollowersCount(count)}
+                  />
+                )}
               </div>
             </div>
           </div>

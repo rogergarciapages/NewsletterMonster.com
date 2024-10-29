@@ -1,3 +1,4 @@
+// src/app/components/brand/profile/header/client-wrapper.tsx
 "use client";
 
 import { useState } from "react";
@@ -12,11 +13,16 @@ export default function BrandProfileHeaderWrapper({
   newsletterCount,
   followersCount: initialFollowersCount,
   isFollowing: initialIsFollowing = false,
+  hideFollowButton = false,
+  isOwnProfile = false
 }: BrandProfileWrapperOmitProps) {
   const [currentFollowersCount, setFollowersCount] = useState(initialFollowersCount);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
 
   const handleFollowChange = async (newState: boolean) => {
+    // Don't handle follow changes if this is the user's own profile
+    if (isOwnProfile) return;
+    
     if (!user?.user_id && !brandName) return;
 
     try {
@@ -39,9 +45,8 @@ export default function BrandProfileHeaderWrapper({
       followersCount={currentFollowersCount}
       isFollowing={isFollowing}
       onFollowChange={handleFollowChange}
-      onClaimProfile={() => {
-        console.log("Claim profile clicked");
-      }}
+      hideFollowButton={hideFollowButton || isOwnProfile}
+      isOwnProfile={isOwnProfile}
     />
   );
 }
