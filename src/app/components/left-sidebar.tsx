@@ -33,7 +33,6 @@ const LeftSidebar: React.FC = () => {
   const [lastAttemptedPath, setLastAttemptedPath] = useState<string | null>(null);
 
   const menuItems: MenuItem[] = [
-    { icon: IconHome, label: "Feed", path: "/userfeed", requiresAuth: true },
     { 
       icon: IconUser, 
       label: "Profile", 
