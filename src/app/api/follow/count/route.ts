@@ -1,6 +1,5 @@
 // src/app/api/follow/count/route.ts
 import { prisma } from "@/lib/prisma-client";
-import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -12,24 +11,16 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Target ID required" }, { status: 400 });
     }
 
-    // Cache follower count for 1 minute
-    const getFollowerCount = unstable_cache(
-      async () => {
-        const count = await prisma.follow.count({
-          where: {
-            following_id: targetId
-          }
-        });
-        return count;
-      },
-      [`follower-count-${targetId}`],
-      { revalidate: 60 } // Cache for 1 minute
-    );
+    // Count followers by name
+    const count = await prisma.follow.count({
+      where: {
+        following_name: targetId, // Use following_name for brand names
+      }
+    });
 
-    const count = await getFollowerCount();
     return NextResponse.json({ count });
   } catch (error) {
-    console.error("Error fetching follower count:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Error getting follow count:", error);
+    return NextResponse.json({ count: 0 });
   }
 }

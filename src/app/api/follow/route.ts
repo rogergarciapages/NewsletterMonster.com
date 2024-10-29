@@ -12,16 +12,15 @@ export async function POST(req: Request) {
     }
 
     const { targetId } = await req.json();
-    
     if (!targetId) {
       return NextResponse.json({ error: "Target ID required" }, { status: 400 });
     }
 
-    // Check if follow already exists
+    // Check if already following
     const existingFollow = await prisma.follow.findFirst({
       where: {
         follower_id: session.user.user_id,
-        following_id: targetId
+        following_name: targetId,
       }
     });
 
@@ -29,18 +28,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Already following" }, { status: 400 });
     }
 
-    // Create follow
-    const follow = await prisma.follow.create({
+    // Create follow using following_name
+    await prisma.follow.create({
       data: {
         follower_id: session.user.user_id,
-        following_id: targetId
+        following_name: targetId,
       }
     });
 
-    return NextResponse.json({ success: true, follow });
+    // Get updated count
+    const count = await prisma.follow.count({
+      where: {
+        following_name: targetId,
+      }
+    });
+
+    return NextResponse.json({ success: true, count });
   } catch (error) {
     console.error("Error following:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to follow" }, { status: 500 });
   }
 }
 
@@ -52,54 +58,32 @@ export async function DELETE(req: Request) {
     }
 
     const { targetId } = await req.json();
-
     if (!targetId) {
       return NextResponse.json({ error: "Target ID required" }, { status: 400 });
     }
 
-    // Delete the follow relationship
+    // Delete follow by name
     const result = await prisma.follow.deleteMany({
       where: {
         follower_id: session.user.user_id,
-        following_id: targetId
+        following_name: targetId,
       }
     });
 
     if (result.count === 0) {
-      return NextResponse.json({ error: "Follow not found" }, { status: 404 });
+      return NextResponse.json({ error: "Not following" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error unfollowing:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
-
-export async function GET(req: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ isFollowing: false });
-    }
-
-    const { searchParams } = new URL(req.url);
-    const targetId = searchParams.get("targetId");
-
-    if (!targetId) {
-      return NextResponse.json({ error: "Target ID required" }, { status: 400 });
-    }
-
-    const follow = await prisma.follow.findFirst({
+    // Get updated count
+    const count = await prisma.follow.count({
       where: {
-        follower_id: session.user.user_id,
-        following_id: targetId
+        following_name: targetId,
       }
     });
 
-    return NextResponse.json({ isFollowing: !!follow });
+    return NextResponse.json({ success: true, count });
   } catch (error) {
-    console.error("Error checking follow status:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Error unfollowing:", error);
+    return NextResponse.json({ error: "Failed to unfollow" }, { status: 500 });
   }
 }
