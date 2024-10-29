@@ -1,12 +1,20 @@
+// src/app/components/brand/profile/header/index.tsx
 "use client";
 
 import LoginModal from "@/app/components/login-modal";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BrandProfileProps } from "../types";
+import ClaimBrandButton from "./claim-button";
 import FollowButton from "./follow-button";
 import ProfileImage from "./profile-image";
 import ProfileInfo from "./profile-info";
+
+function getBrandDomain(brandName: string): string {
+  // Remove special characters and spaces, convert to lowercase
+  const cleanName = brandName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return `${cleanName}.com`;
+}
 
 export default function BrandProfileHeader({
   brandName,
@@ -15,24 +23,16 @@ export default function BrandProfileHeader({
   followersCount: initialFollowersCount,
   isFollowing = false,
   onFollowChange,
+  hideFollowButton = false,
+  isOwnProfile = false,
 }: BrandProfileProps) {
   const { data: session } = useSession();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [followersCount, setFollowersCount] = useState(initialFollowersCount);
 
-  // Check if this is the user's own profile
-  const isOwnProfile = session?.user?.email === user?.email;
+  // Check if brand is claimed
+  const isClaimed = Boolean(user?.role === "BRAND");
 
-  // Update followers count when logged in
-  useEffect(() => {
-    if (session?.user) {
-      fetch(`/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user}`)
-        .then(res => res.json())
-        .then(data => setFollowersCount(data.count))
-        .catch(console.error);
-    }
-  }, [session, user, brandName]);
-  
   return (
     <div className="p-8 border-b bg-white dark:bg-zinc-800 m-1 rounded-lg">
       <div className="max-w-6xl mx-auto">
@@ -50,8 +50,8 @@ export default function BrandProfileHeader({
                 />
               </div>
               
-              <div className="flex gap-2">
-                {!isOwnProfile && (
+              <div className="flex flex-col gap-2">
+                {!hideFollowButton && !isOwnProfile && (
                   <FollowButton 
                     targetId={user?.user_id || brandName}
                     isUnclaimed={!user}
@@ -61,6 +61,13 @@ export default function BrandProfileHeader({
                     }}
                     onNeedsLogin={() => setIsLoginModalOpen(true)}
                     onCountUpdate={(count) => setFollowersCount(count)}
+                  />
+                )}
+                
+                {!isClaimed && session && (
+                  <ClaimBrandButton 
+                    brandName={brandName}
+                    brandDomain={getBrandDomain(brandName)}
                   />
                 )}
               </div>

@@ -5,7 +5,10 @@ import { useState } from "react";
 import { BrandProfileProps } from "../types";
 import BrandProfileHeader from "./index";
 
-type BrandProfileWrapperOmitProps = Omit<BrandProfileProps, "onFollowChange">;
+type BrandProfileWrapperProps = Omit<BrandProfileProps, "onFollowChange"> & {
+  hideFollowButton?: boolean;
+  isOwnProfile?: boolean;
+};
 
 export default function BrandProfileHeaderWrapper({
   brandName,
@@ -15,15 +18,12 @@ export default function BrandProfileHeaderWrapper({
   isFollowing: initialIsFollowing = false,
   hideFollowButton = false,
   isOwnProfile = false
-}: BrandProfileWrapperOmitProps) {
+}: BrandProfileWrapperProps) {
   const [currentFollowersCount, setFollowersCount] = useState(initialFollowersCount);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
 
   const handleFollowChange = async (newState: boolean) => {
-    // Don't handle follow changes if this is the user's own profile
-    if (isOwnProfile) return;
-    
-    if (!user?.user_id && !brandName) return;
+    if (isOwnProfile || !user?.user_id && !brandName) return;
 
     try {
       const response = await fetch(`/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user}`);
