@@ -1,41 +1,81 @@
 // src/app/user/[userId]/page.tsx
 import NewsletterCard from "@/app/components/brand/newsletter/card";
+import { Newsletter } from "@/app/components/brand/newsletter/types";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
-import { ErrorBoundary } from "@/app/components/brand/profile/header/error-boundary";
-import Loading from "@/app/components/brand/profile/header/loading";
+import { BrandUser } from "@/app/components/brand/profile/types";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { getUserProfile } from "@/lib/services/user";
-import { Metadata } from "next";
-import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/prisma-client";
+import { Button } from "@nextui-org/react";
+import { IconEdit } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { userId: string } 
-}): Promise<Metadata> {
-  const data = await getUserProfile(params.userId);
-  if (!data) return notFound();
+interface UserProfileData {
+  newsletters: Newsletter[];
+  user: BrandUser;
+  followersCount: number;
+}
 
-  const { user } = data;
-  const displayName = user.name; // Already just the first name
+async function getUserData(userId: string): Promise<UserProfileData | null> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        user_id: userId
+      },
+      select: {
+        user_id: true,
+        name: true,
+        surname: true,
+        company_name: true,
+        username: true,
+        email: true,
+        profile_photo: true,
+        bio: true,
+        website: true,
+        twitter_username: true,
+        instagram_username: true,
+        youtube_channel: true,
+        linkedin_profile: true,
+        role: true
+      }
+    });
 
-  return {
-    title: `${displayName} - Profile | NewsletterMonster`,
-    description: user.bio || `View ${displayName}'s profile and newsletters on NewsletterMonster`,
-    openGraph: {
-      title: `${displayName} on NewsletterMonster`,
-      description: user.bio || `Check out ${displayName}'s profile and newsletters`,
-      images: user.profile_photo ? [{ url: user.profile_photo }] : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${displayName} on NewsletterMonster`,
-      description: user.bio || `Check out ${displayName}'s profile and newsletters`,
-      images: user.profile_photo ? [user.profile_photo] : [],
-    }
-  };
+    if (!user) return null;
+
+    const newsletters = await prisma.newsletter.findMany({
+      where: {
+        user_id: userId
+      },
+      orderBy: {
+        created_at: "desc"
+      },
+      select: {
+        newsletter_id: true,
+        sender: true,
+        subject: true,
+        top_screenshot_url: true,
+        likes_count: true,
+        you_rocks_count: true,
+        created_at: true,
+        summary: true,
+        user_id: true,
+      }
+    });
+
+    const followersCount = await prisma.follow.count({
+      where: {
+        following_id: userId
+      }
+    });
+
+    return {
+      newsletters,
+      user,
+      followersCount
+    };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
 }
 
 export default async function UserProfilePage({ 
@@ -43,46 +83,43 @@ export default async function UserProfilePage({
 }: { 
   params: { userId: string } 
 }) {
-  const session = await getServerSession();
-  const data = await getUserProfile(params.userId);
+  const data = await getUserData(params.userId);
   
   if (!data) {
     notFound();
   }
 
-  const { user, newsletters, followersCount } = data;
-  const isOwnProfile = session?.user?.email === user.email;
+  const { newsletters, user, followersCount } = data;
 
   return (
     <ThreeColumnLayout>
       <div className="w-full">
-        <ErrorBoundary>
-          <Suspense fallback={<Loading />}>
-            <BrandProfileHeaderWrapper 
-              brandName={user.name} // Already just the first name
-              user={user}
-              newsletterCount={newsletters.length}
-              followersCount={followersCount}
-              isFollowing={false}
-              hideFollowButton={isOwnProfile} // Add this prop to the interface
-              isOwnProfile={isOwnProfile} // Add this prop to the interface
-            />
-          </Suspense>
-        </ErrorBoundary>
-        
-        <main className="max-w-6xl mx-auto px-1 py-8">
-          <h1 className="sr-only">{user.name}&apos;s Newsletters</h1>
-          
-          {isOwnProfile && newsletters.length === 0 && (
-            <div className="text-center py-8">
-              <h2 className="text-xl font-semibold mb-2">Welcome to your profile!</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                You haven&apos;t published any newsletters yet.
-              </p>
-            </div>
-          )}
+        <BrandProfileHeaderWrapper 
+          brandName={user.name}
+          user={user}
+          newsletterCount={newsletters.length}
+          followersCount={followersCount}
+          isFollowing={false}
+          hideFollowButton={true}
+          isOwnProfile={true}
+        />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="max-w-6xl mx-auto px-4 mt-4">
+          <Button
+            color="primary"
+            variant="flat"
+            startContent={<IconEdit size={20} />}
+            href={`/user/${params.userId}/edit`}
+            as="a"
+            className="w-full sm:w-auto"
+          >
+            Edit my Profile
+          </Button>
+        </div>
+        
+        <main className="max-w-6xl mx-auto px-4 py-8">
+          <h1 className="sr-only">{user.name}&apos;s Newsletters</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {newsletters.map((newsletter) => (
               <NewsletterCard
                 key={newsletter.newsletter_id}

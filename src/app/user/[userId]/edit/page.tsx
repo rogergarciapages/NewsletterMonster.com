@@ -8,33 +8,60 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, Input, Textarea } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Loading from "./loading";
 
 export default function EditProfilePage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<UserProfileFormData>({
-    resolver: zodResolver(userProfileSchema),
+    resolver: zodResolver(userProfileSchema)
   });
+
+  // Fetch current user data
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const response = await fetch(`/api/users/${session?.user?.user_id}`);
+        if (response.ok) {
+          const userData = await response.json();
+          reset(userData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load profile data");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (session?.user?.user_id) {
+      fetchUserData();
+    }
+  }, [session, reset]);
 
   const onSubmit = async (data: UserProfileFormData) => {
     try {
       setIsSubmitting(true);
 
-      // Handle image upload if there's a new image
       let profilePhotoUrl = undefined;
-      const profilePhoto = data.profile_photo as FileList | undefined;
+      const files = data.profile_photo as FileList | undefined;
       
-      if (profilePhoto && profilePhoto.length > 0) {
-        profilePhotoUrl = await uploadProfileImage(profilePhoto[0]);
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file instanceof File) {
+          profilePhotoUrl = await uploadProfileImage(file);
+        }
       }
 
       const response = await fetch("/api/users/profile", {
@@ -60,9 +87,12 @@ export default function EditProfilePage() {
     }
   };
 
-  // Protect route
   if (!session) {
-    return null; // or redirect to login
+    return null;
+  }
+
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (

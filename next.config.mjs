@@ -7,7 +7,7 @@ const nextConfig = {
   images: {
     domains: [
       // S3 bucket
-      "nlmr1.s3.eu-central-1.amazonaws.com",
+      "nlmr1.s3.eu-central-1.amazonaws.com", "minio-l40s4ockokc8ggs04s4kkc4k.newslettermonster.com",
       
       // Google
       "lh3.googleusercontent.com",

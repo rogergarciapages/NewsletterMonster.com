@@ -4,35 +4,43 @@ import { userProfileSchema } from "@/lib/schemas/user-profile";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession();
+    
     if (!session?.user?.email) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const body = await request.json();
-    const validatedData = userProfileSchema.parse(body);
-
-    // Remove profile_photo from the data as it's handled separately
+    
+    // Remove profile_photo from validation schema temporarily
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { profile_photo, ...updateData } = validatedData;
+    const { profile_photo: _, ...dataToValidate } = body;
+    const validatedData = userProfileSchema.parse(dataToValidate);
 
     const updatedUser = await prisma.user.update({
       where: {
-        email: session.user.email,
+        email: session.user.email
       },
       data: {
-        ...updateData,
+        ...validatedData,
         // Only update profile_photo if a new URL is provided
-        ...(body.profile_photo_url ? { profile_photo: body.profile_photo_url } : {}),
-        updated_at: new Date(),
-      },
+        ...(body.profile_photo ? { profile_photo: body.profile_photo } : {}),
+        updated_at: new Date()
+      }
     });
 
-    return NextResponse.json({ user: updatedUser });
+    return NextResponse.json({
+      user: updatedUser
+    });
   } catch (error) {
-    console.error("Profile update error:", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error("Error updating profile:", error);
+    if (error instanceof Error) {
+      return new NextResponse(error.message, { status: 400 });
+    }
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
