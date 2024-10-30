@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier src/ --write"
+    "format": "prettier src/ --write",
+    "postinstall": "prisma generate --no-engine",
+    "clean": "rimraf .next",
+    "prebuild": "npm run clean"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
@@ -63,6 +66,7 @@
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/uuid": "^10.0.0",
     "daisyui": "^4.12.13",
     "eslint": "^8",
     "eslint-config-next": "14.2.12",
@@ -72,6 +76,7 @@
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "prisma": "^5.19.1",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.12",
     "ts-node": "^10.9.2",
     "typescript": "^5"

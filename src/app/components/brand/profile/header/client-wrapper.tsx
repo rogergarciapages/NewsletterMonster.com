@@ -6,8 +6,8 @@ import { BrandProfileProps } from "../types";
 import BrandProfileHeader from "./index";
 
 type BrandProfileWrapperProps = Omit<BrandProfileProps, "onFollowChange"> & {
-  hideFollowButton?: boolean;
-  isOwnProfile?: boolean;
+  followersCount: number;
+  isFollowing?: boolean;
 };
 
 export default function BrandProfileHeaderWrapper({
@@ -17,7 +17,8 @@ export default function BrandProfileHeaderWrapper({
   followersCount: initialFollowersCount,
   isFollowing: initialIsFollowing = false,
   hideFollowButton = false,
-  isOwnProfile = false
+  isOwnProfile = false,
+  onClaimProfile,
 }: BrandProfileWrapperProps) {
   const [currentFollowersCount, setFollowersCount] = useState(initialFollowersCount);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
@@ -45,7 +46,8 @@ export default function BrandProfileHeaderWrapper({
       followersCount={currentFollowersCount}
       isFollowing={isFollowing}
       onFollowChange={handleFollowChange}
-      hideFollowButton={hideFollowButton || isOwnProfile}
+      onClaimProfile={onClaimProfile}
+      hideFollowButton={hideFollowButton}
       isOwnProfile={isOwnProfile}
     />
   );

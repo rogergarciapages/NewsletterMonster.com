@@ -3,7 +3,7 @@
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { userProfileSchema, type UserProfileFormData } from "@/lib/schemas/user-profile";
-import { uploadProfileImage } from "@/lib/utils/minio";
+import { uploadProfileImage } from "@/lib/utils/upload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, Input, Textarea } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
@@ -13,8 +13,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function EditProfilePage() {
-  const { data: session } = useSession();
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -31,8 +31,10 @@ export default function EditProfilePage() {
 
       // Handle image upload if there's a new image
       let profilePhotoUrl = undefined;
-      if (data.profile_photo && data.profile_photo.length > 0) {
-        profilePhotoUrl = await uploadProfileImage(data.profile_photo[0]);
+      const profilePhoto = data.profile_photo as FileList | undefined;
+      
+      if (profilePhoto && profilePhoto.length > 0) {
+        profilePhotoUrl = await uploadProfileImage(profilePhoto[0]);
       }
 
       const response = await fetch("/api/users/profile", {
@@ -42,8 +44,7 @@ export default function EditProfilePage() {
         },
         body: JSON.stringify({
           ...data,
-          profile_photo_url: profilePhotoUrl, // Send as separate field
-          profile_photo: undefined, // Don't send the FileList
+          profile_photo: profilePhotoUrl,
         }),
       });
 
@@ -59,6 +60,11 @@ export default function EditProfilePage() {
     }
   };
 
+  // Protect route
+  if (!session) {
+    return null; // or redirect to login
+  }
+
   return (
     <ThreeColumnLayout>
       <div className="max-w-4xl mx-auto w-full px-4 py-8">
@@ -73,6 +79,7 @@ export default function EditProfilePage() {
                     label="Name"
                     {...register("name")}
                     errorMessage={errors.name?.message}
+                    isRequired
                   />
                 </div>
 
@@ -118,18 +125,11 @@ export default function EditProfilePage() {
 
                 <div>
                   <Input
-                    label="Location"
-                    {...register("location")}
-                    errorMessage={errors.location?.message}
-                  />
-                </div>
-
-                <div>
-                  <Input
-                    type="date"
-                    label="Date of Birth"
-                    {...register("date_of_birth")}
-                    errorMessage={errors.date_of_birth?.message}
+                    type="file"
+                    label="Profile Photo"
+                    accept="image/*"
+                    {...register("profile_photo")}
+                    errorMessage={errors.profile_photo?.message}
                   />
                 </div>
 
@@ -153,14 +153,6 @@ export default function EditProfilePage() {
 
                 <div>
                   <Input
-                    label="YouTube Channel"
-                    {...register("youtube_channel")}
-                    errorMessage={errors.youtube_channel?.message}
-                  />
-                </div>
-
-                <div>
-                  <Input
                     label="LinkedIn Profile"
                     {...register("linkedin_profile")}
                     errorMessage={errors.linkedin_profile?.message}
@@ -169,11 +161,9 @@ export default function EditProfilePage() {
 
                 <div>
                   <Input
-                    type="file"
-                    label="Profile Photo"
-                    accept="image/*"
-                    {...register("profile_photo")}
-                    errorMessage={errors.profile_photo?.message}
+                    label="YouTube Channel"
+                    {...register("youtube_channel")}
+                    errorMessage={errors.youtube_channel?.message}
                   />
                 </div>
               </div>

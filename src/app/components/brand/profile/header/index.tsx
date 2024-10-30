@@ -11,7 +11,6 @@ import ProfileImage from "./profile-image";
 import ProfileInfo from "./profile-info";
 
 function getBrandDomain(brandName: string): string {
-  // Remove special characters and spaces, convert to lowercase
   const cleanName = brandName.toLowerCase().replace(/[^a-z0-9]/g, "");
   return `${cleanName}.com`;
 }
@@ -20,15 +19,15 @@ export default function BrandProfileHeader({
   brandName,
   user,
   newsletterCount,
-  followersCount: initialFollowersCount,
-  isFollowing = false,
+  followersCount,
+  isFollowing,
   onFollowChange,
-  hideFollowButton = false,
-  isOwnProfile = false,
+  hideFollowButton,
+  isOwnProfile,
 }: BrandProfileProps) {
   const { data: session } = useSession();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [followersCount, setFollowersCount] = useState(initialFollowersCount);
+  const [localFollowersCount, setLocalFollowersCount] = useState(followersCount);
 
   // Check if brand is claimed
   const isClaimed = Boolean(user?.role === "BRAND");
@@ -46,7 +45,7 @@ export default function BrandProfileHeader({
                   brandName={brandName}
                   user={user}
                   newsletterCount={newsletterCount}
-                  followersCount={followersCount}
+                  followersCount={localFollowersCount}
                 />
               </div>
               
@@ -60,11 +59,13 @@ export default function BrandProfileHeader({
                       onFollowChange?.(newState);
                     }}
                     onNeedsLogin={() => setIsLoginModalOpen(true)}
-                    onCountUpdate={(count) => setFollowersCount(count)}
+                    onCountUpdate={(count) => {
+                      setLocalFollowersCount(count);
+                    }}
                   />
                 )}
                 
-                {!isClaimed && session && (
+                {!isClaimed && session && !isOwnProfile && (
                   <ClaimBrandButton 
                     brandName={brandName}
                     brandDomain={getBrandDomain(brandName)}
