@@ -10,9 +10,27 @@ const minioClient = new Client({
   secretKey: process.env.MINIO_SECRET_KEY!,
 });
 
-// Generate a UUID using crypto
 function generateUUID(): string {
   return crypto.randomUUID();
+}
+
+// Add 'export' keyword to make these functions available
+export async function deleteProfileImage(imageUrl: string): Promise<void> {
+  try {
+    // Extract filename from URL
+    const fileName = imageUrl.split("/").pop();
+    if (!fileName) return;
+
+    await minioClient.removeObject(process.env.MINIO_BUCKET!, fileName);
+  } catch (error) {
+    console.error("Error deleting from MinIO:", error);
+    throw new Error("Failed to delete image");
+  }
+}
+
+// Add 'export' keyword here too
+export function isMinioUrl(url: string): boolean {
+  return url.startsWith(process.env.MINIO_ENDPOINT!);
 }
 
 export async function uploadProfileImage(file: File): Promise<string> {
