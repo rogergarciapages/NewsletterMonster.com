@@ -1,7 +1,7 @@
-// src/app/user/[userId]/edit/page.tsx
 "use client";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import ImageUpload from "@/app/components/ui/image-upload";
 import { userProfileSchema, type UserProfileFormData } from "@/lib/schemas/user-profile";
 import { uploadProfileImage } from "@/lib/utils/upload";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,62 +13,96 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Loading from "./loading";
 
+interface UserData {
+  name: string;
+  surname?: string;
+  company_name?: string;
+  username?: string;
+  bio?: string;
+  website?: string;
+  location?: string;
+  date_of_birth?: string;
+  twitter_username?: string;
+  instagram_username?: string;
+  youtube_channel?: string;
+  linkedin_profile?: string;
+  profile_photo?: string;
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentImage, setCurrentImage] = useState<string | undefined>(undefined);
 
   const {
     register,
     handleSubmit,
-    reset,
+    setValue,
     formState: { errors },
   } = useForm<UserProfileFormData>({
-    resolver: zodResolver(userProfileSchema)
+    resolver: zodResolver(userProfileSchema),
+    defaultValues: {
+      name: "",
+      surname: "",
+      company_name: "",
+      username: "",
+      bio: "",
+      website: "",
+      location: "",
+      twitter_username: "",
+      instagram_username: "",
+      youtube_channel: "",
+      linkedin_profile: "",
+    }
   });
 
-  // Fetch current user data
   useEffect(() => {
     async function fetchUserData() {
+      if (!session?.user?.user_id) return;
+      
       try {
-        const response = await fetch(`/api/users/${session?.user?.user_id}`);
-        if (response.ok) {
-          const userData = await response.json();
-          reset(userData);
-        }
+        const response = await fetch(`/api/users/${session.user.user_id}`);
+        if (!response.ok) throw new Error("Failed to fetch user data");
+        
+        const userData = await response.json() as UserData;
+        
+        // Set current profile image
+        setCurrentImage(userData.profile_photo);
+        
+        // Set form values
+        Object.entries(userData).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && key in userProfileSchema.shape) {
+            setValue(key as keyof UserProfileFormData, value);
+          }
+        });
+
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.error("Failed to load profile data");
-      } finally {
         setIsLoading(false);
       }
     }
 
-    if (session?.user?.user_id) {
-      fetchUserData();
-    }
-  }, [session, reset]);
+    fetchUserData();
+  }, [session, setValue]);
 
   const onSubmit = async (data: UserProfileFormData) => {
     try {
       setIsSubmitting(true);
 
       let profilePhotoUrl = undefined;
-      const files = data.profile_photo as FileList | undefined;
+      const files = data.profile_photo as unknown as FileList;
       
-      if (files && files.length > 0) {
-        const file = files[0];
-        if (file instanceof File) {
-          profilePhotoUrl = await uploadProfileImage(file);
-        }
+      if (files?.[0] instanceof File) {
+        profilePhotoUrl = await uploadProfileImage(files[0]);
       }
 
       const response = await fetch("/api/users/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           profile_photo: profilePhotoUrl,
@@ -87,13 +121,8 @@ export default function EditProfilePage() {
     }
   };
 
-  if (!session) {
-    return null;
-  }
-
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (!session) return null;
+  if (isLoading) return <Loading />;
 
   return (
     <ThreeColumnLayout>
@@ -155,13 +184,13 @@ export default function EditProfilePage() {
 
                 <div>
                   <Input
-                    type="file"
-                    label="Profile Photo"
-                    accept="image/*"
-                    {...register("profile_photo")}
-                    errorMessage={errors.profile_photo?.message}
+                    label="Location"
+                    {...register("location")}
+                    errorMessage={errors.location?.message}
                   />
                 </div>
+
+
 
                 <div>
                   <Input
@@ -196,6 +225,16 @@ export default function EditProfilePage() {
                     errorMessage={errors.youtube_channel?.message}
                   />
                 </div>
+
+                <div>
+                  <ImageUpload
+                    currentImage={currentImage}
+                    register={register}
+                    name="profile_photo"
+                    errorMessage={errors.profile_photo?.message}
+                  />
+                </div>
+
               </div>
 
               <div className="flex justify-end gap-4">
