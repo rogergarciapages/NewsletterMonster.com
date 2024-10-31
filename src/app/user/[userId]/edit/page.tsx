@@ -1,7 +1,8 @@
+// src/app/user/[userId]/edit/page.tsx
 "use client";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import ImageUpload from "@/app/components/ui/image-upload";
+import ImageUpload from "@/app/components/ui/image-upload"; // Fixed import
 import { userProfileSchema, type UserProfileFormData } from "@/lib/schemas/user-profile";
 import { uploadProfileImage } from "@/lib/utils/upload";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +41,7 @@ export default function EditProfilePage() {
     register,
     handleSubmit,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
@@ -68,10 +70,9 @@ export default function EditProfilePage() {
         
         const userData = await response.json() as UserData;
         
-        // Set current profile image
+        // Set current image
         setCurrentImage(userData.profile_photo);
         
-        // Set form values
         Object.entries(userData).forEach(([key, value]) => {
           if (value !== null && value !== undefined && key in userProfileSchema.shape) {
             setValue(key as keyof UserProfileFormData, value);
@@ -89,37 +90,62 @@ export default function EditProfilePage() {
     fetchUserData();
   }, [session, setValue]);
 
-  const onSubmit = async (data: UserProfileFormData) => {
-    try {
-      setIsSubmitting(true);
+const onSubmit = async (data: UserProfileFormData) => {
+  try {
+    setIsSubmitting(true);
 
-      let profilePhotoUrl = undefined;
-      const files = data.profile_photo as unknown as FileList;
-      
-      if (files?.[0] instanceof File) {
-        profilePhotoUrl = await uploadProfileImage(files[0]);
+    const formElement = document.querySelector("form") as HTMLFormElement;
+    const fileInput = formElement?.querySelector("input[type=\"file\"]") as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+
+    console.log("File input:", {
+      hasFile: !!file,
+      fileDetails: file ? {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      } : null
+    });
+
+    let profilePhotoUrl = undefined;
+    if (file) {
+      try {
+        profilePhotoUrl = await uploadProfileImage(file);
+        console.log("Upload successful, URL:", profilePhotoUrl);
+      } catch (uploadError) {
+        console.error("Upload failed:", uploadError);
+        toast.error("Failed to upload image");
+        return;
       }
-
-      const response = await fetch("/api/users/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          profile_photo: profilePhotoUrl,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update profile");
-
-      toast.success("Profile updated successfully");
-      router.push(`/user/${session?.user?.user_id}`);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    const response = await fetch("/api/users/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...data,
+        profile_photo: profilePhotoUrl || currentImage, // Keep current image if no new one
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to update profile: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log("Profile update response:", result);
+
+    toast.success("Profile updated successfully");
+    await router.refresh(); // Force page refresh
+    router.push(`/user/${session?.user?.user_id}`);
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    toast.error(error instanceof Error ? error.message : "Failed to update profile");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (!session) return null;
   if (isLoading) return <Loading />;
@@ -133,6 +159,16 @@ export default function EditProfilePage() {
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <ImageUpload
+                    currentImage={currentImage}
+                    register={register}
+                    name="profile_photo"
+                    errorMessage={errors.profile_photo?.message}
+                    setError={setError}
+                  />
+                </div>
+
                 <div>
                   <Input
                     label="Name"
@@ -190,8 +226,6 @@ export default function EditProfilePage() {
                   />
                 </div>
 
-
-
                 <div>
                   <Input
                     label="Twitter Username"
@@ -225,16 +259,6 @@ export default function EditProfilePage() {
                     errorMessage={errors.youtube_channel?.message}
                   />
                 </div>
-
-                <div>
-                  <ImageUpload
-                    currentImage={currentImage}
-                    register={register}
-                    name="profile_photo"
-                    errorMessage={errors.profile_photo?.message}
-                  />
-                </div>
-
               </div>
 
               <div className="flex justify-end gap-4">

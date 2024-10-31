@@ -1,7 +1,7 @@
 // src/lib/schemas/user-profile.ts
 import { z } from "zod";
 
-const MAX_FILE_SIZE = 5000000; // 5MB
+const MAX_FILE_SIZE = 2000000; // 2MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 export const userProfileSchema = z.object({
@@ -31,7 +31,7 @@ export const userProfileSchema = z.object({
     .custom<FileList>()
     .optional()
     .refine((files) => !files || files.length === 0 || files[0].size <= MAX_FILE_SIZE, 
-      "Max file size is 5MB")
+      "Max file size is 2MB")
     .refine(
       (files) => !files || files.length === 0 || ACCEPTED_IMAGE_TYPES.includes(files[0].type),
       "Only .jpg, .jpeg, .png and .webp formats are supported"

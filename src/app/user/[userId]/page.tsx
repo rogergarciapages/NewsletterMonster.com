@@ -1,4 +1,3 @@
-// src/app/user/[userId]/page.tsx
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import { Newsletter } from "@/app/components/brand/newsletter/types";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
@@ -7,7 +6,19 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { prisma } from "@/lib/prisma-client";
 import { Button } from "@nextui-org/react";
 import { IconEdit } from "@tabler/icons-react";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  other: {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
+  }
+};
 
 interface UserProfileData {
   newsletters: Newsletter[];
@@ -17,6 +28,7 @@ interface UserProfileData {
 
 async function getUserData(userId: string): Promise<UserProfileData | null> {
   try {
+    const timestamp = Date.now();
     const user = await prisma.user.findUnique({
       where: {
         user_id: userId
@@ -40,6 +52,11 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
     });
 
     if (!user) return null;
+
+    // Add cache busting to profile photo URL
+    if (user.profile_photo) {
+      user.profile_photo = `${user.profile_photo}?t=${timestamp}`;
+    }
 
     const newsletters = await prisma.newsletter.findMany({
       where: {
