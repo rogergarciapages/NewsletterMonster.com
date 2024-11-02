@@ -11,7 +11,7 @@ const Footer = () => {
             <div className="text-sm flex flex-col gap-1">
               <a 
                 className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:underline transition duration-150 ease-in-out" 
-                href="/terms"
+                href="/terms-and-conditions"
               >
                 Terms
               </a>
