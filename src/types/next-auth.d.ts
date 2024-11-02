@@ -1,3 +1,4 @@
+// src/types/next-auth.d.ts
 import { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
@@ -9,7 +10,8 @@ declare module "next-auth" {
       image?: string | null;
       profile_photo?: string | null;
       username?: string | null;
-      role?: string;
+      role: string;
+      emailVerified?: Date | null;
     } & DefaultSession["user"]
   }
 
@@ -20,7 +22,8 @@ declare module "next-auth" {
     image?: string | null;
     profile_photo?: string | null;
     username?: string | null;
-    role?: string;
+    role: string;
+    emailVerified?: Date | null;
   }
 }
 
@@ -32,6 +35,7 @@ declare module "next-auth/jwt" {
     picture?: string | null;
     profile_photo?: string | null;
     username?: string | null;
-    role?: string;
+    role: string;
+    emailVerified?: Date | null;
   }
 }

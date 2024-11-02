@@ -104,7 +104,7 @@ const PricingWrapper = () => {
       {
         title: "free starter",
         subtitle:
-          "Optimal option to get your newsletter out there for the world to see.",
+          "Get things started, get your newsletter out there for the world to see.",
         price: "0",
         period: "forever",
         items: [

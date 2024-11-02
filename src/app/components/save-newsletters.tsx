@@ -1,4 +1,5 @@
-/* eslint-disable react/no-unescaped-entities */
+"use client";
+
 import Image from "next/image";
 
 export default function SaveNewsletters() {
@@ -7,17 +8,17 @@ export default function SaveNewsletters() {
       <div className="grid grid-cols-1 md:grid-cols-10 gap-8 items-start">
         <div className="md:col-span-4 order-2 md:order-1 relative">
           <div className="relative overflow-hidden rounded-lg">
-            <div className="aspect-[2/3] w-full">
+            <div className="aspect-[2/3] relative w-full">
               <Image
                 src="/save-newsletters.png"
                 alt="Newsletter collection illustration"
-                layout="fill"
-                objectFit="cover"
-                className="w-full h-full"
+                fill
+                className="w-full h-full object-cover"
                 style={{
                   maskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)",
                   WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)"
                 }}
+                priority
               />
             </div>
           </div>
@@ -39,7 +40,7 @@ export default function SaveNewsletters() {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold tracking-tight leading-[2rem] text-primar border-b-8 border-torch-600">Design Recognition</h3>
-              <p className="text-sm">Highlight your newsletter's design excellence and marketing practices, enhancing your brand's credibility and reputation within the industry.</p>
+              <p className="text-sm">Highlight your newsletter&apos;s design excellence and marketing practices, enhancing your brand&apos;s credibility and reputation within the industry.</p>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold tracking-tight leading-[2rem] text-primar border-b-8 border-torch-600">Networking Opportunities</h3>

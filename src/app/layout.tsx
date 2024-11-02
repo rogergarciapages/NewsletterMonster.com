@@ -1,3 +1,4 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import AppNavbar from "./components/app-navbar";
 import Footer from "./components/footer";
