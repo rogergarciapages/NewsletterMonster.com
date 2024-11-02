@@ -1,3 +1,5 @@
+// src/app/components/login-modal.tsx
+import { getPasswordStrength, validateEmail, validatePassword } from "@/lib/validation";
 import {
   Button,
   Checkbox,
@@ -9,25 +11,196 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Progress,
 } from "@nextui-org/react";
-import { IconBrandDiscord, IconBrandGithub, IconBrandGoogle, IconBrandLinkedin, IconLock, IconMail } from "@tabler/icons-react";
+import {
+  IconBrandDiscord,
+  IconBrandGithub,
+  IconBrandGoogle,
+  IconBrandLinkedin,
+  IconLock,
+  IconMail,
+} from "@tabler/icons-react";
 import { signIn } from "next-auth/react";
-import React, { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import GdprIcon from "./app-navbar/svg/Gdpr.svg";
-  
-  interface LoginModalProps {
-    isOpen: boolean;
-    onOpenChange: () => void;
-    onSuccess?: () => void; 
-  }
-  
-  const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange }) => {
-    const [showSignup, setShowSignup] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [loginFormData, setLoginFormData] = useState({ email: "", password: "" });
-    const [signupFormData, setSignupFormData] = useState({
+import { useState } from "react";
+import { toast } from "sonner";
+
+interface LoginModalProps {
+  isOpen: boolean;
+  onOpenChange: () => void;
+  onSuccess?: () => void;
+}
+
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess }) => {
+  const [showSignup, setShowSignup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [signupFormData, setSignupFormData] = useState({
+    name: "",
+    surname: "",
+    company_name: "",
+    email: "",
+    password: "",
+    verifyPassword: "",
+  });
+
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: "",
+  });
+
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSignupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignupFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "password") {
+      setPasswordStrength(getPasswordStrength(value));
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, formType: "login" | "signup") => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (formType === "login") {
+        void handleLogin();
+      } else {
+        void handleSignup();
+      }
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!loginFormData.email || !loginFormData.password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
+    if (!validateEmail(loginFormData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const result = await signIn("credentials", {
+        email: loginFormData.email,
+        password: loginFormData.password,
+        redirect: false,
+        callbackUrl: "/",
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+        return;
+      }
+
+      if (result?.ok) {
+        toast.success("Login successful!");
+        onSuccess?.();
+        onOpenChange();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (!signupFormData.name || !signupFormData.email || !signupFormData.password) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!validateEmail(signupFormData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (!validatePassword(signupFormData.password)) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+
+    if (signupFormData.password !== signupFormData.verifyPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          name: signupFormData.name,
+          surname: signupFormData.surname,
+          company_name: signupFormData.company_name,
+          email: signupFormData.email,
+          password: signupFormData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account");
+      }
+
+      // Auto-login after successful signup
+      const loginResult = await signIn("credentials", {
+        email: signupFormData.email,
+        password: signupFormData.password,
+        redirect: false,
+      });
+
+      if (loginResult?.error) {
+        toast.error("Account created but login failed. Please try logging in.");
+        setShowSignup(false);
+        return;
+      }
+
+      toast.success("Account created and logged in successfully!");
+      onSuccess?.();
+      onOpenChange();
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create account");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: string) => {
+    try {
+      setIsLoading(true);
+      await signIn(provider, { callbackUrl: "/" });
+    } catch (error) {
+      console.error(`${provider} sign in error:`, error);
+      toast.error(`Failed to sign in with ${provider}`);
+      setIsLoading(false);
+    }
+  };
+
+  const handleSwitchMode = (toSignup: boolean) => {
+    setShowSignup(toSignup);
+    setLoginFormData({ email: "", password: "" });
+    setSignupFormData({
       name: "",
       surname: "",
       company_name: "",
@@ -35,271 +208,222 @@ import GdprIcon from "./app-navbar/svg/Gdpr.svg";
       password: "",
       verifyPassword: "",
     });
-  
-    const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setLoginFormData({ ...loginFormData, [name]: value });
-    };
-  
-    const handleSignupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setSignupFormData({ ...signupFormData, [name]: value });
-    };
-  
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, formType: "login" | "signup") => {
-      if (e.key === "Enter") {
-        if (formType === "login") {
-          handleLogin();
-        } else {
-          handleSignup();
-        }
-      }
-    };
-  
-    const handleLogin = async () => {
-      setIsLoading(true);
-      try {
-        await signIn("email", { email: loginFormData.email, callbackUrl: "/" });
-        toast.success("Login successful!");
-        setIsLoading(false);
-        onOpenChange(); // Close modal on success
-      } catch (error) {
-        console.error("Login error:", error);
-        toast.error("Login failed. Please try again.");
-        setIsLoading(false);
-      }
-    };
-  
-    const handleSignup = async () => {
-      if (signupFormData.password !== signupFormData.verifyPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
-  
-      setIsLoading(true);
-      try {
-        const res = await fetch("/api/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(signupFormData),
-        });
-  
-        if (!res.ok) {
-          const errorText = await res.text();
-          toast.error(`Signup failed: ${errorText}`);
-          setIsLoading(false);
-          return;
-        }
-  
-        toast.success("Signup successful!");
-        setShowSignup(false);
-        setSignupFormData({ name: "", surname: "", company_name: "", email: "", password: "", verifyPassword: "" });
-        setIsLoading(false);
-        onOpenChange(); // Close modal on success
-      } catch (error) {
-        console.error("An error occurred during signup:", error);
-        toast.error("An error occurred during signup. Please try again.");
-        setIsLoading(false);
-      }
-    };
-  
-    const handleSwitchMode = (toSignup: boolean) => {
-      setShowSignup(toSignup);
-      setLoginFormData({ email: "", password: "" });
-      setSignupFormData({ name: "", surname: "", company_name: "", email: "", password: "", verifyPassword: "" });
-    };
-  
-    return (
-      <>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
-          <ModalContent>
-            {(onClose) => (
+  };
+
+  return (
+    <Modal 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      placement="top-center"
+      classNames={{
+        base: "max-w-md",
+      }}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            {!showSignup ? (
               <>
-                {!showSignup ? (
-                  <>
-                    <ModalHeader className="flex flex-col gap-1 text-2xl pb-0">Log in now</ModalHeader>
-                    <ModalBody className="pt-0">
-                      <p className="text-base muted text-[#a7a6a6] pb-4">yeah, you know what to do...</p>
-                      <Input
-                        autoFocus
-                        endContent={<IconMail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
-                        label="Email"
-                        placeholder="Enter your email"
-                        variant="bordered"
-                        onChange={handleLoginInputChange}
-                        name="email"
-                        value={loginFormData.email}
-                        onKeyPress={(e) => handleKeyPress(e, "login")}
+                <ModalHeader className="flex flex-col gap-1">
+                  <h2 className="text-2xl">Log in</h2>
+                  <p className="text-sm text-default-500">Welcome back!</p>
+                </ModalHeader>
+                <ModalBody>
+                  <Input
+                    autoFocus
+                    endContent={<IconMail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    label="Email"
+                    placeholder="Enter your email"
+                    variant="bordered"
+                    name="email"
+                    value={loginFormData.email}
+                    onChange={handleLoginInputChange}
+                    onKeyPress={(e) => handleKeyPress(e, "login")}
+                  />
+                  <Input
+                    endContent={<IconLock className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    label="Password"
+                    placeholder="Enter your password"
+                    type="password"
+                    variant="bordered"
+                    name="password"
+                    value={loginFormData.password}
+                    onChange={handleLoginInputChange}
+                    onKeyPress={(e) => handleKeyPress(e, "login")}
+                  />
+                  <div className="flex py-2 px-1 justify-between">
+                    <Checkbox
+                      isSelected={rememberMe}
+                      onValueChange={setRememberMe}
+                      classNames={{
+                        label: "text-small",
+                      }}
+                    >
+                      Remember me
+                    </Checkbox>
+                    <Link color="primary" href="#" size="sm" onClick={() => handleSwitchMode(true)}>
+                      Create account
+                    </Link>
+                  </div>
+                </ModalBody>
+                <ModalFooter className="flex-col">
+                  <Button
+                    color="warning"
+                    onPress={handleLogin}
+                    isLoading={isLoading}
+                    className="w-full"
+                  >
+                    Sign in
+                  </Button>
+                  <Divider className="my-4" />
+                  <Button
+                    onClick={() => handleOAuthSignIn("google")}
+                    startContent={<IconBrandGoogle />}
+                    className="w-full bg-torch-800 text-white"
+                    isLoading={isLoading}
+                  >
+                    Continue with Google
+                  </Button>
+                  <Button
+                    onClick={() => handleOAuthSignIn("github")}
+                    startContent={<IconBrandGithub />}
+                    className="w-full bg-[#4078c0] text-white mt-2"
+                    isLoading={isLoading}
+                  >
+                    Continue with GitHub
+                  </Button>
+                  <Button
+                    onClick={() => handleOAuthSignIn("discord")}
+                    startContent={<IconBrandDiscord />}
+                    className="w-full bg-[#5865F2] text-white mt-2"
+                    isLoading={isLoading}
+                  >
+                    Continue with Discord
+                  </Button>
+                  <Button
+                    onClick={() => handleOAuthSignIn("linkedin")}
+                    startContent={<IconBrandLinkedin />}
+                    className="w-full bg-[#0A66C2] text-white mt-2"
+                    isLoading={isLoading}
+                  >
+                    Continue with LinkedIn
+                  </Button>
+                </ModalFooter>
+              </>
+            ) : (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  <h2 className="text-2xl">Create account</h2>
+                  <p className="text-sm text-default-500">Get started with your account</p>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="First Name"
+                      placeholder="Enter your first name"
+                      variant="bordered"
+                      name="name"
+                      value={signupFormData.name}
+                      onChange={handleSignupInputChange}
+                      isRequired
+                    />
+                    <Input
+                      label="Last Name"
+                      placeholder="Enter your last name"
+                      variant="bordered"
+                      name="surname"
+                      value={signupFormData.surname}
+                      onChange={handleSignupInputChange}
+                    />
+                  </div>
+                  <Input
+                    label="Company Name"
+                    placeholder="Enter your company name (optional)"
+                    variant="bordered"
+                    name="company_name"
+                    value={signupFormData.company_name}
+                    onChange={handleSignupInputChange}
+                  />
+                  <Input
+                    label="Email"
+                    placeholder="Enter your email"
+                    variant="bordered"
+                    name="email"
+                    value={signupFormData.email}
+                    onChange={handleSignupInputChange}
+                    isRequired
+                  />
+                  <Input
+                    label="Password"
+                    placeholder="Create a password"
+                    type="password"
+                    variant="bordered"
+                    name="password"
+                    value={signupFormData.password}
+                    onChange={handleSignupInputChange}
+                    isRequired
+                  />
+                  {signupFormData.password && (
+                    <div className="w-full">
+                      <Progress
+                        value={passwordStrength.score * 20}
+                        className="w-full"
+                        color={
+                          passwordStrength.score < 2
+                            ? "danger"
+                            : passwordStrength.score < 4
+                            ? "warning"
+                            : "success"
+                        }
                       />
-                      <Input
-                        endContent={<IconLock className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
-                        label="Password"
-                        placeholder="Enter your password"
-                        type="password"
-                        variant="bordered"
-                        onChange={handleLoginInputChange}
-                        name="password"
-                        value={loginFormData.password}
-                        onKeyPress={(e) => handleKeyPress(e, "login")}
-                      />
-                      <div className="flex py-2 px-1 justify-between">
-                        <Checkbox classNames={{ label: "text-small" }}>Remember me</Checkbox>
-                        <Link color="primary" href="#" size="sm" onClick={() => handleSwitchMode(true)}>
-                          Create Account
-                        </Link>
-                      </div>
-                    </ModalBody>
-                    <ModalFooter className="flex-col">
-                      <Button color="warning" onPress={handleLogin} isLoading={isLoading}>
-                        Sign in
-                      </Button>
-                      <Button color="default" variant="solid" onPress={onClose}>
-                        Close
-                      </Button>
-                      <Divider className="my-4" />
-                      <Button
-                        onClick={() => signIn("google", { callbackUrl: "/" })}
-                        color="danger"
-                        variant="solid"
-                        fullWidth
-                        style={{ marginTop: "2px", backgroundColor: "#b10329" }}
-                      >
-                        <IconBrandGoogle />
-                        Sign In with Google
-                      </Button>
-                      <Button
-                        onClick={() => signIn("linkedin", { callbackUrl: "/" })}
-                        color="danger"
-                        variant="solid"
-                        fullWidth
-                        style={{ marginTop: "5px", backgroundColor: "#2e485c" }}
-                      >
-                        <IconBrandLinkedin />
-                        Sign In with LinkedIn
-                      </Button>
-                      <Button
-                        onClick={() => signIn("discord", { callbackUrl: "/" })}
-                        color="danger"
-                        variant="solid"
-                        fullWidth
-                        style={{ marginTop: "5px", backgroundColor: "#351d49" }}
-                      >
-                        <IconBrandDiscord />
-                        Sign In with Discord
-                      </Button>
-                      <Button
-                        onClick={() => signIn("github", { callbackUrl: "/" })}
-                        color="danger"
-                        variant="solid"
-                        fullWidth
-                        style={{ marginTop: "5px", backgroundColor: "#3869a8" }}
-                      >
-                        <IconBrandGithub />
-                        Sign In with Github
-                      </Button>
-                      <div className="w-full flex-auto">
-                        <p className="text-sm muted">
-                          By creating an account, you agree to our Terms and have read and acknowledge the Global Privacy
-                          Statement. Invisible reCAPTCHA by Google Privacy Policy and Terms of Use. NewsletterMonster is GDPR
-                          compliant. Learn more about how you can use NewsletterMonster in a GDPR compliant way.
-                        </p>
-                        <div className="mt-2 flex justify-start">
-                          <GdprIcon className="w-32" />
-                        </div>
-                      </div>
-                    </ModalFooter>
-                  </>
-                ) : (
-                  <>
-                    <ModalHeader className="flex flex-col gap-1 text-2xl pb-0">Sign up now</ModalHeader>
-                    <ModalBody className="pt-0">
-                      <Input
-                        name="name"
-                        label="Name"
-                        placeholder="Enter your name"
-                        variant="bordered"
-                        value={signupFormData.name}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                      <Input
-                        name="surname"
-                        label="Surname"
-                        placeholder="Enter your surname"
-                        variant="bordered"
-                        value={signupFormData.surname}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                      <Input
-                        name="company_name"
-                        label="Company Name"
-                        placeholder="Enter your company name"
-                        variant="bordered"
-                        value={signupFormData.company_name}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                      <Input
-                        name="email"
-                        label="Email"
-                        placeholder="Enter your email"
-                        variant="bordered"
-                        value={signupFormData.email}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                      <Input
-                        name="password"
-                        label="Password"
-                        placeholder="Enter your password"
-                        type="password"
-                        variant="bordered"
-                        value={signupFormData.password}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                      <Input
-                        name="verifyPassword"
-                        label="Verify Password"
-                        placeholder="Verify your password"
-                        type="password"
-                        variant="bordered"
-                        value={signupFormData.verifyPassword}
-                        onChange={handleSignupInputChange}
-                        onKeyPress={(e) => handleKeyPress(e, "signup")}
-                      />
-                    </ModalBody>
-                    <ModalFooter className="flex-col">
-                      <Button color="warning" onPress={handleSignup} isLoading={isLoading}>
-                        Sign up
-                      </Button>
-                      <Button color="danger" variant="flat" onPress={() => handleSwitchMode(false)}>
-                        Back to Login
-                      </Button>
-                      <div className="w-full flex-auto">
-                        <p className="text-sm muted">
-                          By creating an account, you agree to our Terms and have read and acknowledge the Global Privacy
-                          Statement. Invisible reCAPTCHA by Google Privacy Policy and Terms of Use. NewsletterMonster is GDPR
-                          compliant. Learn more about how you can use NewsletterMonster in a GDPR compliant way.
-                        </p>
-                        <div className="mt-2 flex justify-start">
-                          <GdprIcon className="w-32" />
-                        </div>
-                      </div>
-                    </ModalFooter>
-                  </>
-                )}
+                      <p className="text-sm text-default-500 mt-1">
+                        {passwordStrength.feedback}
+                      </p>
+                    </div>
+                  )}
+                  <Input
+                    label="Confirm Password"
+                    placeholder="Confirm your password"
+                    type="password"
+                    variant="bordered"
+                    name="verifyPassword"
+                    value={signupFormData.verifyPassword}
+                    onChange={handleSignupInputChange}
+                    isRequired
+                  />
+                </ModalBody>
+                <ModalFooter className="flex-col">
+                  <Button
+                    color="warning"
+                    onPress={handleSignup}
+                    isLoading={isLoading}
+                    className="w-full"
+                  >
+                    Create account
+                  </Button>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={() => handleSwitchMode(false)}
+                    className="w-full mt-2"
+                  >
+                    Back to login
+                  </Button>
+                  <div className="mt-4 text-center text-small text-default-500">
+                    <p>
+                      By clicking "Create account", you agree to our{" "}
+                      <Link href="#" size="sm">Terms of Service</Link> and{" "}
+                      <Link href="#" size="sm">Privacy Policy</Link>.
+                    </p>
+                  </div>
+                </ModalFooter>
               </>
             )}
-          </ModalContent>
-        </Modal>
-        <ToastContainer />
-      </>
-    );
-  };
-  
-  export default LoginModal;
-  
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+};
+
+export default LoginModal;
