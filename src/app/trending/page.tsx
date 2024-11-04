@@ -1,7 +1,6 @@
 // src/app/trending/page.tsx
 "use client";
 
-import { NewsletterCardSkeleton } from "@/app/components/skeleton/newsletter-card-skeleton";
 import { Button } from "@nextui-org/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -9,10 +8,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Newsletter } from "../components/brand/newsletter/types";
 import ThreeColumnLayout from "../components/layouts/three-column-layout";
 import { NewsletterCard } from "../components/newsletters/newsletter-card";
+import { NewsletterCardSkeleton } from "../components/skeleton/newsletter-card-skeleton";
+import { TrendingPageSkeleton } from "../components/skeleton/trending-page-skeleton";
 
-const NEWSLETTERS_PER_PAGE = 15; // Multiple of 3 for even columns
+const NEWSLETTERS_PER_PAGE = 15;
 
-const TrendingNewslettersPage = () => {
+export default function TrendingNewslettersPage() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +75,7 @@ const TrendingNewslettersPage = () => {
         <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
           <div className="text-red-500 mb-4">{error}</div>
           <Button 
-            color="primary" 
+            color="primary"
             onClick={() => {
               setError(null);
               setPage(0);
@@ -88,9 +89,18 @@ const TrendingNewslettersPage = () => {
     );
   }
 
+  // Show skeleton while loading initial data
+  if (isLoading && newsletters.length === 0) {
+    return (
+      <ThreeColumnLayout>
+        <TrendingPageSkeleton />
+      </ThreeColumnLayout>
+    );
+  }
+
   return (
     <ThreeColumnLayout>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         {newsletters.map((newsletter, index) => (
           <div
             ref={index === newsletters.length - 1 ? lastNewsletterCallback : null}
@@ -103,18 +113,21 @@ const TrendingNewslettersPage = () => {
           </div>
         ))}
         
-        {isLoading && Array.from({ length: 6 }).map((_, index) => (
-          <NewsletterCardSkeleton key={`skeleton-${index}`} />
-        ))}
+        {/* Show additional skeletons while loading more */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 col-span-full">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <NewsletterCardSkeleton key={`loading-${index}`} />
+            ))}
+          </div>
+        )}
 
         {!hasMore && newsletters.length > 0 && (
           <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center p-8 text-gray-600">
-            You have reached the end of trending newsletters.
+            You've reached the end of trending newsletters.
           </div>
         )}
       </div>
     </ThreeColumnLayout>
   );
-};
-
-export default TrendingNewslettersPage;
+}
