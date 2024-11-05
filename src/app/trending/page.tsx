@@ -1,143 +1,87 @@
-// src/app/trending/trending-newsletters-client.tsx
-"use client";
+// src/app/trending/page.tsx
+import { Metadata } from "next";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import TrendingNewslettersClient from "./trending-newsletters-client";
 
-import { Button } from "@nextui-org/react";
-import axios from "axios";
+export const metadata: Metadata = {
+  title: "Trending Newsletters | Most Popular Email Newsletters | NewsletterMonster",
+  description:
+    "Discover the most popular and trending email newsletters. Browse our curated collection of top-performing newsletters across various industries and topics.",
+  keywords:
+    "trending newsletters, popular newsletters, best newsletters, email newsletters, newsletter trends, top newsletters",
+  openGraph: {
+    title: "Trending Newsletters | NewsletterMonster",
+    description: "Discover the most popular and trending email newsletters on NewsletterMonster.",
+    type: "website",
+    siteName: "NewsletterMonster",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trending Newsletters | NewsletterMonster",
+    description: "Discover the most popular and trending email newsletters on NewsletterMonster.",
+  },
+  alternates: {
+    canonical: "https://newslettermonster.com/trending",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
+  },
+};
 
-import { Newsletter } from "../components/brand/newsletter/types";
-import ThreeColumnLayout from "../components/layouts/three-column-layout";
-import { NewsletterCard } from "../components/newsletters/newsletter-card";
-import { NewsletterCardSkeleton } from "../components/skeleton/newsletter-card-skeleton";
-import { TrendingPageSkeleton } from "../components/skeleton/trending-page-skeleton";
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-const NEWSLETTERS_PER_PAGE = 15;
-
-export default function TrendingNewslettersClient() {
-  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
-  const router = useRouter();
-
-  // Reference for our observer
-  const observerRef = useRef<IntersectionObserver>();
-
-  const fetchNewsletters = async (pageNumber: number) => {
-    try {
-      const skip = pageNumber * NEWSLETTERS_PER_PAGE;
-      const response = await axios.get("/api/newsletters/trending", {
-        params: {
-          skip,
-          take: NEWSLETTERS_PER_PAGE,
-        },
-      });
-
-      const newNewsletters = response.data;
-
-      if (newNewsletters.length < NEWSLETTERS_PER_PAGE) {
-        setHasMore(false);
-      }
-
-      setNewsletters(prev => (pageNumber === 0 ? newNewsletters : [...prev, ...newNewsletters]));
-    } catch (error) {
-      console.error("Error fetching newsletters:", error);
-      setError("Failed to fetch newsletters. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Callback for intersection observer
-  const lastNewsletterCallback = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isLoading) return;
-
-      if (observerRef.current) observerRef.current.disconnect();
-
-      observerRef.current = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage(prevPage => prevPage + 1);
-        }
-      });
-
-      if (node) observerRef.current.observe(node);
-    },
-    [isLoading, hasMore]
-  );
-
-  // Initial load
-  useEffect(() => {
-    fetchNewsletters(page);
-  }, [page]);
-
-  if (error) {
-    return (
-      <ThreeColumnLayout>
-        <div className="flex min-h-[50vh] flex-col items-center justify-center p-4">
-          <div className="mb-4 text-red-500">{error}</div>
-          <Button
-            color="primary"
-            onClick={() => {
-              setError(null);
-              setPage(0);
-              fetchNewsletters(0);
-            }}
-          >
-            Try Again
-          </Button>
-        </div>
-      </ThreeColumnLayout>
-    );
-  }
-
-  // Show skeleton while loading initial data
-  if (isLoading && newsletters.length === 0) {
-    return (
-      <ThreeColumnLayout>
-        <TrendingPageSkeleton />
-      </ThreeColumnLayout>
-    );
-  }
-
+// Move client-side code to a separate component
+export default async function TrendingPage() {
+  // You can add any server-side data fetching here if needed
   return (
-    <ThreeColumnLayout>
-      <div role="main" aria-label="Trending Newsletters">
-        <h1 className="sr-only">Trending Newsletters</h1>
-        <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
-          {newsletters.map((newsletter, index) => (
-            <div
-              ref={index === newsletters.length - 1 ? lastNewsletterCallback : null}
-              key={newsletter.newsletter_id}
-            >
-              <article>
-                <NewsletterCard newsletter={newsletter} priority={index < 6} />
-              </article>
-            </div>
-          ))}
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "@id": "https://newslettermonster.com/trending#webpage",
+            name: "Trending Newsletters",
+            description:
+              "Discover the most popular and trending email newsletters on NewsletterMonster.",
+            url: "https://newslettermonster.com/trending",
+            isPartOf: {
+              "@type": "WebSite",
+              "@id": "https://newslettermonster.com/#website",
+              name: "NewsletterMonster",
+              url: "https://newslettermonster.com",
+            },
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  item: {
+                    "@id": "https://newslettermonster.com/",
+                    name: "Home",
+                  },
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  item: {
+                    "@id": "https://newslettermonster.com/trending",
+                    name: "Trending Newsletters",
+                  },
+                },
+              ],
+            },
+          }),
+        }}
+      />
 
-          {isLoading && (
-            <div className="col-span-full grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <NewsletterCardSkeleton key={`loading-${index}`} />
-              ))}
-            </div>
-          )}
-
-          {!hasMore && newsletters.length > 0 && (
-            <div className="col-span-1 p-8 text-center text-gray-600 md:col-span-2 lg:col-span-3">
-              You&apos;ve reached the end of trending newsletters.
-            </div>
-          )}
-        </div>
-      </div>
-    </ThreeColumnLayout>
+      <TrendingNewslettersClient />
+    </>
   );
 }

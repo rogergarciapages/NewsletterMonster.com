@@ -1,11 +1,10 @@
-// src/app/components/brand/newsletter/card/image.tsx
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 
-// src/app/components/brand/newsletter/card/image.tsx
+import { IconMailOpened } from "@tabler/icons-react";
 
 // src/app/components/brand/newsletter/card/image.tsx
 
@@ -29,7 +28,7 @@ const NewsletterImage = memo(
   }: NewsletterImageProps) => {
     if (!imageUrl) return null;
 
-    const imageTitle = `${subject || "Newsletter"} by ${brandname} | NewsletterMonster.com`;
+    const imageTitle = `${subject || "Newsletter"} by ${brandname} | NewsletterMonster`;
     const imageAlt = `${subject || "Newsletter"} by ${brandname}`;
 
     const imageContent = (
@@ -49,7 +48,19 @@ const NewsletterImage = memo(
                 priority={priority}
                 quality={85}
               />
-              {/* ... rest of your component */}
+              {showHoverEffect && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-torch-600/0 opacity-0 transition-all duration-300 group-hover:bg-torch-600/90 group-hover:opacity-100">
+                  <div className="flex translate-y-4 transform flex-col items-center gap-3 transition-transform duration-300 group-hover:translate-y-0">
+                    <IconMailOpened
+                      className="h-16 w-16 text-white"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                      title="Open newsletter"
+                    />
+                    <span className="text-xl font-bold tracking-tighter text-white">Open It!</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -59,8 +70,8 @@ const NewsletterImage = memo(
     return showHoverEffect ? (
       <Link
         href={`/${brandname}/${newsletterId}`}
-        title={`View ${imageTitle}`}
-        aria-label={`View ${imageAlt}`}
+        title={`Read ${subject || "Newsletter"} by ${brandname}`}
+        aria-label={`Read ${subject || "Newsletter"} by ${brandname}`}
       >
         {imageContent}
       </Link>
