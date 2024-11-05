@@ -46,7 +46,7 @@ const EmailCopyProfile = () => {
           color="primary"
           variant="solid"
           aria-label="Copy email address"
-          className="h-11 w-11"
+          className="h-11 w-11 rounded-lg"
         >
           <IconCopy className="h-5 w-5" />
         </Button>
