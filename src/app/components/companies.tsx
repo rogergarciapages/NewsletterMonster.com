@@ -1,4 +1,5 @@
 
+
 export const Companies = () => {
     return (
 
@@ -6,10 +7,13 @@ export const Companies = () => {
         <div className="container my-24 mx-auto md:px-6 pt-5">
 
   <section className="mb-32 text-center">
-    <h2 className="mb-16 max-w-5xl mx-auto text-center tracking-tight text-5xl">
-      We chomped over <span className="font-extrabold">2.000.000+ emails</span> and we will never stop!
-    </h2>
 
+  <h2 className="mb-4 max-w-4xl font-bold mx-auto text-center tracking-tight text-5xl relative">
+              The <span className="text-torch-700">largest newsletter database</span> on the internet. Period.
+            </h2>
+            <p className="mb-16 max-w-5xl mx-auto text-center font-light tracking-tight text-xl text-balance">
+              We archived over 2,000,000+ emails and the monster will never stop chomping newsletters!
+            </p>
     <div className="grid items-center gap-6 md:grid-cols-2 lg:grid-cols-4">
       <div className="flex items-center justify-center mb-12 lg:mb-12">
         <img

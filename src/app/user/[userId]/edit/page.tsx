@@ -168,7 +168,7 @@ const onSubmit = async (data: UserProfileFormData) => {
                     setError={setError}
                   />
                 </div>
-
+            <p className="text-muted text-sm">The photo will be used for your profile, and will be visible to other users across the platform.</p>
                 <div>
                   <Input
                     label="Name"

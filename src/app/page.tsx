@@ -7,10 +7,12 @@ import { signOut } from "next-auth/react";
 import Benefits from "./components/benefits";
 import Companies from "./components/companies";
 import { HeroSection } from "./components/hero/hero-section";
+import PainPoints from "./components/pain-points";
 import PricingWrapper from "./components/pricing";
 import SaveNewsletters from "./components/save-newsletters";
 import { PopularNewsletters } from "./components/sections/popular-newsletters";
 import { HeroLanding } from "./components/slider";
+import Solutions from "./components/solutions";
 import Statement from "./components/statement";
 
 
@@ -19,6 +21,8 @@ export default function Home() {
     <div>
     <HeroSection />
     <HeroLanding currentImageIndex={0} images={[]} />
+    <PainPoints />
+    <Solutions />
     <SaveNewsletters />
     <Statement />
     <Companies />
