@@ -1,6 +1,6 @@
 // src/hooks/useInfiniteScroll.ts
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseInfiniteScrollOptions<T> {
   apiEndpoint: string;
@@ -40,7 +40,7 @@ export function useInfiniteScroll<T>({
       setHasMore(newItems.length === pageSize);
       setPage(currentPage + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }

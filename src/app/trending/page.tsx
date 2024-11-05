@@ -124,7 +124,7 @@ export default function TrendingNewslettersPage() {
 
         {!hasMore && newsletters.length > 0 && (
           <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center p-8 text-gray-600">
-            You've reached the end of trending newsletters.
+            You&apos;ve reached the end of trending newsletters.
           </div>
         )}
       </div>

@@ -1,8 +1,8 @@
 // src/app/terms-and-conditions/page.tsx
-import { promises as fs } from "fs"
-import { marked } from "marked"
-import { Metadata } from "next"
-import path from "path"
+import { promises as fs } from "fs";
+import { marked } from "marked";
+import { Metadata } from "next";
+import path from "path";
 
 export const metadata: Metadata = {
   title: "Terms and Conditions",
@@ -18,7 +18,7 @@ export default async function TermsPage() {
   )
 
   // Convert markdown to HTML
-  const htmlContent = marked(markdown)
+  const htmlContent = marked(markdown);
 
   return (
     <main className="container mx-auto px-4 py-8">
