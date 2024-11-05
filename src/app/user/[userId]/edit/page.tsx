@@ -16,8 +16,6 @@ import { uploadProfileImage } from "@/lib/utils/upload";
 
 import Loading from "./loading";
 
-// src/app/user/[userId]/edit/page.tsx
-
 interface UserData {
   name: string;
   surname?: string;
@@ -74,7 +72,6 @@ export default function EditProfilePage() {
 
         const userData = (await response.json()) as UserData;
 
-        // Set current image
         setCurrentImage(userData.profile_photo);
 
         Object.entries(userData).forEach(([key, value]) => {
@@ -99,6 +96,7 @@ export default function EditProfilePage() {
       setIsSubmitting(true);
 
       const formElement = document.querySelector("form") as HTMLFormElement;
+      // eslint-disable-next-line quotes
       const fileInput = formElement?.querySelector('input[type="file"]') as HTMLInputElement;
       const file = fileInput?.files?.[0];
 
@@ -130,7 +128,7 @@ export default function EditProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          profile_photo: profilePhotoUrl || currentImage, // Keep current image if no new one
+          profile_photo: profilePhotoUrl || currentImage,
         }),
       });
 
@@ -143,7 +141,7 @@ export default function EditProfilePage() {
       console.log("Profile update response:", result);
 
       toast.success("Profile updated successfully");
-      await router.refresh(); // Force page refresh
+      await router.refresh();
       router.push(`/user/${session?.user?.user_id}`);
     } catch (error) {
       console.error("Error updating profile:", error);

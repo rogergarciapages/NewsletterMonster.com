@@ -1,7 +1,9 @@
 // src/app/api/signup/route.ts
-import { prisma } from "@/lib/prisma-client";
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+
+import bcrypt from "bcryptjs";
+
+import { prisma } from "@/lib/prisma-client";
 
 const validateEmail = (email: string) => {
   const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -19,23 +21,32 @@ export async function POST(req: Request) {
 
     // Validate required fields
     if (!email || !password || !name) {
-      return NextResponse.json({ 
-        error: "Name, email, and password are required" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Name, email, and password are required",
+        },
+        { status: 400 }
+      );
     }
 
     // Validate email format
     if (!validateEmail(email)) {
-      return NextResponse.json({ 
-        error: "Invalid email format" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid email format",
+        },
+        { status: 400 }
+      );
     }
 
     // Validate password
     if (!validatePassword(password)) {
-      return NextResponse.json({ 
-        error: "Password must be at least 8 characters long" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Password must be at least 8 characters long",
+        },
+        { status: 400 }
+      );
     }
 
     // Check for existing user
@@ -44,9 +55,12 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json({ 
-        error: "An account with this email already exists" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "An account with this email already exists",
+        },
+        { status: 400 }
+      );
     }
 
     // Hash password
@@ -70,26 +84,34 @@ export async function POST(req: Request) {
     // Remove sensitive data before sending response
     const { password: _, ...safeUser } = user;
 
-    return NextResponse.json({ 
-      message: "Account created successfully",
-      user: safeUser 
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        message: "Account created successfully",
+        user: safeUser,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Signup error:", error);
-    
+
     // Handle Prisma errors
     if (error instanceof Error) {
-      if (error.message.includes('Unique constraint')) {
-        return NextResponse.json({ 
-          error: "An account with this email already exists" 
-        }, { status: 400 });
+      if (error.message.includes("Unique constraint")) {
+        return NextResponse.json(
+          {
+            error: "An account with this email already exists",
+          },
+          { status: 400 }
+        );
       }
     }
 
-    return NextResponse.json({ 
-      error: "An error occurred while creating your account" 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "An error occurred while creating your account",
+      },
+      { status: 500 }
+    );
   }
 }
 

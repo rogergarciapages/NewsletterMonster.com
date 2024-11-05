@@ -48,11 +48,11 @@ export async function generateMetadata({
   const displayName = user.username || user.name || "User";
 
   return {
-    title: `${displayName}'s Profile | Newsletter Monster`,
-    description: `View ${displayName}'s profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
+    title: `${displayName}&quot;s Profile | Newsletter Monster`,
+    description: `View ${displayName}&quot;s profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
     openGraph: {
-      title: `${displayName}'s Profile | Newsletter Monster`,
-      description: `Check out ${displayName}'s newsletters and updates on Newsletter Monster`,
+      title: `${displayName}&quot;s Profile | Newsletter Monster`,
+      description: `Check out ${displayName}&quot;s newsletters and updates on Newsletter Monster`,
       images: user.profile_photo ? [{ url: user.profile_photo }] : undefined,
       type: "profile",
       firstName: user.name || undefined,
@@ -62,8 +62,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${displayName}'s Profile | Newsletter Monster`,
-      description: `Check out ${displayName}'s newsletters and updates on Newsletter Monster`,
+      title: `${displayName}&quot;s Profile | Newsletter Monster`,
+      description: `Check out ${displayName}&quot;s newsletters and updates on Newsletter Monster`,
       creator: user.twitter_username ? `@${user.twitter_username}` : undefined,
       images: user.profile_photo ? [user.profile_photo] : undefined,
     },
