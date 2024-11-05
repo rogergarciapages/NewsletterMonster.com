@@ -7,10 +7,16 @@
     "build": "prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier src/ --write",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "postinstall": "prisma generate --no-engine",
     "clean": "rimraf .next",
-    "prebuild": "npm run clean"
+    "prebuild": "npm run clean",
+    "type-check": "tsc --noEmit",
+    "validate": "npm run lint && npm run type-check && npm run format:check",
+    "check-all": "npm run format:check && npm run lint && npm run type-check",
+    "fix-all": "npm run format && npm run lint:fix"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
@@ -61,6 +67,8 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "daisyui": "^4.12.13",
     "eslint": "^8",
     "eslint-config-next": "14.2.12",

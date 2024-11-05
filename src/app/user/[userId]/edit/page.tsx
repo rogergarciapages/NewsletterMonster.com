@@ -1,18 +1,24 @@
 // src/app/user/[userId]/edit/page.tsx
 "use client";
 
-import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import ImageUpload from "@/app/components/ui/image-upload"; // Fixed import
-import { userProfileSchema, type UserProfileFormData } from "@/lib/schemas/user-profile";
-import { uploadProfileImage } from "@/lib/utils/upload";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, Input, Textarea } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import ImageUpload from "@/app/components/ui/image-upload";
+// Fixed import
+import { type UserProfileFormData, userProfileSchema } from "@/lib/schemas/user-profile";
+import { uploadProfileImage } from "@/lib/utils/upload";
+
 import Loading from "./loading";
+
+// src/app/user/[userId]/edit/page.tsx
 
 interface UserData {
   name: string;
@@ -57,22 +63,22 @@ export default function EditProfilePage() {
       instagram_username: "",
       youtube_channel: "",
       linkedin_profile: "",
-    }
+    },
   });
 
   useEffect(() => {
     async function fetchUserData() {
       if (!session?.user?.user_id) return;
-      
+
       try {
         const response = await fetch(`/api/users/${session.user.user_id}`);
         if (!response.ok) throw new Error("Failed to fetch user data");
-        
-        const userData = await response.json() as UserData;
-        
+
+        const userData = (await response.json()) as UserData;
+
         // Set current image
         setCurrentImage(userData.profile_photo);
-        
+
         Object.entries(userData).forEach(([key, value]) => {
           if (value !== null && value !== undefined && key in userProfileSchema.shape) {
             setValue(key as keyof UserProfileFormData, value);
@@ -90,75 +96,77 @@ export default function EditProfilePage() {
     fetchUserData();
   }, [session, setValue]);
 
-const onSubmit = async (data: UserProfileFormData) => {
-  try {
-    setIsSubmitting(true);
+  const onSubmit = async (data: UserProfileFormData) => {
+    try {
+      setIsSubmitting(true);
 
-    const formElement = document.querySelector("form") as HTMLFormElement;
-    const fileInput = formElement?.querySelector("input[type=\"file\"]") as HTMLInputElement;
-    const file = fileInput?.files?.[0];
+      const formElement = document.querySelector("form") as HTMLFormElement;
+      const fileInput = formElement?.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = fileInput?.files?.[0];
 
-    console.log("File input:", {
-      hasFile: !!file,
-      fileDetails: file ? {
-        name: file.name,
-        type: file.type,
-        size: file.size
-      } : null
-    });
+      console.log("File input:", {
+        hasFile: !!file,
+        fileDetails: file
+          ? {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+            }
+          : null,
+      });
 
-    let profilePhotoUrl = undefined;
-    if (file) {
-      try {
-        profilePhotoUrl = await uploadProfileImage(file);
-        console.log("Upload successful, URL:", profilePhotoUrl);
-      } catch (uploadError) {
-        console.error("Upload failed:", uploadError);
-        toast.error("Failed to upload image");
-        return;
+      let profilePhotoUrl = undefined;
+      if (file) {
+        try {
+          profilePhotoUrl = await uploadProfileImage(file);
+          console.log("Upload successful, URL:", profilePhotoUrl);
+        } catch (uploadError) {
+          console.error("Upload failed:", uploadError);
+          toast.error("Failed to upload image");
+          return;
+        }
       }
+
+      const response = await fetch("/api/users/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          profile_photo: profilePhotoUrl || currentImage, // Keep current image if no new one
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update profile: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("Profile update response:", result);
+
+      toast.success("Profile updated successfully");
+      await router.refresh(); // Force page refresh
+      router.push(`/user/${session?.user?.user_id}`);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update profile");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const response = await fetch("/api/users/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...data,
-        profile_photo: profilePhotoUrl || currentImage, // Keep current image if no new one
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to update profile: ${errorText}`);
-    }
-
-    const result = await response.json();
-    console.log("Profile update response:", result);
-
-    toast.success("Profile updated successfully");
-    await router.refresh(); // Force page refresh
-    router.push(`/user/${session?.user?.user_id}`);
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    toast.error(error instanceof Error ? error.message : "Failed to update profile");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   if (!session) return null;
   if (isLoading) return <Loading />;
 
   return (
     <ThreeColumnLayout>
-      <div className="max-w-4xl mx-auto w-full px-4 py-8">
+      <div className="mx-auto w-full max-w-4xl px-4 py-8">
         <Card>
           <CardBody className="gap-4">
-            <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
-            
+            <h1 className="mb-4 text-2xl font-bold">Edit Profile</h1>
+
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
                   <ImageUpload
                     currentImage={currentImage}
@@ -167,8 +175,11 @@ const onSubmit = async (data: UserProfileFormData) => {
                     errorMessage={errors.profile_photo?.message}
                     setError={setError}
                   />
+                  <p className="text-sm text-zinc-800 dark:text-white/80">
+                    The photo will be used for your profile, and will be visible to other users
+                    across the platform.
+                  </p>
                 </div>
-            <p className="text-muted text-sm">The photo will be used for your profile, and will be visible to other users across the platform.</p>
                 <div>
                   <Input
                     label="Name"
@@ -203,11 +214,7 @@ const onSubmit = async (data: UserProfileFormData) => {
                 </div>
 
                 <div className="md:col-span-2">
-                  <Textarea
-                    label="Bio"
-                    {...register("bio")}
-                    errorMessage={errors.bio?.message}
-                  />
+                  <Textarea label="Bio" {...register("bio")} errorMessage={errors.bio?.message} />
                 </div>
 
                 <div>
@@ -262,18 +269,10 @@ const onSubmit = async (data: UserProfileFormData) => {
               </div>
 
               <div className="flex justify-end gap-4">
-                <Button
-                  color="danger"
-                  variant="light"
-                  onClick={() => router.back()}
-                >
+                <Button color="danger" variant="light" onClick={() => router.back()}>
                   Cancel
                 </Button>
-                <Button
-                  color="primary"
-                  type="submit"
-                  isLoading={isSubmitting}
-                >
+                <Button color="primary" type="submit" isLoading={isSubmitting}>
                   Save Changes
                 </Button>
               </div>

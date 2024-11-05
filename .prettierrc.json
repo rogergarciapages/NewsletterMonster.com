@@ -3,6 +3,9 @@
   "singleQuote": false,
   "tabWidth": 2,
   "trailingComma": "es5",
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
   "importOrder": [
     "^(react|next?/?([a-zA-Z/]*))$",
     "<THIRD_PARTY_MODULES>",

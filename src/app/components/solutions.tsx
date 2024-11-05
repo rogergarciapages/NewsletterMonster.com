@@ -25,7 +25,7 @@ const Solutions = () => {
                 Boost Domain Authority for Higher Rankings
               </h3>
               <p className="text-gray-700">
-                Backlinks from reputable sites enhance your website's domain authority, helping it rank better on search engines. Higher rankings mean your newsletter sign-up pages are more likely to attract and convert visitors.
+                Backlinks from reputable sites enhance your website&apos;s domain authority, helping it rank better on search engines. Higher rankings mean your newsletter sign-up pages are more likely to attract and convert visitors.
               </p>
             </div>
 
@@ -34,7 +34,7 @@ const Solutions = () => {
                 Establish Credibility and Audience Trust
               </h3>
               <p className="text-gray-700">
-                When well-known websites link to your content, it boosts your brand’s credibility. Trustworthy backlinks can reduce subscriber churn by attracting users who are genuinely interested in your expertise and value.
+                When well-known websites link to your content, it boosts your brand&apos;s credibility. Trustworthy backlinks can reduce subscriber churn by attracting users who are genuinely interested in your expertise and value.
               </p>
             </div>
           </div>
