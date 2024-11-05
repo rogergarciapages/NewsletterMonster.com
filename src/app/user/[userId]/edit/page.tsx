@@ -1,4 +1,3 @@
-// src/app/user/[userId]/edit/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -12,17 +11,10 @@ import { toast } from "sonner";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import ImageUpload from "@/app/components/ui/image-upload";
-// Fixed import
 import { type UserProfileFormData, userProfileSchema } from "@/lib/schemas/user-profile";
 import { uploadProfileImage } from "@/lib/utils/upload";
 
 import Loading from "./loading";
-
-// src/app/user/[userId]/edit/page.tsx
-
-// src/app/user/[userId]/edit/page.tsx
-
-// src/app/user/[userId]/edit/page.tsx
 
 // src/app/user/[userId]/edit/page.tsx
 
