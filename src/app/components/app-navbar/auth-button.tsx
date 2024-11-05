@@ -1,6 +1,9 @@
 // src/app/components/app-navbar/auth-button.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
+import { memo, useCallback } from "react";
+
 import {
   Avatar,
   Button,
@@ -10,19 +13,20 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/react";
-import { IconUser } from "@tabler/icons-react";
+import { IconLock, IconLogout, IconUser } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
-import { memo, useCallback } from "react";
+
+// src/app/components/app-navbar/auth-button.tsx
 
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
 
 const LoadingState = memo(() => (
-  <div className="flex items-center justify-center w-10 h-10">
-    <CircularProgress 
+  <div className="flex h-10 w-10 items-center justify-center">
+    <CircularProgress
       size="sm"
-      aria-label="Loading authentication status..." 
+      aria-label="Loading authentication status..."
       classNames={{
         svg: "w-5 h-5",
       }}
@@ -46,6 +50,8 @@ interface UserDropdownProps {
 }
 
 const UserDropdown = memo(({ session }: UserDropdownProps) => {
+  const router = useRouter();
+
   const handleSignOut = useCallback(async () => {
     try {
       await signOut({ callbackUrl: "/" });
@@ -53,6 +59,20 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
       console.error("Sign out failed:", error);
     }
   }, []);
+
+  const handleAction = useCallback(
+    (key: string | number) => {
+      switch (key) {
+        case "profile":
+          router.push(`/user/${session.user.user_id}`);
+          break;
+        case "sign-out":
+          handleSignOut();
+          break;
+      }
+    },
+    [router, session.user.user_id, handleSignOut]
+  );
 
   return (
     <Dropdown placement="bottom-end">
@@ -67,23 +87,28 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
           aria-label="User menu"
         />
       </DropdownTrigger>
-      <DropdownMenu 
-        aria-label="Profile Actions" 
-        variant="flat"
-        onAction={(key) => {
-          if (key === "sign-out") {
-            handleSignOut();
-          }
-        }}
-      >
-        <DropdownItem key="profile" className="h-14 gap-2">
-          <p className="font-semibold">Signed in as:</p>
-          <p className="font-semibold">{session.user.email}</p>
+      <DropdownMenu aria-label="Profile Actions" variant="flat" onAction={handleAction}>
+        <DropdownItem
+          key="user-info"
+          className="h-14"
+          startContent={<IconLock className="h-4 w-4 text-default-500" />}
+          description={session.user.email}
+        >
+          Signed in as
         </DropdownItem>
-        <DropdownItem 
-          key="sign-out" 
-          color="danger"
+        <DropdownItem
+          key="profile"
+          startContent={<IconUser className="h-4 w-4" />}
+          description="View and edit your profile"
+        >
+          Your Profile
+        </DropdownItem>
+        <DropdownItem
+          key="sign-out"
+          startContent={<IconLogout className="h-4 w-4" />}
+          description="Exit your account"
           className="text-danger"
+          color="danger"
         >
           Sign Out
         </DropdownItem>
@@ -94,9 +119,9 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
 UserDropdown.displayName = "UserDropdown";
 
 const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => (
-  <Button 
-    onClick={onOpenLoginModal} 
-    color="warning" 
+  <Button
+    onClick={onOpenLoginModal}
+    color="warning"
     variant="shadow"
     startContent={<IconUser className="h-4 w-4" />}
     className="min-w-[100px]"
