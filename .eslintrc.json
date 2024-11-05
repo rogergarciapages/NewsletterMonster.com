@@ -19,7 +19,7 @@
     ],
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": "warn",
-    "@typescript-eslint/no-non-null-assertion": "off", // Changed to off since you use it frequently
+    "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-empty-function": "off",
 
@@ -31,11 +31,11 @@
     "no-console": [
       "warn",
       {
-        "allow": ["warn", "error", "info"] // Added info for development logging
+        "allow": ["warn", "error", "info"]
       }
     ],
 
-    // File Naming
+    // File Naming - keep only filename conventions
     "check-file/filename-naming-convention": [
       "error",
       {
@@ -49,15 +49,9 @@
         "ignoreMiddleExtensions": true
       }
     ],
-    "check-file/folder-naming-convention": [
-      "error",
-      {
-        "src/**/": "KEBAB_CASE"
-      },
-      {
-        "ignorePaths": ["**/[...nextauth]", "**/[userId]", "**/[brandname]", "**/[newsletterId]"]
-      }
-    ]
+
+    // Disable folder naming convention
+    "check-file/folder-naming-convention": "off"
   },
   "settings": {
     "next": {
@@ -70,10 +64,9 @@
       "parser": "@typescript-eslint/parser"
     },
     {
-      // Specific rules for Next.js API routes and pages
       "files": ["**/app/**/{page,layout,loading,error,not-found,route}.{ts,tsx}"],
       "rules": {
-        "no-console": "off" // Allow console in pages and API routes for debugging
+        "no-console": "off"
       }
     }
   ],
