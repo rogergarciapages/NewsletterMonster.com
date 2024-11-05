@@ -22,6 +22,10 @@ import Loading from "./loading";
 
 // src/app/user/[userId]/edit/page.tsx
 
+// src/app/user/[userId]/edit/page.tsx
+
+// src/app/user/[userId]/edit/page.tsx
+
 interface UserData {
   name: string;
   surname?: string;

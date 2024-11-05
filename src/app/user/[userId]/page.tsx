@@ -1,13 +1,16 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { Button } from "@nextui-org/react";
+import { IconEdit } from "@tabler/icons-react";
+
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import { Newsletter } from "@/app/components/brand/newsletter/types";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
 import { BrandUser } from "@/app/components/brand/profile/types";
+import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { prisma } from "@/lib/prisma-client";
-import { Button } from "@nextui-org/react";
-import { IconEdit } from "@tabler/icons-react";
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -15,9 +18,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   other: {
     "Cache-Control": "no-cache, no-store, must-revalidate",
-    "Pragma": "no-cache",
-    "Expires": "0"
-  }
+    Pragma: "no-cache",
+    Expires: "0",
+  },
 };
 
 interface UserProfileData {
@@ -31,7 +34,7 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
     const timestamp = Date.now();
     const user = await prisma.user.findUnique({
       where: {
-        user_id: userId
+        user_id: userId,
       },
       select: {
         user_id: true,
@@ -47,8 +50,8 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
         instagram_username: true,
         youtube_channel: true,
         linkedin_profile: true,
-        role: true
-      }
+        role: true,
+      },
     });
 
     if (!user) return null;
@@ -60,10 +63,10 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
 
     const newsletters = await prisma.newsletter.findMany({
       where: {
-        user_id: userId
+        user_id: userId,
       },
       orderBy: {
-        created_at: "desc"
+        created_at: "desc",
       },
       select: {
         newsletter_id: true,
@@ -75,19 +78,19 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
         created_at: true,
         summary: true,
         user_id: true,
-      }
+      },
     });
 
     const followersCount = await prisma.follow.count({
       where: {
-        following_id: userId
-      }
+        following_id: userId,
+      },
     });
 
     return {
       newsletters,
       user,
-      followersCount
+      followersCount,
     };
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -95,13 +98,9 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
   }
 }
 
-export default async function UserProfilePage({ 
-  params 
-}: { 
-  params: { userId: string } 
-}) {
+export default async function UserProfilePage({ params }: { params: { userId: string } }) {
   const data = await getUserData(params.userId);
-  
+
   if (!data) {
     notFound();
   }
@@ -111,7 +110,7 @@ export default async function UserProfilePage({
   return (
     <ThreeColumnLayout>
       <div className="w-full">
-        <BrandProfileHeaderWrapper 
+        <BrandProfileHeaderWrapper
           brandName={user.name}
           user={user}
           newsletterCount={newsletters.length}
@@ -121,7 +120,7 @@ export default async function UserProfilePage({
           isOwnProfile={true}
         />
 
-        <div className="max-w-6xl mx-auto px-4 mt-4">
+        <div className="mx-auto mt-4 max-w-6xl px-4">
           <Button
             color="primary"
             variant="flat"
@@ -133,11 +132,11 @@ export default async function UserProfilePage({
             Edit my Profile
           </Button>
         </div>
-        
-        <main className="max-w-6xl mx-auto px-4 py-8">
+
+        <main className="mx-auto max-w-6xl px-4 py-8">
           <h1 className="sr-only">{user.name}&apos;s Newsletters</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {newsletters.map((newsletter) => (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {newsletters.map(newsletter => (
               <NewsletterCard
                 key={newsletter.newsletter_id}
                 newsletter={newsletter}
@@ -145,6 +144,7 @@ export default async function UserProfilePage({
               />
             ))}
           </div>
+          <EmailCopyProfile />
         </main>
       </div>
     </ThreeColumnLayout>
