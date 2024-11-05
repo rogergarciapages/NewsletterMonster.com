@@ -1,11 +1,13 @@
 // src/components/newsletters/newsletter-card.tsx
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { slugify } from "@/utils/slugify";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+
 import { Newsletter } from "../../components/brand/newsletter/types";
 
 interface NewsletterCardProps {
@@ -32,13 +34,17 @@ export const NewsletterCard = ({ newsletter, priority = false }: NewsletterCardP
   const defaultImage = "/images/newsletter-placeholder.jpg"; // Make sure to create this placeholder image
 
   return (
-    <Card 
-      className="group relative w-full transition-transform duration-300 hover:scale-[1.02] cursor-pointer bg-gradient-to-b from-torch-900 to-gray-900"
-      onClick={() => router.push(`/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`)}
+    <Card
+      className="group relative w-full cursor-pointer bg-gradient-to-b from-torch-900 to-gray-900 transition-transform duration-300 hover:scale-[1.02]"
+      onClick={() =>
+        router.push(`/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`)
+      }
     >
       {/* Aspect ratio container */}
-      <div className="relative w-full pt-[132.35%]"> {/* 900/680 ≈ 1.3235 */}
-        <div className="absolute inset-0 m-2 rounded-lg overflow-hidden">
+      <div className="relative w-full pt-[132.35%]">
+        {" "}
+        {/* 900/680 ≈ 1.3235 */}
+        <div className="absolute inset-0 m-2 overflow-hidden rounded-lg">
           {!imageError ? (
             <Image
               src={newsletter.top_screenshot_url || defaultImage}
@@ -50,45 +56,44 @@ export const NewsletterCard = ({ newsletter, priority = false }: NewsletterCardP
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-b from-gray-800 to-gray-900" />
+            <div className="h-full w-full bg-gradient-to-b from-gray-800 to-gray-900" />
           )}
         </div>
-
         {/* Content overlay */}
         <div className="absolute inset-0 z-10 flex flex-col justify-between py-2">
           <CardContent>
-            <CardTitle className="text-xl text-white tracking-tight leading-[1em] pt-4 mb-2 line-clamp-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <CardTitle className="mb-2 line-clamp-4 pt-4 text-xl leading-[1em] tracking-tight text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               {newsletter.subject || "No Subject"}
             </CardTitle>
-            
+
             {newsletter.created_at && (
-              <div className="text-xs text-gray-300 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="mb-2 text-xs text-gray-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 {formatDate(newsletter.created_at)}
               </div>
             )}
           </CardContent>
 
-          <CardFooter className="flex flex-col items-start align-bottom px-4 py-1 gap-2">
-            <div className="flex space-x-4 items-center">
+          <CardFooter className="flex flex-col items-start gap-2 px-4 py-1 align-bottom">
+            <div className="flex items-center space-x-4">
               {typeof newsletter.likes_count === "number" && (
-                <div className="flex items-center space-x-2 bg-black/70 backdrop-blur-sm text-white rounded-full px-2 py-1">
-                  <HeartFullIcon className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-2 py-1 text-white backdrop-blur-sm">
+                  <HeartFullIcon className="h-4 w-4" />
                   <span className="text-xs">{newsletter.likes_count}</span>
                 </div>
               )}
               {typeof newsletter.you_rocks_count === "number" && (
-                <div className="flex items-center space-x-2 bg-black/70 backdrop-blur-sm text-white rounded-full px-3 py-1">
-                  <YouRockIcon className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-3 py-1 text-white backdrop-blur-sm">
+                  <YouRockIcon className="h-4 w-4" />
                   <span className="text-xs">{newsletter.you_rocks_count}</span>
                 </div>
               )}
             </div>
 
-            <button 
+            <button
               onClick={handleSenderClick}
-              className="transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-aquamarine-500 rounded-full"
+              className="rounded-full transition-transform duration-300 hover:scale-105"
             >
-              <CardDescription className="text-white text-xs truncate bg-aquamarine-700 px-3 py-1 inline-block rounded-full hover:bg-aquamarine-600">
+              <CardDescription className="inline-block truncate rounded-full bg-aquamarine-700 px-3 py-1 text-xs text-white hover:bg-aquamarine-600">
                 {newsletter.sender || "Unknown Sender"}
               </CardDescription>
             </button>
