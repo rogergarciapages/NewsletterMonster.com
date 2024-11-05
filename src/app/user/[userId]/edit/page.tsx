@@ -20,6 +20,8 @@ import Loading from "./loading";
 
 // src/app/user/[userId]/edit/page.tsx
 
+// src/app/user/[userId]/edit/page.tsx
+
 interface UserData {
   name: string;
   surname?: string;
@@ -175,7 +177,7 @@ export default function EditProfilePage() {
                     errorMessage={errors.profile_photo?.message}
                     setError={setError}
                   />
-                  <p className="text-sm text-zinc-800 dark:text-white/80">
+                  <p className="px-2 py-4 text-xs text-zinc-800 dark:text-white/80">
                     The photo will be used for your profile, and will be visible to other users
                     across the platform.
                   </p>
