@@ -1,3 +1,4 @@
+// src/app/components/brand/newsletter/card/image.tsx
 "use client";
 
 import Image from "next/image";
