@@ -1,33 +1,42 @@
-// Create new file: src/app/components/brand/profile/header/error-boundary.tsx
+// src/app/components/brand/profile/header/error-boundary.tsx
 "use client";
 
-import { Component, ReactNode } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
+
+// src/app/components/brand/profile/header/error-boundary.tsx
 
 interface Props {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  error?: Error;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
+  public state: State = {
+    hasError: false,
+  };
+
+  public static getDerivedStateFromError(_: Error): State {
+    return { hasError: true };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
   }
 
-  render() {
+  public render() {
     if (this.state.hasError) {
       return (
-        <div className="p-4 text-red-500 bg-red-50 rounded-md">
-          <h2 className="font-bold">Something went wrong</h2>
-          <p className="text-sm">{this.state.error?.message || "An error occurred"}</p>
+        <div className="p-4 text-center">
+          <h2 className="text-xl font-bold text-red-500">Something went wrong</h2>
+          <button
+            className="mt-4 rounded bg-primary px-4 py-2 text-white hover:bg-primary/90"
+            onClick={() => this.setState({ hasError: false })}
+          >
+            Try again
+          </button>
         </div>
       );
     }

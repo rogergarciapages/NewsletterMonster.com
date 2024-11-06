@@ -164,9 +164,10 @@ model User {
   linkedin_profile   String?       @db.Text
   provider           String?       @db.VarChar(255)
   website_domain     String?       @db.VarChar(255)
-  domain_verified    Boolean       @default(false)
-  verification_token String?       @db.VarChar(255)
-  verification_sent  DateTime?     @db.Timestamp(6)
+  facebook_url      String?       @db.Text
+  domain_verified   Boolean       @default(false)
+  verification_token String?      @db.VarChar(255)
+  verification_sent DateTime?     @db.Timestamp(6)
   Account            Account[]
   Session            Session[]
   Bookmark           Bookmark[]

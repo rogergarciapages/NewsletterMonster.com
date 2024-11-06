@@ -1,35 +1,39 @@
 // src/app/[brandname]/page.tsx
-import NewsletterCard from "@/app/components/brand/newsletter/card";
-import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
-import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { prisma } from "@/lib/prisma-client";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Newsletter } from "../components/brand/newsletter/types";
-import { BrandUser } from "../components/brand/profile/types";
-import { BrandStructuredData, generateBrandMetadata } from "../components/brand/seo/brand-page-seo";
+
+import NewsletterCard from "@/app/components/brand/newsletter/card";
+import { Newsletter } from "@/app/components/brand/newsletter/types";
+import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
+import { BrandUser } from "@/app/components/brand/profile/types";
+import {
+  BrandStructuredData,
+  generateBrandMetadata,
+} from "@/app/components/brand/seo/brand-page-seo";
+import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { prisma } from "@/lib/prisma-client";
 
 interface BrandData {
   newsletters: Newsletter[];
-  user: BrandUser | null;
+  user: BrandUser;
   followersCount: number;
 }
 
 function formatBrandName(brandname: string): string {
-  return brandname.split("-").map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(" ");
+  return brandname
+    .split("-")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 async function getBrandData(brandname: string): Promise<BrandData | null> {
   try {
-    // First try to find a user that matches the brand name
     const brandUser = await prisma.user.findFirst({
       where: {
         OR: [
           { company_name: { contains: brandname.replace(/-/g, " "), mode: "insensitive" } },
-          { username: { equals: brandname, mode: "insensitive" } }
-        ]
+          { username: { equals: brandname, mode: "insensitive" } },
+        ],
       },
       select: {
         user_id: true,
@@ -41,15 +45,18 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
         profile_photo: true,
         bio: true,
         website: true,
+        website_domain: true,
+        domain_verified: true,
         twitter_username: true,
         instagram_username: true,
         youtube_channel: true,
         linkedin_profile: true,
-        role: true
-      }
+        role: true,
+      },
     });
 
-    // Then get newsletters
+    if (!brandUser) return null;
+
     const newsletters = await prisma.newsletter.findMany({
       where: {
         OR: [
@@ -57,12 +64,12 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
             sender: {
               contains: brandname.replace(/-/g, " "),
               mode: "insensitive",
-            }
+            },
           },
           {
-            user_id: brandUser?.user_id
-          }
-        ]
+            user_id: brandUser?.user_id,
+          },
+        ],
       },
       orderBy: {
         created_at: "desc",
@@ -84,63 +91,51 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
       return null;
     }
 
-    // Get followers count using the follow table
-    let followersCount = 0;
-    if (brandUser) {
-      followersCount = await prisma.follow.count({
-        where: {
-          OR: [
-            { following_id: brandUser.user_id },
-            { following_name: brandname }
-          ]
-        }
-      });
-    } else {
-      // If no user found, count followers for unclaimed brand
-      followersCount = await prisma.follow.count({
-        where: {
-          following_name: brandname
-        }
-      });
-    }
+    const followersCount = await prisma.follow.count({
+      where: {
+        OR: [{ following_id: brandUser.user_id }, { following_name: brandname }],
+      },
+    });
+
+    // Ensure all required fields are present with defaults
+    const user: BrandUser = {
+      ...brandUser,
+      website_domain: brandUser.website_domain || null,
+      domain_verified: brandUser.domain_verified || false,
+    };
 
     return {
       newsletters,
-      user: brandUser,
-      followersCount
+      user,
+      followersCount,
     };
   } catch (error) {
     console.error("Error fetching brand data:", error);
     return null;
   }
 }
-
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { brandname: string } 
+export async function generateMetadata({
+  params,
+}: {
+  params: { brandname: string };
 }): Promise<Metadata> {
   const data = await getBrandData(params.brandname);
   if (!data) return notFound();
 
   const displayName = formatBrandName(params.brandname);
-  
+
   return generateBrandMetadata({
     brandname: params.brandname,
     displayName,
     newsletters: data.newsletters,
     user: data.user,
-    followersCount: data.followersCount
+    followersCount: data.followersCount,
   });
 }
 
-export default async function BrandPage({ 
-  params 
-}: { 
-  params: { brandname: string } 
-}) {
+export default async function BrandPage({ params }: { params: { brandname: string } }) {
   const data = await getBrandData(params.brandname);
-  
+
   if (!data) {
     notFound();
   }
@@ -157,21 +152,21 @@ export default async function BrandPage({
         user={user}
         followersCount={followersCount}
       />
-      
+
       <ThreeColumnLayout>
         <div className="w-full text-[#111]">
-          <BrandProfileHeaderWrapper 
+          <BrandProfileHeaderWrapper
             brandName={brandDisplayName}
             user={user}
             newsletterCount={newsletters.length}
             followersCount={followersCount}
             isFollowing={false}
           />
-          
-          <main className="max-w-6xl mx-auto px-1 py-8">
+
+          <main className="mx-auto max-w-6xl px-1 py-8">
             <h1 className="sr-only">{brandDisplayName} Newsletters</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {newsletters.map((newsletter) => (
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {newsletters.map(newsletter => (
                 <NewsletterCard
                   key={newsletter.newsletter_id}
                   newsletter={newsletter}

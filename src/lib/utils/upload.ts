@@ -1,11 +1,5 @@
 // src/lib/utils/upload.ts
 export async function uploadProfileImage(file: File): Promise<string> {
-  console.log("Starting file upload:", {
-    name: file.name,
-    type: file.type,
-    size: file.size
-  });
-
   const formData = new FormData();
   formData.append("file", file);
 
@@ -13,10 +7,8 @@ export async function uploadProfileImage(file: File): Promise<string> {
     const response = await fetch("/api/upload/profile-image", {
       method: "POST",
       body: formData,
-      headers: {
-        // Don't set Content-Type here - browser will set it with boundary for FormData
-      },
-      credentials: "same-origin"
+      headers: {},
+      credentials: "same-origin",
     });
 
     if (!response.ok) {
@@ -27,10 +19,8 @@ export async function uploadProfileImage(file: File): Promise<string> {
     }
 
     const data = await response.json();
-    console.log("Upload successful:", data);
     return data.url;
   } catch (error) {
-    console.error("Upload failed:", error);
     throw error;
   }
 }

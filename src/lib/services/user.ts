@@ -1,5 +1,6 @@
 // src/lib/services/user.ts
 import { BrandUser } from "@/app/components/brand/profile/types";
+
 import { prisma } from "../prisma-client";
 
 export interface UserProfileData {
@@ -38,6 +39,8 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
         profile_photo: true,
         bio: true,
         website: true,
+        website_domain: true, // Added this
+        domain_verified: true, // Added this
         twitter_username: true,
         instagram_username: true,
         youtube_channel: true,
@@ -45,7 +48,7 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
         role: true,
         Newsletter: {
           orderBy: {
-            created_at: "desc"
+            created_at: "desc",
           },
           select: {
             newsletter_id: true,
@@ -57,15 +60,15 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
             created_at: true,
             summary: true,
             user_id: true,
-          }
+          },
         },
         _count: {
           select: {
             followers: true,
-            following: true
-          }
-        }
-      }
+            following: true,
+          },
+        },
+      },
     });
 
     if (!user) return null;
@@ -76,7 +79,7 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
     // Transform newsletters to ensure non-null values where required
     const transformedNewsletters = user.Newsletter.map(newsletter => ({
       newsletter_id: newsletter.newsletter_id,
-      sender: newsletter.sender || firstName, // Use first name only
+      sender: newsletter.sender || firstName,
       subject: newsletter.subject || "Untitled",
       top_screenshot_url: newsletter.top_screenshot_url,
       likes_count: newsletter.likes_count || 0,
@@ -86,14 +89,31 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
       user_id: newsletter.user_id || user.user_id,
     }));
 
+    // Create BrandUser object with all required fields
+    const brandUser: BrandUser = {
+      user_id: user.user_id,
+      name: firstName,
+      email: user.email,
+      surname: user.surname,
+      company_name: user.company_name,
+      username: user.username,
+      profile_photo: user.profile_photo,
+      bio: user.bio,
+      website: user.website,
+      website_domain: user.website_domain || null, // Added with default
+      domain_verified: user.domain_verified || false, // Added with default
+      twitter_username: user.twitter_username,
+      instagram_username: user.instagram_username,
+      youtube_channel: user.youtube_channel,
+      linkedin_profile: user.linkedin_profile,
+      role: user.role,
+    };
+
     return {
-      user: {
-        ...user,
-        name: firstName, // Use first name only for the user object
-      },
+      user: brandUser,
       newsletters: transformedNewsletters,
       followersCount: user._count.followers,
-      followingCount: user._count.following
+      followingCount: user._count.following,
     };
   } catch (error) {
     console.error("Error fetching user profile:", error);

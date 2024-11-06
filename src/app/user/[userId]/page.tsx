@@ -178,7 +178,7 @@ export default async function UserProfilePage({ params }: { params: { userId: st
     profile_photo: user.profile_photo,
     bio: user.bio,
     website: user.website,
-    website_domain: user.website_domain,
+    website_domain: user.website_domain || "",
     domain_verified: user.domain_verified || false,
     twitter_username: user.twitter_username,
     instagram_username: user.instagram_username,
