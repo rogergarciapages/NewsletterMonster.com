@@ -217,7 +217,18 @@ export default function EditProfilePage() {
                   <Input
                     label="Website"
                     {...register("website")}
+                    placeholder="https://your-website.com"
                     errorMessage={errors.website?.message}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="Website Domain"
+                    {...register("website_domain")}
+                    placeholder="your-website.com"
+                    description="Domain for newsletter verification"
+                    errorMessage={errors.website_domain?.message}
                   />
                 </div>
 
@@ -235,6 +246,15 @@ export default function EditProfilePage() {
                     startContent="@"
                     {...register("twitter_username")}
                     errorMessage={errors.twitter_username?.message}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="Facebook Page/Group"
+                    {...register("facebook_url")}
+                    placeholder="https://facebook.com/your.page"
+                    errorMessage={errors.facebook_url?.message}
                   />
                 </div>
 
