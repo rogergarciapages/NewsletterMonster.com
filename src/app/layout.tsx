@@ -6,6 +6,13 @@ import Footer from "./components/footer";
 import Providers from "./components/providers";
 import "./globals.css";
 
+// Base URL for metadata
+const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://newslettermonster.com");
+
 export const metadata: Metadata = {
   title: "NewsletterMonster - Track and Discover the Best Email Newsletters",
   description:

@@ -1,45 +1,102 @@
 // next.config.mjs
-/** @type {import('next').NextConfig} */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
   images: {
-    domains: [
+    remotePatterns: [
       // S3 bucket
-      "nlmr1.s3.eu-central-1.amazonaws.com", "minio-l40s4ockokc8ggs04s4kkc4k.newslettermonster.com",
+      {
+        protocol: "https",
+        hostname: "nlmr1.s3.eu-central-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "minio-l40s4ockokc8ggs04s4kkc4k.newslettermonster.com",
+      },
       
       // Google
-      "lh3.googleusercontent.com",
-      "lh4.googleusercontent.com",
-      "lh5.googleusercontent.com",
-      "lh6.googleusercontent.com",
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh4.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh5.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh6.googleusercontent.com",
+      },
       
       // GitHub
-      "avatars.githubusercontent.com",
-      "github.com",
-      "raw.githubusercontent.com",
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "github.com",
+      },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+      },
       
       // Discord
-      "cdn.discordapp.com",
-      "images.discordapp.net",
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.discordapp.net",
+      },
       
       // Twitter
-      "pbs.twimg.com",
-      "abs.twimg.com",
+      {
+        protocol: "https",
+        hostname: "pbs.twimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "abs.twimg.com",
+      },
       
       // Facebook
-      "platform-lookaside.fbsbx.com",
-      "scontent.xx.fbcdn.net",
-      "scontent.fbom1-1.fna.fbcdn.net",
+      {
+        protocol: "https",
+        hostname: "platform-lookaside.fbsbx.com",
+      },
+      {
+        protocol: "https",
+        hostname: "scontent.xx.fbcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "scontent.fbom1-1.fna.fbcdn.net",
+      },
       
       // LinkedIn
-      "media.licdn.com",
-      "platform-lookaside.fbsbx.com",
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+      },
       
-      // Additional common domains
-      "img.clerk.com",  // If you're using Clerk
-      "avatar.vercel.sh" // If you're using Vercel avatars
+      // Additional
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatar.vercel.sh",
+      }
     ],
   },
   webpack(config) {
