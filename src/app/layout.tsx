@@ -7,8 +7,18 @@ import Providers from "./components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Next.js Starter App",
-  description: "A basic starter for next.js",
+  title: "NewsletterMonster - Track and Discover the Best Email Newsletters",
+  description:
+    "Find, track and discover the best email newsletters all in one place. Join our community of newsletter enthusiasts.",
+  keywords:
+    "newsletters, email newsletters, newsletter directory, newsletter tracking, newsletter discovery",
+  authors: [{ name: "NewsletterMonster" }],
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+  },
   icons: {
     // Standard favicons
     icon: [
@@ -24,8 +34,39 @@ export const metadata: Metadata = {
       { url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
     ],
   },
-  // Add manifest for PWA support
   manifest: "/site.webmanifest",
+  // Theme colors for browsers
+  themeColor: "#d7002e",
+  // Open Graph / Social Media
+  openGraph: {
+    type: "website",
+    siteName: "NewsletterMonster",
+    title: "NewsletterMonster - Track and Discover the Best Email Newsletters",
+    description: "Find, track and discover the best email newsletters all in one place",
+    images: [
+      {
+        url: "/social-share-image.png",
+        width: 1200,
+        height: 630,
+        alt: "NewsletterMonster - Newsletter Discovery Platform",
+      },
+    ],
+  },
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "NewsletterMonster",
+    description: "Find, track and discover the best email newsletters",
+    images: ["/social-share-image.png"],
+  },
+  // Viewport settings
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+  },
+  alternates: {
+    canonical: "https://newslettermonster.com",
+  },
 };
 
 export default function RootLayout({

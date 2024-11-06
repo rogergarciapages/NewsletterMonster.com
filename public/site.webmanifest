@@ -1,6 +1,7 @@
 {
   "name": "NewsletterMonster",
   "short_name": "NewsletterMonster",
+  "description": "Find, track and discover the best email newsletters",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -11,9 +12,25 @@
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
+  "start_url": "/",
+  "theme_color": "#d7002e",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Trending Newsletters",
+      "short_name": "Trending",
+      "description": "View trending newsletters",
+      "url": "/trending"
+    }
+  ]
 }
