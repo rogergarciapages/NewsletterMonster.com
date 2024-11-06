@@ -14,6 +14,7 @@ import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/config/auth";
 import { prisma } from "@/lib/prisma-client";
+import { BrandProfile } from "@/types/brands";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${displayName}&quot;s Profile | Newsletter Monster`,
+      title: `${displayName}/'s Profile | Newsletter Monster`,
       description: `Check out ${displayName}&quot;s newsletters and updates on Newsletter Monster`,
       creator: user.twitter_username ? `@${user.twitter_username}` : undefined,
       images: user.profile_photo ? [user.profile_photo] : undefined,
@@ -104,6 +105,8 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
         profile_photo: true,
         bio: true,
         website: true,
+        website_domain: true,
+        domain_verified: true,
         twitter_username: true,
         instagram_username: true,
         youtube_channel: true,
@@ -169,6 +172,29 @@ export default async function UserProfilePage({ params }: { params: { userId: st
   const { newsletters, user, followersCount } = data;
   const isOwnProfile = session?.user?.user_id === params.userId;
 
+  const brandProfile: BrandProfile = {
+    user_id: user.user_id,
+    company_name: user.company_name,
+    profile_photo: user.profile_photo,
+    bio: user.bio,
+    website: user.website,
+    website_domain: user.website_domain,
+    domain_verified: user.domain_verified || false,
+    twitter_username: user.twitter_username,
+    instagram_username: user.instagram_username,
+    youtube_channel: user.youtube_channel,
+    linkedin_profile: user.linkedin_profile,
+    newsletters: newsletters.map(newsletter => ({
+      newsletter_id: newsletter.newsletter_id,
+      subject: newsletter.subject || "",
+      date: newsletter.created_at || new Date(),
+      likes_count: newsletter.likes_count || 0,
+      you_rocks_count: newsletter.you_rocks_count || 0,
+    })),
+    followers_count: followersCount,
+    following_count: 0, // You might want to fetch this if needed
+  };
+
   return (
     <ThreeColumnLayout>
       <div className="w-full">
@@ -208,7 +234,10 @@ export default async function UserProfilePage({ params }: { params: { userId: st
               />
             ))}
           </div>
-          <EmailCopyProfile />
+          <EmailCopyProfile
+            user={brandProfile} // Now includes website_domain and domain_verified
+            isOwnProfile={isOwnProfile}
+          />
         </main>
       </div>
     </ThreeColumnLayout>

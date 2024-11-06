@@ -9,11 +9,13 @@ export interface BrandUser {
   profile_photo: string | null;
   bio: string | null;
   website: string | null;
+  website_domain: string | null;
+  domain_verified: boolean;
   twitter_username: string | null;
   instagram_username: string | null;
   youtube_channel: string | null;
   linkedin_profile: string | null;
-  role: string | null;
+  role: string;
 }
 
 export interface BrandProfileProps {
