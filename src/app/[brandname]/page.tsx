@@ -87,17 +87,12 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
       },
     });
 
-    if (!newsletters.length) {
-      return null;
-    }
-
     const followersCount = await prisma.follow.count({
       where: {
         OR: [{ following_id: brandUser.user_id }, { following_name: brandname }],
       },
     });
 
-    // Ensure all required fields are present with defaults
     const user: BrandUser = {
       ...brandUser,
       website_domain: brandUser.website_domain || null,
@@ -133,6 +128,12 @@ export async function generateMetadata({
   });
 }
 
+export const viewport = {
+  themeColor: "#d7002e",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default async function BrandPage({ params }: { params: { brandname: string } }) {
   const data = await getBrandData(params.brandname);
 
@@ -165,15 +166,24 @@ export default async function BrandPage({ params }: { params: { brandname: strin
 
           <main className="mx-auto max-w-6xl px-1 py-8">
             <h1 className="sr-only">{brandDisplayName} Newsletters</h1>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-              {newsletters.map(newsletter => (
-                <NewsletterCard
-                  key={newsletter.newsletter_id}
-                  newsletter={newsletter}
-                  brandname={params.brandname}
-                />
-              ))}
-            </div>
+            {newsletters.length > 0 ? (
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {newsletters.map(newsletter => (
+                  <NewsletterCard
+                    key={newsletter.newsletter_id}
+                    newsletter={newsletter}
+                    brandname={params.brandname}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <h2 className="mb-2 text-xl font-semibold">No Newsletters Yet</h2>
+                <p className="text-gray-600">
+                  This brand hasn&apos;t published any newsletters yet.
+                </p>
+              </div>
+            )}
           </main>
         </div>
       </ThreeColumnLayout>

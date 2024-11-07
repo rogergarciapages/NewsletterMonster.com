@@ -4,6 +4,9 @@
 import "@fontsource-variable/inter";
 import { Button, Card, CardBody } from "@nextui-org/react";
 import { signOut } from "next-auth/react";
+
+import { HeroParallaxDemo } from "@/app/components/parallax";
+
 import Benefits from "./components/benefits";
 import Companies from "./components/companies";
 import { HeroSection } from "./components/hero/hero-section";
@@ -15,30 +18,29 @@ import { HeroLanding } from "./components/slider";
 import Solutions from "./components/solutions";
 import Statement from "./components/statement";
 
-
 export default function Home() {
   return (
     <div>
-    <HeroSection />
-    <HeroLanding currentImageIndex={0} images={[]} />
-    <PainPoints />
-    <Solutions />
-    <SaveNewsletters />
-    <Statement />
-    <Companies />
-    <Benefits />
-    <PopularNewsletters />
-    <PricingWrapper />
+      <HeroSection />
+      <HeroLanding currentImageIndex={0} images={[]} />
+      <PainPoints />
+      <HeroParallaxDemo />
+      <Solutions />
+      <SaveNewsletters />
+      <Statement />
+      <Companies />
+      <Benefits />
+      <PopularNewsletters />
+      <PricingWrapper />
 
-    <Card className="w-10/12 m-auto">
-      <CardBody>
-        <p>Text</p>
-        <Button onClick={() => signOut({ callbackUrl: "/" })} variant="solid">
-          Logout
-        </Button>
-
-      </CardBody>
-    </Card>
+      <Card className="m-auto w-10/12">
+        <CardBody>
+          <p>Text</p>
+          <Button onClick={() => signOut({ callbackUrl: "/" })} variant="solid">
+            Logout
+          </Button>
+        </CardBody>
+      </Card>
     </div>
   );
 }

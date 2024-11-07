@@ -1,10 +1,8 @@
 // src/app/components/brand/seo/brand-page-seo.tsx
 import { Metadata } from "next";
-import {
-  Organization,
-  Person,
-  WithContext
-} from "schema-dts";
+
+import { Organization, Person, WithContext } from "schema-dts";
+
 import { Newsletter } from "../newsletter/types";
 import { BrandUser } from "../profile/types";
 
@@ -12,84 +10,62 @@ interface BrandSEOProps {
   brandname: string;
   displayName: string;
   newsletters: Newsletter[];
-  user: BrandUser | null;
+  user: BrandUser;
   followersCount: number;
 }
 
-export function generateBrandMetadata({ 
+export function generateBrandMetadata({
   brandname,
   displayName,
   newsletters,
   user,
-  followersCount
+  followersCount,
 }: BrandSEOProps): Metadata {
-  const title = `${displayName} Newsletters | NewsletterMonster`;
-  const description = user?.bio || 
-    `Browse ${newsletters.length} newsletters from ${displayName}. Join ${followersCount} followers getting the latest updates and insights.`;
-
-  const keywords = [
-    displayName,
-    `${displayName} newsletter`,
-    `${displayName} updates`,
-    "company newsletter",
-    "business updates",
-    "newsletter archive",
-    user?.company_name || "",
-    "email newsletter",
-    "NewsletterMonster"
-  ].filter(Boolean).join(", ");
+  const description =
+    user?.bio ||
+    `Check out ${displayName}'s newsletters on Newsletter Monster. ${newsletters.length} newsletters published, ${followersCount} followers.`;
 
   return {
-    title,
+    title: `${displayName} Newsletters | Newsletter Monster`,
     description,
-    keywords,
-    authors: user ? [{ name: user.name }] : undefined,
     openGraph: {
-      title,
+      title: `${displayName} - Newsletter Archive`,
       description,
-      url: `https://newslettermonster.com/${brandname}`,
-      siteName: "NewsletterMonster",
-      images: user?.profile_photo ? [{
-        url: user.profile_photo,
-        width: 1200,
-        height: 630,
-        alt: `${displayName}'s profile photo`
-      }] : undefined,
-      type: "website"
+      type: "profile",
+      images: user?.profile_photo
+        ? [
+            {
+              url: user.profile_photo,
+              width: 400,
+              height: 400,
+              alt: `${displayName}'s profile photo`,
+            },
+          ]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: `${displayName} Newsletters`,
       description,
-      site: "@NewsletterMonster",
       creator: user?.twitter_username ? `@${user.twitter_username}` : undefined,
-      images: user?.profile_photo ? [user.profile_photo] : undefined,
     },
     alternates: {
-      canonical: `https://newslettermonster.com/${brandname}`,
-      languages: {
-        "en-US": `https://newslettermonster.com/en/${brandname}`,
-      }
+      canonical: `/${brandname}`,
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   };
 }
 
-export function generateBrandJsonLd({ 
+export function generateBrandJsonLd({
   brandname,
   displayName,
   user,
-  newsletters 
+  newsletters,
 }: BrandSEOProps): WithContext<Organization | Person> {
   const baseUrl = `https://newslettermonster.com/${brandname}`;
 
@@ -105,17 +81,19 @@ export function generateBrandJsonLd({
         user.twitter_username && `https://twitter.com/${user.twitter_username}`,
         user.linkedin_profile,
         user.instagram_username && `https://instagram.com/${user.instagram_username}`,
-        user.youtube_channel
+        user.youtube_channel,
       ].filter(Boolean) as string[],
-      worksFor: user.company_name ? {
-        "@type": "Organization",
-        name: user.company_name
-      } : undefined,
+      worksFor: user.company_name
+        ? {
+            "@type": "Organization",
+            name: user.company_name,
+          }
+        : undefined,
       memberOf: {
         "@type": "Organization",
         name: "NewsletterMonster",
-        url: "https://newslettermonster.com"
-      }
+        url: "https://newslettermonster.com",
+      },
     };
   }
 
@@ -128,7 +106,7 @@ export function generateBrandJsonLd({
     subOrganization: {
       "@type": "Organization",
       name: "NewsletterMonster",
-      url: "https://newslettermonster.com"
+      url: "https://newslettermonster.com",
     },
     makesOffer: newsletters.map(newsletter => ({
       "@type": "Offer",
@@ -142,16 +120,16 @@ export function generateBrandJsonLd({
         publisher: {
           "@type": "Organization",
           name: displayName,
-          "@id": baseUrl
-        }
-      }
-    }))
+          "@id": baseUrl,
+        },
+      },
+    })),
   };
 }
 
 export function BrandStructuredData(props: BrandSEOProps) {
   const jsonLd = generateBrandJsonLd(props);
-  
+
   return (
     <script
       type="application/ld+json"
