@@ -1,12 +1,9 @@
-// src/app/components/brand/profile/header/client-wrapper.tsx
 "use client";
 
 import { useState } from "react";
 
 import { BrandProfileProps } from "../types";
 import BrandProfileHeader from "./index";
-
-// src/app/components/brand/profile/header/client-wrapper.tsx
 
 type BrandProfileWrapperProps = Omit<BrandProfileProps, "onFollowChange"> & {
   followersCount: number;
@@ -31,7 +28,7 @@ export default function BrandProfileHeaderWrapper({
 
     try {
       const response = await fetch(
-        `/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user}`
+        `/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user?.user_id}`
       );
       if (response.ok) {
         const data = await response.json();

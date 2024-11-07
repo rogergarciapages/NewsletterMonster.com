@@ -75,9 +75,9 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
 export const Header = () => {
   return (
     <div className="relative left-0 top-0 mx-auto w-full max-w-7xl px-4 py-20 md:py-40">
-      <h1 className="text-2xl font-bold dark:text-white md:text-7xl">
-        The Ultimate <br /> development studio
-      </h1>
+      <h2 className="max-w-[450px] text-8xl font-bold leading-[72px] dark:text-white md:text-2xl">
+        Too Good to pass!
+      </h2>
       <p className="mt-8 max-w-2xl text-base dark:text-neutral-200 md:text-xl">
         We build beautiful products with the latest technologies and frameworks. We are a team of
         passionate developers and designers that love to build amazing products.

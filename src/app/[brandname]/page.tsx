@@ -1,4 +1,3 @@
-// src/app/[brandname]/page.tsx
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -28,7 +27,52 @@ function formatBrandName(brandname: string): string {
 
 async function getBrandData(brandname: string): Promise<BrandData | null> {
   try {
-    const brandUser = await prisma.user.findFirst({
+    // Find newsletters
+    const newsletters = await prisma.newsletter.findMany({
+      where: {
+        sender: {
+          contains: brandname.replace(/-/g, " "),
+          mode: "insensitive",
+        },
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        newsletter_id: true,
+        sender: true,
+        subject: true,
+        top_screenshot_url: true,
+        likes_count: true,
+        you_rocks_count: true,
+        created_at: true,
+        summary: true,
+        user_id: true,
+      },
+    });
+
+    // Create a default user object
+    const defaultUser: BrandUser = {
+      user_id: "",
+      name: formatBrandName(brandname),
+      surname: null,
+      company_name: formatBrandName(brandname),
+      username: brandname,
+      email: "",
+      profile_photo: null,
+      bio: null,
+      website: null,
+      website_domain: null,
+      domain_verified: false,
+      twitter_username: null,
+      instagram_username: null,
+      youtube_channel: null,
+      linkedin_profile: null,
+      role: "FREE", // Default role for unclaimed brands
+    };
+
+    // Try to find a verified user
+    const verifiedUser = await prisma.user.findFirst({
       where: {
         OR: [
           { company_name: { contains: brandname.replace(/-/g, " "), mode: "insensitive" } },
@@ -55,60 +99,45 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
       },
     });
 
-    if (!brandUser) return null;
-
-    const newsletters = await prisma.newsletter.findMany({
-      where: {
-        OR: [
-          {
-            sender: {
-              contains: brandname.replace(/-/g, " "),
-              mode: "insensitive",
-            },
-          },
-          {
-            user_id: brandUser?.user_id,
-          },
-        ],
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-      select: {
-        newsletter_id: true,
-        sender: true,
-        subject: true,
-        top_screenshot_url: true,
-        likes_count: true,
-        you_rocks_count: true,
-        created_at: true,
-        summary: true,
-        user_id: true,
-      },
-    });
-
     const followersCount = await prisma.follow.count({
       where: {
-        OR: [{ following_id: brandUser.user_id }, { following_name: brandname }],
+        OR: [{ following_id: verifiedUser?.user_id }, { following_name: brandname }],
       },
     });
-
-    const user: BrandUser = {
-      ...brandUser,
-      website_domain: brandUser.website_domain || null,
-      domain_verified: brandUser.domain_verified || false,
-    };
 
     return {
       newsletters,
-      user,
+      user: verifiedUser || defaultUser,
       followersCount,
     };
   } catch (error) {
-    console.error("Error fetching brand data:", error);
-    return null;
+    console.error("Error in getBrandData:", error);
+    // Return default data instead of null
+    return {
+      newsletters: [],
+      user: {
+        user_id: "",
+        name: formatBrandName(brandname),
+        surname: null,
+        company_name: formatBrandName(brandname),
+        username: brandname,
+        email: "",
+        profile_photo: null,
+        bio: null,
+        website: null,
+        website_domain: null,
+        domain_verified: false,
+        twitter_username: null,
+        instagram_username: null,
+        youtube_channel: null,
+        linkedin_profile: null,
+        role: "FREE",
+      },
+      followersCount: 0,
+    };
   }
 }
+
 export async function generateMetadata({
   params,
 }: {
@@ -137,6 +166,7 @@ export const viewport = {
 export default async function BrandPage({ params }: { params: { brandname: string } }) {
   const data = await getBrandData(params.brandname);
 
+  // Should never happen now since getBrandData always returns data
   if (!data) {
     notFound();
   }
@@ -162,6 +192,8 @@ export default async function BrandPage({ params }: { params: { brandname: strin
             newsletterCount={newsletters.length}
             followersCount={followersCount}
             isFollowing={false}
+            hideFollowButton={false}
+            isOwnProfile={false}
           />
 
           <main className="mx-auto max-w-6xl px-1 py-8">

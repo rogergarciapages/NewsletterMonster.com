@@ -1,6 +1,9 @@
 // src/app/components/left-sidebar.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Accordion, AccordionItem, Button } from "@nextui-org/react";
 import {
   IconBell,
@@ -10,13 +13,16 @@ import {
   IconMessageCircle2,
   IconMovie,
   IconTrendingUp,
-  IconUser
+  IconUser,
 } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+
 import LoginModal from "./login-modal";
+
+// src/app/components/left-sidebar.tsx
+
+// src/app/components/left-sidebar.tsx
 
 interface MenuItem {
   icon: typeof IconHome;
@@ -33,11 +39,11 @@ const LeftSidebar: React.FC = () => {
   const [lastAttemptedPath, setLastAttemptedPath] = useState<string | null>(null);
 
   const menuItems: MenuItem[] = [
-    { 
-      icon: IconUser, 
-      label: "Profile", 
+    {
+      icon: IconUser,
+      label: "Profile",
       path: session?.user?.user_id ? `/user/${session.user.user_id}` : "#",
-      requiresAuth: true 
+      requiresAuth: true,
     },
     { icon: IconMessageCircle2, label: "Messages", path: "#" },
     { icon: IconList, label: "Lists", path: "#" },
@@ -58,13 +64,13 @@ const LeftSidebar: React.FC = () => {
       return;
     }
 
-    router.push(item.path as never); 
+    router.push(item.path as never);
   };
 
   const handleLoginSuccess = () => {
     setIsLoginModalOpen(false);
     if (lastAttemptedPath && lastAttemptedPath !== "#") {
-      router.push(lastAttemptedPath as never); 
+      router.push(lastAttemptedPath as never);
       setLastAttemptedPath(null);
     }
   };
@@ -75,7 +81,7 @@ const LeftSidebar: React.FC = () => {
       variant="light"
       className="w-full justify-start"
       onClick={() => handleNavigation(item)}
-      startContent={<item.icon className="h-4 w-4" />}
+      startContent={<item.icon className="h-6 w-6" />}
     >
       {item.label}
     </Button>
@@ -94,15 +100,13 @@ const LeftSidebar: React.FC = () => {
               </Accordion>
             </div>
 
-            <div className="hidden lg:block">
-              {menuItems.map(renderMenuItem)}
-            </div>
+            <div className="hidden lg:block">{menuItems.map(renderMenuItem)}</div>
           </nav>
         </div>
       </div>
 
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
+      <LoginModal
+        isOpen={isLoginModalOpen}
         onOpenChange={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
       />
