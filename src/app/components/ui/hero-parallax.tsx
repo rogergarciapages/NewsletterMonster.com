@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -41,7 +40,6 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
       className="relative flex h-[300vh] flex-col self-auto overflow-hidden py-40 antialiased [perspective:1000px] [transform-style:preserve-3d]"
     >
       <Header />
-
       <motion.div
         style={{
           rotateX,
@@ -49,7 +47,6 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
           translateY,
           opacity,
         }}
-        className=""
       >
         <motion.div className="mb-20 flex flex-row-reverse space-x-20 space-x-reverse">
           {firstRow.map(product => (
@@ -113,20 +110,15 @@ export const ProductCard = ({
       key={product.title}
       className="group/product relative h-96 w-[30rem] flex-shrink-0"
     >
-      {product.link.startsWith("http") ? (
-        <a
-          href={product.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block group-hover/product:shadow-2xl"
-        >
-          {renderImage()}
-        </a>
-      ) : (
-        <Link href={product.link as Route} className="block group-hover/product:shadow-2xl">
-          {renderImage()}
-        </Link>
-      )}
+      {/* Convert the link prop to a route */}
+      <Link
+        href={{
+          pathname: product.link,
+        }}
+        className="block group-hover/product:shadow-2xl"
+      >
+        {renderImage()}
+      </Link>
       <div className="pointer-events-none absolute inset-0 h-full w-full bg-black opacity-0 group-hover/product:opacity-80" />
       <h2 className="absolute bottom-4 left-4 text-white opacity-0 group-hover/product:opacity-100">
         {product.title}
