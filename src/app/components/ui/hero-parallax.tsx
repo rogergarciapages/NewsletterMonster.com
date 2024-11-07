@@ -1,12 +1,11 @@
 "use client";
 
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 import { MotionValue, motion, useScroll, useSpring, useTransform } from "framer-motion";
-
-// src/app/components/ui/hero-parallax.tsx
 
 interface Product {
   title: string;
@@ -93,8 +92,15 @@ export const ProductCard = ({
   product: Product;
   translate: MotionValue<number>;
 }) => {
-  // Check if it's an external link
-  const isExternalLink = product.link.startsWith("http");
+  const renderImage = () => (
+    <Image
+      src={product.thumbnail}
+      height={600}
+      width={600}
+      className="absolute inset-0 h-full w-full object-cover object-left-top"
+      alt={product.title}
+    />
+  );
 
   return (
     <motion.div
@@ -107,33 +113,18 @@ export const ProductCard = ({
       key={product.title}
       className="group/product relative h-96 w-[30rem] flex-shrink-0"
     >
-      {isExternalLink ? (
+      {product.link.startsWith("http") ? (
         <a
           href={product.link}
           target="_blank"
           rel="noopener noreferrer"
           className="block group-hover/product:shadow-2xl"
         >
-          <Image
-            src={product.thumbnail}
-            height={600}
-            width={600}
-            className="absolute inset-0 h-full w-full object-cover object-left-top"
-            alt={product.title}
-          />
+          {renderImage()}
         </a>
       ) : (
-        <Link
-          href={product.link as any} // Type assertion only if you're sure about internal links
-          className="block group-hover/product:shadow-2xl"
-        >
-          <Image
-            src={product.thumbnail}
-            height={600}
-            width={600}
-            className="absolute inset-0 h-full w-full object-cover object-left-top"
-            alt={product.title}
-          />
+        <Link href={product.link as Route} className="block group-hover/product:shadow-2xl">
+          {renderImage()}
         </Link>
       )}
       <div className="pointer-events-none absolute inset-0 h-full w-full bg-black opacity-0 group-hover/product:opacity-80" />
