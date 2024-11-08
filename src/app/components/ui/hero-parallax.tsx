@@ -12,7 +12,19 @@ interface Product {
   thumbnail: string;
 }
 
-export const HeroParallax = ({ products }: { products: Product[] }) => {
+const SafeLink = ({ href, ...props }: { href: string } & any) => (
+  <Link href={href as any} {...props} />
+);
+
+export const HeroParallax = ({
+  products,
+}: {
+  products: {
+    title: string;
+    link: string;
+    thumbnail: string;
+  }[];
+}) => {
   const firstRow = products.slice(0, 5);
   const secondRow = products.slice(5, 10);
   const thirdRow = products.slice(10, 15);
@@ -33,7 +45,6 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
   const opacity = useSpring(useTransform(scrollYProgress, [0, 0.2], [0.2, 1]), springConfig);
   const rotateZ = useSpring(useTransform(scrollYProgress, [0, 0.2], [20, 0]), springConfig);
   const translateY = useSpring(useTransform(scrollYProgress, [0, 0.2], [-700, 500]), springConfig);
-
   return (
     <div
       ref={ref}
@@ -47,6 +58,7 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
           translateY,
           opacity,
         }}
+        className=""
       >
         <motion.div className="mb-20 flex flex-row-reverse space-x-20 space-x-reverse">
           {firstRow.map(product => (
@@ -71,9 +83,9 @@ export const HeroParallax = ({ products }: { products: Product[] }) => {
 export const Header = () => {
   return (
     <div className="relative left-0 top-0 mx-auto w-full max-w-7xl px-4 py-20 md:py-40">
-      <h2 className="max-w-[450px] text-8xl font-bold leading-[72px] dark:text-white md:text-2xl">
-        Too Good to pass!
-      </h2>
+      <h1 className="text-2xl font-bold dark:text-white md:text-7xl">
+        The Ultimate <br /> development studio
+      </h1>
       <p className="mt-8 max-w-2xl text-base dark:text-neutral-200 md:text-xl">
         We build beautiful products with the latest technologies and frameworks. We are a team of
         passionate developers and designers that love to build amazing products.
@@ -89,16 +101,6 @@ export const ProductCard = ({
   product: Product;
   translate: MotionValue<number>;
 }) => {
-  const renderImage = () => (
-    <Image
-      src={product.thumbnail}
-      height={600}
-      width={600}
-      className="absolute inset-0 h-full w-full object-cover object-left-top"
-      alt={product.title}
-    />
-  );
-
   return (
     <motion.div
       style={{
@@ -110,16 +112,19 @@ export const ProductCard = ({
       key={product.title}
       className="group/product relative h-96 w-[30rem] flex-shrink-0"
     >
-      {/* Convert the link prop to a route */}
       <Link
-        href={{
-          pathname: product.link,
-        }}
+        href={{ pathname: product.link } as any}
         className="block group-hover/product:shadow-2xl"
       >
-        {renderImage()}
+        <Image
+          src={product.thumbnail}
+          height="600"
+          width="600"
+          className="absolute inset-0 h-full w-full object-cover object-left-top"
+          alt={product.title}
+        />
       </Link>
-      <div className="pointer-events-none absolute inset-0 h-full w-full bg-black opacity-0 group-hover/product:opacity-80" />
+      <div className="pointer-events-none absolute inset-0 h-full w-full bg-black opacity-0 group-hover/product:opacity-80"></div>
       <h2 className="absolute bottom-4 left-4 text-white opacity-0 group-hover/product:opacity-100">
         {product.title}
       </h2>
