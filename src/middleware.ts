@@ -14,22 +14,10 @@ export default withAuth(
       }
     }
 
-    // Handle tag routes
-    if (path.startsWith("/tag")) {
-      const tagPath = path.slice(5); // Remove '/tag/'
-
-      // If it's just /tag, allow it (landing page)
-      if (!tagPath) {
-        return NextResponse.next();
-      }
-
-      // If it's a specific tag page (contains '/'), allow it
-      if (tagPath.includes("/")) {
-        return NextResponse.next();
-      }
-
-      // If it's an incomplete tag path, redirect to tag index
-      return NextResponse.redirect(new URL("/tag", req.url));
+    // Handle tag routes - Add this section
+    if (path.startsWith("/tag/")) {
+      // Allow both /tag and /tag/[slug]
+      return NextResponse.next();
     }
 
     // Allow public paths even if not authenticated
@@ -67,6 +55,6 @@ export const config = {
     "/following/:path*",
     "/followers/:path*",
     "/drafts/:path*",
-    "/tag/:path*", // Added tag routes to matcher
+    "/tag/:path*", // Add this line
   ],
 };

@@ -70,3 +70,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Selection styling in light mode */
+::selection {
+  color: hsl(240, 5.9%, 10%); /* Adjust this to match your light mode theme */
+  background-color: hsl(240, 4.8%, 95.9%); /* Or use any color that fits */
+}
+
+/* Selection styling in dark mode */
+.dark ::selection {
+  --tw-text-opacity: 1;
+  color: rgb(250, 0, 54 / var(--tw-text-opacity)); /* Torch color */
+  background-color: transparent; /* Optional: Remove background highlight if desired */
+}

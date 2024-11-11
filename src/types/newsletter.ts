@@ -21,7 +21,6 @@ export interface Tag {
   count: number;
   createdAt: Date;
   updatedAt: Date;
-  Newsletters?: NewsletterTag[];
 }
 
 export interface TagWithNewsletters extends Tag {

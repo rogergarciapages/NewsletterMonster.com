@@ -9,7 +9,7 @@ import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { slugify } from "@/utils/slugify";
 
-import { Newsletter } from "../../components/brand/newsletter/types";
+import { Newsletter } from "../../../types/newsletter";
 
 // src/components/newsletters/newsletter-card.tsx
 

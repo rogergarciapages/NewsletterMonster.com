@@ -116,7 +116,7 @@ export default function TagNewslettersClient({ tag }: TagNewslettersClientProps)
           <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             {tag.name} Newsletters
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
+          <p className="text-lg text-gray-600 dark:text-gray-200">
             {tag.count > 0 ? (
               <>
                 Discover {tag.count} curated {tag.name.toLowerCase()} newsletters in our database.
