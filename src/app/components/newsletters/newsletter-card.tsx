@@ -1,7 +1,8 @@
-// src/components/newsletters/newsletter-card.tsx
+"use client";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
@@ -10,15 +11,32 @@ import { slugify } from "@/utils/slugify";
 
 import { Newsletter } from "../../components/brand/newsletter/types";
 
+// src/components/newsletters/newsletter-card.tsx
+
 interface NewsletterCardProps {
   newsletter: Newsletter;
   priority?: boolean;
 }
 
-export const NewsletterCard = ({ newsletter, priority = false }: NewsletterCardProps) => {
+export function NewsletterCard({ newsletter, priority = false }: NewsletterCardProps) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Return a placeholder with the same dimensions
+    return (
+      <div className="relative aspect-[3/4] w-full rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+        </div>
+      </div>
+    );
+  }
   const handleSenderClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     router.push(`/${slugify(newsletter.sender || "")}`);
@@ -102,4 +120,4 @@ export const NewsletterCard = ({ newsletter, priority = false }: NewsletterCardP
       </div>
     </Card>
   );
-};
+}

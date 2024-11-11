@@ -1,4 +1,3 @@
-// src/middleware.ts
 import { NextResponse } from "next/server";
 
 import { withAuth } from "next-auth/middleware";
@@ -13,6 +12,24 @@ export default withAuth(
       if (token?.user_id) {
         return NextResponse.redirect(new URL(`/user/${token.user_id}`, req.url));
       }
+    }
+
+    // Handle tag routes
+    if (path.startsWith("/tag")) {
+      const tagPath = path.slice(5); // Remove '/tag/'
+
+      // If it's just /tag, allow it (landing page)
+      if (!tagPath) {
+        return NextResponse.next();
+      }
+
+      // If it's a specific tag page (contains '/'), allow it
+      if (tagPath.includes("/")) {
+        return NextResponse.next();
+      }
+
+      // If it's an incomplete tag path, redirect to tag index
+      return NextResponse.redirect(new URL("/tag", req.url));
     }
 
     // Allow public paths even if not authenticated
@@ -50,5 +67,6 @@ export const config = {
     "/following/:path*",
     "/followers/:path*",
     "/drafts/:path*",
+    "/tag/:path*", // Added tag routes to matcher
   ],
 };

@@ -1,14 +1,20 @@
 // app/[brandname]/[newsletterId]/page.tsx
-import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { prisma } from "@/lib/prisma-client";
-import { Chip } from "@nextui-org/chip";
-import { Tooltip } from "@nextui-org/react";
-import { IconTagFilled, IconWindowMaximize } from "@tabler/icons-react";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { generateNewsletterMetadata, NewsletterStructuredData } from "../../components/brand/seo/newsletter-detail-seo";
+
+import { Tooltip } from "@nextui-org/react";
+import { IconWindowMaximize } from "@tabler/icons-react";
+
+import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import NewsletterTags from "@/app/components/tags/newsletter-tags";
+import { prisma } from "@/lib/prisma-client";
+
+import {
+  NewsletterStructuredData,
+  generateNewsletterMetadata,
+} from "../../components/brand/seo/newsletter-detail-seo";
 import DynamicBackButton from "../../components/navigation/dynamic-back-button";
 import PageNavigationTracker from "../../components/navigation/page-tracker";
 
@@ -34,13 +40,14 @@ type NewsletterDetail = {
       name: string;
     };
   }[];
-}
+};
 
 // Helper function to format brand name
 function formatBrandName(brandname: string): string {
-  return brandname.split("-").map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(" ");
+  return brandname
+    .split("-")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 // Data fetching function
@@ -91,10 +98,10 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
 }
 
 // Metadata generation
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { brandname: string; newsletterId: string } 
+export async function generateMetadata({
+  params,
+}: {
+  params: { brandname: string; newsletterId: string };
 }): Promise<Metadata> {
   const newsletter = await getNewsletter(params.newsletterId);
   if (!newsletter) return notFound();
@@ -106,15 +113,15 @@ export async function generateMetadata({
     newsletter,
     brandname: params.brandname,
     brandDisplayName,
-    currentUrl
+    currentUrl,
   });
 }
 
 // Main page component
-export default async function NewsletterPage({ 
-  params 
-}: { 
-  params: { brandname: string; newsletterId: string } 
+export default async function NewsletterPage({
+  params,
+}: {
+  params: { brandname: string; newsletterId: string };
 }) {
   const newsletter = await getNewsletter(params.newsletterId);
   if (!newsletter) notFound();
@@ -131,55 +138,44 @@ export default async function NewsletterPage({
         brandDisplayName={brandDisplayName}
         currentUrl={currentUrl}
       />
-      
+
       <ThreeColumnLayout>
         <PageNavigationTracker />
         {/* Main content with semantic markup */}
-        <article 
-          className="max-w-3xl mx-auto px-4 py-8"
-          itemScope 
+        <article
+          className="mx-auto max-w-3xl px-4 py-8"
+          itemScope
           itemType="https://schema.org/Article"
         >
-          <header className="mb-8 pb-4 border-b-5 border-torch-600">
-            <DynamicBackButton 
-              brandname={params.brandname}
-              brandDisplayName={brandDisplayName}
-            />
-            
+          <header className="mb-8 border-b-5 border-torch-600 pb-4">
+            <DynamicBackButton brandname={params.brandname} brandDisplayName={brandDisplayName} />
+
             {/* SEO-optimized title */}
-            <h1 
-              className="text-4xl font-bold mb-4 tracking-tight"
-              itemProp="headline"
-            >
+            <h1 className="mb-4 text-4xl font-bold tracking-tight" itemProp="headline">
               {newsletter.subject || "Untitled Newsletter"}
             </h1>
-            
+
             {/* Semantic metadata */}
             <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
             <meta itemProp="publisher" content="NewsletterMonster" />
             <meta itemProp="author" content={brandDisplayName} />
-            {newsletter.summary && (
-              <meta itemProp="description" content={newsletter.summary} />
-            )}
-            
-            <div className="space-y-2 text-[#111] text-[20px] leading-tight dark:text-white">
+            {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
+
+            <div className="space-y-2 text-[20px] leading-tight text-[#111] dark:text-white">
               <div className="flex flex-col gap-2">
                 {/* Sender information */}
                 <div className="grid grid-cols-[auto,1fr] items-center gap-x-2">
-                  <span className="font-light w-[110px]">Sender:</span>
-                  <Link 
+                  <span className="w-[110px] font-light">Sender:</span>
+                  <Link
                     href={`/${params.brandname}`}
-                    className="hover:text-torch-600 font-bold transition-colors flex items-center"
+                    className="flex items-center font-bold transition-colors hover:text-torch-600"
                     itemProp="author"
                   >
-                    <Tooltip 
+                    <Tooltip
                       placement="right"
                       content="Check All Newsletters"
                       classNames={{
-                        content: [
-                          "py-2 px-4 shadow-xl",
-                          "text-white bg-zinc-800",
-                        ],
+                        content: ["py-2 px-4 shadow-xl", "text-white bg-zinc-800"],
                       }}
                     >
                       {newsletter.sender}
@@ -187,71 +183,67 @@ export default async function NewsletterPage({
                     <IconWindowMaximize className="ml-2" />
                   </Link>
                 </div>
-  
+
                 {/* Publication date */}
                 {newsletter.created_at && (
                   <div className="grid grid-cols-[auto,1fr] items-center gap-x-2">
-                    <span className="font-light w-[110px]">Date Sent:</span>
-                    <time 
-                      dateTime={newsletter.created_at.toISOString()}
-                      itemProp="datePublished"
-                    >
+                    <span className="w-[110px] font-light">Date Sent:</span>
+                    <time dateTime={newsletter.created_at.toISOString()} itemProp="datePublished">
                       {newsletter.created_at.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
-                        day: "numeric"
+                        day: "numeric",
                       })}
                     </time>
                   </div>
                 )}
               </div>
-  
+
               {/* Tags */}
               {newsletter.NewsletterTag?.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-8">
-                  {newsletter.NewsletterTag.map(({ Tag }) => (
-                    <Chip
-                      key={Tag.id}
-                      variant="solid"
-                      color="warning"
-                      startContent={<IconTagFilled size={12} />}
-                      className="text-sm"
-                    >
-                      {Tag.name}
-                    </Chip>
-                  ))}
+                  {newsletter.NewsletterTag?.length > 0 && (
+                    <NewsletterTags
+                      tags={newsletter.NewsletterTag}
+                      className="pt-8"
+                      // Optional: customize the appearance
+                      // size="md"
+                      // variant="bordered"
+                      // color="warning"
+                    />
+                  )}
                 </div>
               )}
             </div>
           </header>
-          
+
           {/* Main content */}
-          <div className="space-y-8 mt-4">
+          <div className="mt-4 space-y-8">
             {/* Summary section */}
             {newsletter.summary && (
               <div className="prose max-w-none rounded-lg" itemProp="abstract">
-                <h2 className="text-xl text-[#111] dark:text-white font-semibold mb-4">
+                <h2 className="mb-4 text-xl font-semibold text-[#111] dark:text-white">
                   Quick summary of this {brandDisplayName} newsletter
                 </h2>
                 <p className="text-[#111] dark:text-[#ccc]">{newsletter.summary}</p>
               </div>
             )}
-  
+
             {/* Newsletter screenshot */}
             {newsletter.full_screenshot_url && (
-              <div className="rounded-lg overflow-hidden shadow-lg relative aspect-auto">
+              <div className="relative aspect-auto overflow-hidden rounded-lg shadow-lg">
                 <Image
                   src={newsletter.full_screenshot_url}
                   alt={newsletter.subject || "Newsletter content"}
                   width={1200}
                   height={800}
-                  className="w-full h-auto"
+                  className="h-auto w-full"
                   priority
                   itemProp="image"
                 />
               </div>
             )}
-  
+
             {/* Engagement metrics */}
             <div className="flex space-x-6 text-gray-600">
               {newsletter.likes_count !== null && (
@@ -265,23 +257,23 @@ export default async function NewsletterPage({
                 </div>
               )}
             </div>
-  
+
             {/* Newsletter content iframe */}
             {newsletter.html_file_url && (
-              <div className="rounded-lg overflow-hidden shadow-lg">
+              <div className="overflow-hidden rounded-lg shadow-lg">
                 <iframe
                   src={newsletter.html_file_url}
-                  className="w-full h-screen"
+                  className="h-screen w-full"
                   title={newsletter.subject || "Newsletter content"}
                   itemProp="articleBody"
                 />
               </div>
             )}
-  
+
             {/* Products link */}
             {newsletter.products_link && (
               <div className="mt-4">
-                <a 
+                <a
                   href={newsletter.products_link}
                   target="_blank"
                   rel="noopener noreferrer"
