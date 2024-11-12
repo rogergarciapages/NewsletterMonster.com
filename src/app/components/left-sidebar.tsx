@@ -1,4 +1,3 @@
-// src/app/components/left-sidebar.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -12,6 +11,7 @@ import {
   IconList,
   IconMessageCircle2,
   IconMovie,
+  IconTag,
   IconTrendingUp,
   IconUser,
 } from "@tabler/icons-react";
@@ -19,8 +19,6 @@ import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 
 import LoginModal from "./login-modal";
-
-// src/app/components/left-sidebar.tsx
 
 // src/app/components/left-sidebar.tsx
 
@@ -46,6 +44,7 @@ const LeftSidebar: React.FC = () => {
       requiresAuth: true,
     },
     { icon: IconMessageCircle2, label: "Messages", path: "#" },
+    { icon: IconTag, label: "Tags", path: "/tag" },
     { icon: IconList, label: "Lists", path: "#" },
     { icon: IconTrendingUp, label: "Trending", path: "/trending" },
     { icon: IconBell, label: "Notifications", path: "#" },

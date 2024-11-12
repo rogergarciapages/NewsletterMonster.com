@@ -1,12 +1,27 @@
+/* eslint-disable react/jsx-no-undef */
+// src/app/tag/page.tsx
 import Link from "next/link";
 
 import { Chip } from "@nextui-org/chip";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { getTopTags } from "@/lib/services/tag-service";
+// Updated import path
 import type { TagWithNewsletters } from "@/types/newsletter";
 
-import { getTopTags } from "../../lib/services/tags";
 import { NewsletterGrid } from "../components/tags/tag-grid";
+
+// Since this component isn't used, we can either remove it or use it as a loading state
+// If you want to keep it for future use, prefix with underscore
+function _NewsletterGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <_NewsletterGridSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
 
 function TagSection({ tag }: { tag: TagWithNewsletters }) {
   return (
@@ -56,7 +71,7 @@ export default async function TagsLandingPage() {
         </header>
 
         <div className="space-y-16">
-          {topTags.map(tag => (
+          {topTags.map((tag: TagWithNewsletters) => (
             <TagSection key={tag.id} tag={tag} />
           ))}
         </div>
