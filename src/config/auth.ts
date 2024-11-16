@@ -1,13 +1,13 @@
 // src/config/auth.ts
-import { prisma } from "@/lib/prisma-client";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
+import type { User } from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import DiscordProvider from "next-auth/providers/discord";
 import GithubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
 import LinkedInProvider from "next-auth/providers/linkedin";
+
+import { prisma } from "@/lib/prisma-client";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -16,9 +16,9 @@ export const authOptions: NextAuthOptions = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
@@ -31,10 +31,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No user found");
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
           throw new Error("Invalid password");
@@ -45,35 +42,31 @@ export const authOptions: NextAuthOptions = {
           user_id: user.user_id,
           email: user.email,
           name: user.name,
-          image: user.profile_photo,
           profile_photo: user.profile_photo,
           username: user.username,
           role: user.role,
-        };
+          emailVerified: user.emailVerified,
+          domain_verified: user.domain_verified,
+          status: user.status,
+        } as User;
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      },
-      profile(profile) {
+    GithubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      profile(profile: any): User {
         return {
-          id: profile.sub,
-          user_id: profile.sub,
+          id: profile.id.toString(),
+          user_id: profile.id.toString(),
           email: profile.email!,
-          name: profile.name ?? profile.email?.split("@")[0] ?? "User",
-          image: profile.picture ?? null,
-          profile_photo: profile.picture ?? null,
-          username: null,
+          name: profile.name ?? profile.login ?? profile.email?.split("@")[0] ?? "User",
+          profile_photo: profile.avatar_url ?? null,
+          username: profile.login,
           role: "FREE",
-          emailVerified: profile.email_verified ? new Date() : null,
-        };
+          emailVerified: null,
+          domain_verified: false,
+          status: "active",
+        } as User;
       },
     }),
     LinkedInProvider({
@@ -81,63 +74,70 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: "openid profile email"
-        }
+          scope: "r_liteprofile r_emailaddress",
+          response_type: "code",
+        },
       },
-      profile(profile) {
-        return {
-          id: profile.sub,
-          user_id: profile.sub,
-          email: profile.email!,
-          name: profile.name ?? profile.email?.split("@")[0] ?? "User",
-          image: profile.picture ?? null,
-          profile_photo: profile.picture ?? null,
-          username: null,
-          role: "FREE",
-          emailVerified: null,
-        };
+      token: {
+        url: "https://www.linkedin.com/oauth/v2/accessToken",
+        async request(context) {
+          const tokens = await context.client.grant({
+            grant_type: "authorization_code",
+            code: context.params.code,
+            redirect_uri: context.provider.callbackUrl,
+          });
+          return { tokens };
+        },
       },
-    }),
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-      profile(profile) {
-        const avatarUrl = profile.avatar 
-          ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
-          : null;
-
+      userinfo: {
+        url: "https://api.linkedin.com/v2/me",
+        params: {
+          projection: "(id,localizedFirstName,localizedLastName,emailAddress,profilePicture)",
+        },
+      },
+      profile(profile: any): User {
         return {
           id: profile.id,
           user_id: profile.id,
-          email: profile.email!,
-          name: profile.username ?? profile.email?.split("@")[0] ?? "User",
-          image: avatarUrl,
-          profile_photo: avatarUrl,
-          username: profile.username,
-          role: "FREE",
-          emailVerified: profile.verified ? new Date() : null,
-        };
-      },
-    }),
-    GithubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      profile(profile) {
-        return {
-          id: String(profile.id),
-          user_id: String(profile.id),
-          email: profile.email!,
-          name: profile.name ?? profile.login ?? profile.email?.split("@")[0] ?? "User",
-          image: profile.avatar_url ?? null,
-          profile_photo: profile.avatar_url ?? null,
-          username: profile.login,
+          email: profile.emailAddress,
+          name: `${profile.localizedFirstName} ${profile.localizedLastName}`,
+          profile_photo:
+            profile.profilePicture?.["displayImage~"]?.elements?.[0]?.identifiers?.[0]
+              ?.identifier ?? null,
+          username: null,
           role: "FREE",
           emailVerified: null,
-        };
+          domain_verified: false,
+          status: "active",
+        } as User;
       },
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "github" || account?.provider === "linkedin") {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+        });
+
+        if (existingUser) {
+          // Link the account if user exists
+          await prisma.account.create({
+            data: {
+              userId: existingUser.user_id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              token_type: account.token_type,
+              scope: account.scope,
+            },
+          });
+          return true;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (account && user) {
         return {
@@ -145,7 +145,6 @@ export const authOptions: NextAuthOptions = {
           user_id: user.user_id,
           email: user.email,
           name: user.name,
-          picture: user.image,
           profile_photo: user.profile_photo,
           username: user.username,
           role: user.role,
@@ -162,7 +161,6 @@ export const authOptions: NextAuthOptions = {
           user_id: token.user_id,
           email: token.email,
           name: token.name,
-          image: token.picture,
           profile_photo: token.profile_photo,
           username: token.username,
           role: token.role,
@@ -176,24 +174,25 @@ export const authOptions: NextAuthOptions = {
         await prisma.user.update({
           where: { email: user.email },
           data: {
-            profile_photo: user.image || null,
+            profile_photo: user.profile_photo || null,
             role: "FREE",
             status: "active",
+            domain_verified: false,
             updated_at: new Date(),
-            last_login: new Date()
-          }
+            last_login: new Date(),
+          },
         });
       }
     },
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (user.email) {
         await prisma.user.update({
           where: { email: user.email },
           data: {
             last_login: new Date(),
             updated_at: new Date(),
-            status: "active"
-          }
+            status: "active",
+          },
         });
       }
     },

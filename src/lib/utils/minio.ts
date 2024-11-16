@@ -1,5 +1,4 @@
 // src/lib/utils/minio.ts
-import crypto from "crypto";
 import { Client } from "minio";
 
 const minioClient = new Client({
@@ -10,46 +9,52 @@ const minioClient = new Client({
   secretKey: process.env.MINIO_SECRET_KEY!,
 });
 
-function generateUUID(): string {
-  return crypto.randomUUID();
-}
+const BUCKET_NAME = process.env.MINIO_BUCKET!;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-// Add 'export' keyword to make these functions available
-export async function deleteProfileImage(imageUrl: string): Promise<void> {
+export async function deleteUserProfileImages(userId: string): Promise<void> {
   try {
-    // Extract filename from URL
-    const fileName = imageUrl.split("/").pop();
-    if (!fileName) return;
+    const objectsList = await minioClient.listObjects(BUCKET_NAME, `public/${userId}/`, true);
 
-    await minioClient.removeObject(process.env.MINIO_BUCKET!, fileName);
+    for await (const obj of objectsList) {
+      await minioClient.removeObject(BUCKET_NAME, obj.name);
+    }
   } catch (error) {
-    console.error("Error deleting from MinIO:", error);
-    throw new Error("Failed to delete image");
+    console.error("Error deleting user profile images:", error);
+    throw new Error("Failed to delete old images");
   }
 }
 
-// Add 'export' keyword here too
 export function isMinioUrl(url: string): boolean {
   return url.startsWith(process.env.MINIO_ENDPOINT!);
 }
 
-export async function uploadProfileImage(file: File): Promise<string> {
+export async function uploadProfileImage(file: File, userId: string): Promise<string> {
   try {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${generateUUID()}.${fileExt}`;
-    const fileBuffer = await file.arrayBuffer();
-    
-    await minioClient.putObject(
-      process.env.MINIO_BUCKET!,
-      fileName,
-      Buffer.from(fileBuffer),
-      file.size,
-      {
-        "Content-Type": file.type,
-      }
-    );
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      throw new Error("Invalid file type");
+    }
 
-    return `${process.env.MINIO_ENDPOINT}/${process.env.MINIO_BUCKET}/${fileName}`;
+    // Get file extension while preserving the original format
+    const fileExt = file.type.split("/")[1].replace("jpeg", "jpg");
+
+    // Create the file path
+    const filePath = `public/${userId}/${userId}.${fileExt}`;
+
+    // Convert File to Buffer
+    const fileBuffer = await file.arrayBuffer();
+
+    // Delete any existing files in the user's directory
+    await deleteUserProfileImages(userId);
+
+    // Upload the new file
+    await minioClient.putObject(BUCKET_NAME, filePath, Buffer.from(fileBuffer), file.size, {
+      "Content-Type": file.type,
+      "Cache-Control": "no-cache",
+    });
+
+    // Return the full URL
+    return `${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${filePath}`;
   } catch (error) {
     console.error("Error uploading to MinIO:", error);
     throw new Error("Failed to upload image");

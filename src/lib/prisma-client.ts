@@ -1,10 +1,16 @@
-// src/lib/prisma-client.ts
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    datasourceUrl: process.env.DIRECT_DATABASE_URL,
+    log: ["query", "error", "warn"],
+  });
+};
+
+export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

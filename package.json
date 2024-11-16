@@ -2,6 +2,7 @@
   "name": "next-start",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --no-engine && next build",
@@ -16,7 +17,11 @@
     "type-check": "tsc --noEmit",
     "validate": "npm run lint && npm run type-check && npm run format:check",
     "check-all": "npm run format:check && npm run lint && npm run type-check",
-    "fix-all": "npm run format && npm run lint:fix"
+    "fix-all": "npm run format && npm run lint:fix",
+    "test-db": "node --loader ts-node/esm test-connection.ts",
+    "setup-db": "node --loader ts-node/esm setup-db.ts",
+    "test:network": "node --loader ts-node/esm scripts/test-network.ts",
+    "test:postgres": "node --loader ts-node/esm scripts/test-postgres.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
@@ -27,7 +32,9 @@
     "@nextui-org/react": "^2.4.8",
     "@nextui-org/system": "^2.2.6",
     "@nextui-org/theme": "^2.2.11",
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "^5.22.0",
+    "@prisma/extension-pulse": "^1.2.0",
+    "@supabase/supabase-js": "^2.46.1",
     "@svgr/webpack": "^8.1.0",
     "@tabler/icons-react": "^3.21.0",
     "@tailwindcss/typography": "^0.5.15",
@@ -43,6 +50,7 @@
     "next": "^14.2.12",
     "next-auth": "^4.24.7",
     "next-themes": "^0.3.0",
+    "pg": "^8.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
@@ -58,6 +66,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.0.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -65,14 +74,16 @@
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "^22",
+    "@types/node": "^22.9.0",
     "@types/node-fetch": "^2.6.11",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "daisyui": "^4.12.13",
+    "dotenv": "^16.4.5",
     "eslint": "^8",
     "eslint-config-next": "14.2.12",
     "eslint-config-prettier": "^9.1.0",
@@ -80,10 +91,10 @@
     "postcss": "^8",
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
-    "prisma": "^5.19.1",
+    "prisma": "^5.22.0",
     "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5.6.3"
   }
 }

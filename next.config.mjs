@@ -13,7 +13,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "minio-l40s4ockokc8ggs04s4kkc4k.newslettermonster.com",
+        hostname: "minio-zok40c4wo8s88cks0cwc0kkk.newslettermonster.com",
       },
       
       // Google

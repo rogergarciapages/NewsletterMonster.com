@@ -7,23 +7,32 @@ declare module "next-auth" {
       user_id: string;
       email: string;
       name: string;
-      image?: string | null;
       profile_photo?: string | null;
       username?: string | null;
       role: string;
       emailVerified?: Date | null;
-    } & DefaultSession["user"]
+    } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     user_id: string;
     email: string;
     name: string;
-    image?: string | null;
     profile_photo?: string | null;
     username?: string | null;
     role: string;
     emailVerified?: Date | null;
+    domain_verified: boolean;
+    status: string;
+  }
+
+  interface Account {
+    provider: string;
+    type: string;
+    providerAccountId: string;
+    access_token?: string;
+    token_type?: string;
+    scope?: string;
   }
 }
 
@@ -32,10 +41,10 @@ declare module "next-auth/jwt" {
     user_id: string;
     email: string;
     name: string;
-    picture?: string | null;
     profile_photo?: string | null;
     username?: string | null;
     role: string;
     emailVerified?: Date | null;
+    accessToken?: string;
   }
 }

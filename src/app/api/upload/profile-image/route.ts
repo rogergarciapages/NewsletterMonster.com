@@ -1,10 +1,11 @@
 // C:\Users\Usuario\Documents\GitHub\nm4\src\app\api\upload\profile-image\route.ts
-import authOptions from "@/config/auth"; // Add this import
-import { prisma } from "@/lib/prisma-client";
+import { NextResponse } from "next/server";
+
 import { Client } from "minio";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
+
+import authOptions from "@/config/auth";
+import { prisma } from "@/lib/prisma-client";
 
 export const dynamic = "force-dynamic";
 
@@ -16,31 +17,40 @@ const minioClient = new Client({
   secretKey: process.env.MINIO_SECRET_KEY!,
 });
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+async function deleteExistingProfileImages(bucket: string, userId: string) {
+  try {
+    const objectsList = await minioClient.listObjects(bucket, `public/${userId}/`, true);
+    for await (const obj of objectsList) {
+      await minioClient.removeObject(bucket, obj.name);
+    }
+    console.log(`Deleted existing profile images for user: ${userId}`);
+  } catch (error) {
+    console.error("Error deleting existing profile images:", error);
+  }
+}
+
 export async function POST(request: Request) {
   console.log("API Route hit: /api/upload/profile-image");
-  
+
   try {
-    const session = await getServerSession(authOptions); // Use authOptions here
+    const session = await getServerSession(authOptions);
     console.log("Full session data:", JSON.stringify(session, null, 2));
-    
+
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { user_id: true }
+      select: { user_id: true, profile_photo: true },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const userId = user.user_id;
@@ -48,74 +58,56 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const file = formData.get("file");
-    
+
     console.log("Received file:", {
       exists: !!file,
       isFile: file instanceof File,
       type: file instanceof File ? file.type : null,
-      size: file instanceof File ? file.size : null
+      size: file instanceof File ? file.size : null,
     });
 
     if (!file || !(file instanceof File)) {
-      return NextResponse.json(
-        { error: "No valid file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No valid file provided" }, { status: 400 });
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type" },
-        { status: 400 }
-      );
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
     }
 
-    const maxSize = 2 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File too large" },
-        { status: 400 }
-      );
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
 
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExt = file.type.split("/")[1];
-    const fileName = `${uuidv4()}.${fileExt}`;
+    const fileExt = file.type.split("/")[1].replace("jpeg", "jpg");
+    const fileName = `${userId}.${fileExt}`; // Use userId as filename
     const objectPath = `public/${userId}/${fileName}`;
 
     console.log("Preparing upload:", {
       userId,
       path: objectPath,
       size: buffer.length,
-      type: file.type
+      type: file.type,
     });
 
-    // Create user directory
-    const userPath = `public/${userId}/`;
-    try {
-      await minioClient.putObject(
-        process.env.MINIO_BUCKET!,
-        userPath,
-        Buffer.from(""),
-        0
-      );
-    } catch (dirError) {
-      console.log("Directory creation skipped (may exist):", dirError);
-    }
+    // Delete existing profile images
+    await deleteExistingProfileImages(process.env.MINIO_BUCKET!, userId);
 
-    // Upload file
-    await minioClient.putObject(
-      process.env.MINIO_BUCKET!,
-      objectPath,
-      buffer,
-      file.size,
-      { "Content-Type": file.type }
-    );
+    // Upload new file
+    await minioClient.putObject(process.env.MINIO_BUCKET!, objectPath, buffer, file.size, {
+      "Content-Type": file.type,
+      "Cache-Control": "no-cache",
+    });
 
     const fileUrl = `${process.env.MINIO_ENDPOINT}/${process.env.MINIO_BUCKET}/${objectPath}`;
     console.log("Upload successful, URL:", fileUrl);
+
+    // Update user's profile_photo in database
+    await prisma.user.update({
+      where: { user_id: userId },
+      data: { profile_photo: fileUrl },
+    });
 
     return NextResponse.json({ url: fileUrl });
   } catch (error) {
