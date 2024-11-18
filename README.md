@@ -1,5 +1,8 @@
 # NewsletterMonster
 
+![image](https://github.com/user-attachments/assets/22ca00d1-c51d-4735-9c11-918d7ff1caac)
+
+
 A Next.js 14 platform for discovering, following, and managing newsletter content. Built with TypeScript, PostgreSQL, and NextUI.
 This is the internet newsletter archive.
 
