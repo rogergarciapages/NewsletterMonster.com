@@ -1,5 +1,6 @@
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { ReactNode, useState } from "react";
+
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 type AccordionItemProps = {
   title: string;
@@ -16,15 +17,11 @@ const AccordionItem = ({ title, children }: AccordionItemProps) => {
   return (
     <div className="border-b border-gray-200 dark:border-gray-700">
       <button
-        className="w-full flex justify-between items-center p-4 text-left text-gray-900 dark:text-white focus:outline-none transition"
+        className="flex w-full items-center justify-between p-4 text-left text-gray-900 transition focus:outline-none dark:text-white"
         onClick={toggleOpen}
       >
         <span>{title}</span>
-        {isOpen ? (
-          <ChevronUpIcon className="w-5 h-5" />
-        ) : (
-          <ChevronDownIcon className="w-5 h-5" />
-        )}
+        {isOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
       </button>
       {isOpen && <div className="p-4">{children}</div>}
     </div>

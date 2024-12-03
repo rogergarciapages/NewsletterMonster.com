@@ -1,17 +1,25 @@
 // src/app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
-import AppNavbar from "./components/app-navbar";
-import Footer from "./components/footer";
-import Providers from "./components/providers";
+import { Toaster } from "sonner";
+
+import AppNavbar from "@/app/components/app-navbar";
+import Footer from "@/app/components/footer";
+import Providers from "@/app/components/providers";
+
 import "./globals.css";
 
-// Base URL for metadata
 const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ??
   (process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
     : "https://newslettermonster.com");
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#d7002e",
+};
 
 export const metadata: Metadata = {
   title: "NewsletterMonster - Track and Discover the Best Email Newsletters",
@@ -42,8 +50,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-  // Theme colors for browsers
-  themeColor: "#d7002e",
   // Open Graph / Social Media
   openGraph: {
     type: "website",
@@ -52,7 +58,7 @@ export const metadata: Metadata = {
     description: "Find, track and discover the best email newsletters all in one place",
     images: [
       {
-        url: "/social-share-image.png",
+        url: `${baseUrl}/social-share-image.png`,
         width: 1200,
         height: 630,
         alt: "NewsletterMonster - Newsletter Discovery Platform",
@@ -72,7 +78,7 @@ export const metadata: Metadata = {
     initialScale: 1,
   },
   alternates: {
-    canonical: "https://newslettermonster.com",
+    canonical: baseUrl,
   },
 };
 
@@ -85,11 +91,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="light">
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
         <Providers>
-          <div className="sticky top-0 z-50">
-            <AppNavbar />
-          </div>
-          <div className="flex min-h-[calc(100vh-64px)] flex-grow flex-col">{children}</div>
+          <AppNavbar />
+          <main>
+            <div className="flex min-h-[calc(100vh-64px)] flex-grow flex-col">{children}</div>
+          </main>
           <Footer />
+          <Toaster position="bottom-right" richColors closeButton expand visibleToasts={6} />
         </Providers>
       </body>
     </html>

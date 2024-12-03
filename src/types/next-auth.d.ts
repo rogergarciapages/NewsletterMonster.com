@@ -34,6 +34,14 @@ declare module "next-auth" {
     token_type?: string;
     scope?: string;
   }
+
+  interface Profile {
+    sub?: string;
+    name?: string;
+    email?: string;
+    picture?: string;
+    // Add other provider-specific profile fields
+  }
 }
 
 declare module "next-auth/jwt" {

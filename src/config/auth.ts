@@ -73,37 +73,15 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
       authorization: {
-        params: {
-          scope: "r_liteprofile r_emailaddress",
-          response_type: "code",
-        },
+        params: { scope: "openid profile email" },
       },
-      token: {
-        url: "https://www.linkedin.com/oauth/v2/accessToken",
-        async request(context) {
-          const tokens = await context.client.grant({
-            grant_type: "authorization_code",
-            code: context.params.code,
-            redirect_uri: context.provider.callbackUrl,
-          });
-          return { tokens };
-        },
-      },
-      userinfo: {
-        url: "https://api.linkedin.com/v2/me",
-        params: {
-          projection: "(id,localizedFirstName,localizedLastName,emailAddress,profilePicture)",
-        },
-      },
-      profile(profile: any): User {
+      profile(profile) {
         return {
-          id: profile.id,
-          user_id: profile.id,
-          email: profile.emailAddress,
-          name: `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          profile_photo:
-            profile.profilePicture?.["displayImage~"]?.elements?.[0]?.identifiers?.[0]
-              ?.identifier ?? null,
+          id: profile.sub,
+          user_id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          profile_photo: profile.picture ?? null,
           username: null,
           role: "FREE",
           emailVerified: null,
@@ -116,24 +94,42 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === "github" || account?.provider === "linkedin") {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
-        });
-
-        if (existingUser) {
-          // Link the account if user exists
-          await prisma.account.create({
-            data: {
-              userId: existingUser.user_id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              access_token: account.access_token,
-              token_type: account.token_type,
-              scope: account.scope,
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            include: {
+              Account: true,
             },
           });
-          return true;
+
+          if (existingUser) {
+            // Check if this provider account already exists
+            const existingAccount = await prisma.account.findFirst({
+              where: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            });
+
+            // If account doesn't exist, create it
+            if (!existingAccount) {
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.user_id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                },
+              });
+            }
+            return true;
+          }
+        } catch (error) {
+          console.error("SignIn callback error:", error);
+          return false;
         }
       }
       return true;
@@ -158,12 +154,12 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
-          user_id: token.user_id,
+          user_id: token.user_id as string,
           email: token.email,
           name: token.name,
-          profile_photo: token.profile_photo,
-          username: token.username,
-          role: token.role,
+          profile_photo: token.profile_photo as string | null,
+          username: token.username as string | null,
+          role: token.role as string,
         },
       };
     },

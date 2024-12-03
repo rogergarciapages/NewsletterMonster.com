@@ -5,8 +5,7 @@ import TrendingNewslettersClient from "./trending-newsletters-client";
 
 export const metadata: Metadata = {
   title: "Trending Newsletters | Most Popular Email Newsletters | NewsletterMonster",
-  description:
-    "Discover the most popular and trending email newsletters. Browse our curated collection of top-performing newsletters across various industries and topics.",
+  description: "Discover the most popular and trending email newsletters.",
   keywords:
     "trending newsletters, popular newsletters, best newsletters, email newsletters, newsletter trends, top newsletters",
   openGraph: {
@@ -33,12 +32,9 @@ export const metadata: Metadata = {
   },
 };
 
-// Move client-side code to a separate component
-export default async function TrendingPage() {
-  // You can add any server-side data fetching here if needed
+export default function TrendingPage() {
   return (
     <>
-      {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

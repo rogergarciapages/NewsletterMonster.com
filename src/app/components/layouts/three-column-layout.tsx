@@ -24,28 +24,26 @@ const RightSidebar = dynamic(() => import("../right-sidebar"), {
   ),
 });
 
-const ThreeColumnLayout: React.FC<ThreeColumnLayoutProps> = ({ children }) => {
+export default function ThreeColumnLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-64px)] max-w-[1400px] flex-col">
-      <div className="flex flex-grow flex-col lg:flex-row">
-        <aside className="lg:sticky lg:top-[64px] lg:h-[calc(100vh-64px)] lg:w-1/5">
+    <div className="container mx-auto px-4">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <aside className="lg:col-span-2">
           <div className="max-h-screen overflow-y-auto p-4">
             <LeftSidebar />
           </div>
         </aside>
 
-        <div className="flex min-h-[calc(100vh-64px)] flex-1 flex-col p-4">
+        <div className="lg:col-span-8">
           <div className="flex-grow">{children}</div>
         </div>
 
-        <aside className="lg:sticky lg:top-[64px] lg:h-[calc(100vh-64px)] lg:w-1/5">
+        <aside className="lg:col-span-2">
           <div className="max-h-screen overflow-y-auto p-4">
             <RightSidebar />
           </div>
         </aside>
       </div>
-    </main>
+    </div>
   );
-};
-
-export default ThreeColumnLayout;
+}

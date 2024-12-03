@@ -6,7 +6,6 @@ const globalForPrisma = global as unknown as {
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    datasourceUrl: process.env.DIRECT_DATABASE_URL,
     log: ["query", "error", "warn"],
   });
 };
