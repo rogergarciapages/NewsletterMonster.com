@@ -13,10 +13,16 @@ import { SWRConfig } from "swr";
 
 /* eslint-disable quotes */
 
+/* eslint-disable quotes */
+
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`An error occurred while fetching the data.`);
+    const error = new Error(`An error occurred while fetching the data.`);
+    const info = await response.json().catch(() => ({}));
+    (error as any).status = response.status;
+    (error as any).info = info;
+    throw error;
   }
   return response.json();
 };

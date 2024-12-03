@@ -1,9 +1,11 @@
 // src/app/api/users/profile/route.ts
+import { NextResponse } from "next/server";
+
+import { getServerSession } from "next-auth";
+
 import { prisma } from "@/lib/prisma-client";
 import { userProfileSchema } from "@/lib/schemas/user-profile";
-import { deleteProfileImage, isMinioUrl } from "@/lib/utils/minio";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { deleteUserProfileImages, isMinioUrl } from "@/lib/utils/minio";
 
 export async function PUT(request: Request) {
   try {
@@ -20,13 +22,13 @@ export async function PUT(request: Request) {
     // Get current user data
     const currentUser = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { profile_photo: true }
+      select: { profile_photo: true },
     });
 
     // Delete old image if it exists and is from our MinIO storage
     if (currentUser?.profile_photo && isMinioUrl(currentUser.profile_photo) && body.profile_photo) {
       try {
-        await deleteProfileImage(currentUser.profile_photo);
+        await deleteUserProfileImages(currentUser.profile_photo);
       } catch (error) {
         console.error("Failed to delete old profile image:", error);
         // Continue with update even if delete fails
@@ -35,13 +37,13 @@ export async function PUT(request: Request) {
 
     const updatedUser = await prisma.user.update({
       where: {
-        email: session.user.email
+        email: session.user.email,
       },
       data: {
         ...validatedData,
         ...(body.profile_photo ? { profile_photo: body.profile_photo } : {}),
-        updated_at: new Date()
-      }
+        updated_at: new Date(),
+      },
     });
 
     return NextResponse.json({ user: updatedUser });

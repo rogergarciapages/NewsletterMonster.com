@@ -21,7 +21,8 @@
     "test-db": "node --loader ts-node/esm test-connection.ts",
     "setup-db": "node --loader ts-node/esm setup-db.ts",
     "test:network": "node --loader ts-node/esm scripts/test-network.ts",
-    "test:postgres": "node --loader ts-node/esm scripts/test-postgres.ts"
+    "test:postgres": "node --loader ts-node/esm scripts/test-postgres.ts",
+    "setup-minio": "node src/scripts/setup-minio.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
@@ -74,6 +75,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/minio": "^7.1.0",
     "@types/node": "^22.9.0",
     "@types/node-fetch": "^2.6.11",
     "@types/pg": "^8.11.10",
@@ -82,6 +84,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "cross-env": "^7.0.3",
     "daisyui": "^4.12.13",
     "dotenv": "^16.4.5",
     "eslint": "^8",

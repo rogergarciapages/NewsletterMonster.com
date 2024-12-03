@@ -33,32 +33,35 @@ export default function TagNewslettersClient({ tag }: TagNewslettersClientProps)
 
   const observerRef = useRef<IntersectionObserver>();
 
-  const fetchNewsletters = async (pageNumber: number) => {
-    try {
-      setIsLoading(true);
-      const skip = pageNumber * NEWSLETTERS_PER_PAGE;
-      const response = await axios.get("/api/newsletters/by-tag", {
-        params: {
-          tagId: tag.id,
-          skip,
-          take: NEWSLETTERS_PER_PAGE,
-        },
-      });
+  const fetchNewsletters = useCallback(
+    async (pageNumber: number) => {
+      try {
+        setIsLoading(true);
+        const skip = pageNumber * NEWSLETTERS_PER_PAGE;
+        const response = await axios.get("/api/newsletters/by-tag", {
+          params: {
+            tagId: tag.id,
+            skip,
+            take: NEWSLETTERS_PER_PAGE,
+          },
+        });
 
-      const newNewsletters = response.data;
+        const newNewsletters = response.data;
 
-      if (newNewsletters.length < NEWSLETTERS_PER_PAGE) {
-        setHasMore(false);
+        if (newNewsletters.length < NEWSLETTERS_PER_PAGE) {
+          setHasMore(false);
+        }
+
+        setNewsletters(prev => (pageNumber === 0 ? newNewsletters : [...prev, ...newNewsletters]));
+      } catch (error) {
+        console.error("Error fetching newsletters:", error);
+        setError("Failed to fetch newsletters. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
-
-      setNewsletters(prev => (pageNumber === 0 ? newNewsletters : [...prev, ...newNewsletters]));
-    } catch (error) {
-      console.error("Error fetching newsletters:", error);
-      setError("Failed to fetch newsletters. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [tag.id]
+  );
 
   const lastNewsletterCallback = useCallback(
     (node: HTMLDivElement | null) => {
@@ -79,7 +82,13 @@ export default function TagNewslettersClient({ tag }: TagNewslettersClientProps)
 
   useEffect(() => {
     fetchNewsletters(page);
-  }, [page, tag.id]);
+  }, [page, fetchNewsletters]);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Failed to fetch newsletters:", error);
+    }
+  }, [error]);
 
   if (error) {
     return (

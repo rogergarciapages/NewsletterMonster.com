@@ -51,6 +51,10 @@ export async function uploadProfileImage(file: File, userId: string): Promise<st
     await minioClient.putObject(BUCKET_NAME, filePath, Buffer.from(fileBuffer), file.size, {
       "Content-Type": file.type,
       "Cache-Control": "no-cache",
+      "x-amz-acl": "public-read",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Headers": "*",
     });
 
     // Return the full URL

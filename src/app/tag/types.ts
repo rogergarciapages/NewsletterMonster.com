@@ -3,9 +3,9 @@ export interface Newsletter {
   sender: string | null;
   subject: string | null;
   top_screenshot_url: string | null;
-  likes_count: number | null;
-  you_rocks_count: number | null;
-  created_at: Date | null;
+  likes_count: number;
+  you_rocks_count: number;
+  created_at: Date;
   summary: string | null;
 }
 
