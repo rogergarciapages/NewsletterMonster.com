@@ -37,9 +37,14 @@ export function NewsletterCard({ newsletter, priority = false }: NewsletterCardP
       </div>
     );
   }
-  const handleSenderClick = (e: React.MouseEvent) => {
+  const handleBrandClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
-    router.push(`/${slugify(newsletter.sender || "")}`);
+    router.push(`/brand/${slugify(newsletter.sender || "")}`);
+  };
+
+  const handleCardClick = () => {
+    router.push(`/brand/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`);
   };
 
   // Format date with null check
@@ -54,9 +59,7 @@ export function NewsletterCard({ newsletter, priority = false }: NewsletterCardP
   return (
     <Card
       className="group relative w-full cursor-pointer bg-gradient-to-b from-torch-900 to-gray-900 transition-transform duration-300 hover:scale-[1.02]"
-      onClick={() =>
-        router.push(`/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`)
-      }
+      onClick={handleCardClick}
     >
       {/* Aspect ratio container */}
       <div className="relative w-full pt-[132.35%]">
@@ -108,7 +111,7 @@ export function NewsletterCard({ newsletter, priority = false }: NewsletterCardP
             </div>
 
             <button
-              onClick={handleSenderClick}
+              onClick={handleBrandClick}
               className="rounded-full transition-transform duration-300 hover:scale-105"
             >
               <CardDescription className="inline-block truncate rounded-full bg-aquamarine-700 px-3 py-1 text-xs text-white hover:bg-aquamarine-600">

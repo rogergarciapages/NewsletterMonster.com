@@ -14,9 +14,9 @@ import { prisma } from "@/lib/prisma-client";
 import {
   NewsletterStructuredData,
   generateNewsletterMetadata,
-} from "../../components/brand/seo/newsletter-detail-seo";
-import DynamicBackButton from "../../components/navigation/dynamic-back-button";
-import PageNavigationTracker from "../../components/navigation/page-tracker";
+} from "../../../components/brand/seo/newsletter-detail-seo";
+import DynamicBackButton from "../../../components/navigation/dynamic-back-button";
+import PageNavigationTracker from "../../../components/navigation/page-tracker";
 
 // Type definitions
 type NewsletterDetail = {

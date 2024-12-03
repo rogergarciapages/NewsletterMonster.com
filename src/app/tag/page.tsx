@@ -6,13 +6,10 @@ import { Chip } from "@nextui-org/chip";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { getTopTags } from "@/lib/services/tag-service";
-// Updated import path
 import type { TagWithNewsletters } from "@/types/newsletter";
 
 import { NewsletterGrid } from "../components/tags/tag-grid";
 
-// Since this component isn't used, we can either remove it or use it as a loading state
-// If you want to keep it for future use, prefix with underscore
 function _NewsletterGridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

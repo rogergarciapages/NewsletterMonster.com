@@ -57,8 +57,12 @@ export const PopularNewsletters = () => {
     fetchPopularNewsletters();
   }, []);
 
-  const handleCardClick = (newsletter: Newsletter) => {
-    router.push(`/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`);
+  const handleNewsletterClick = (newsletter: Newsletter) => {
+    router.push(`/brand/${slugify(newsletter.sender || "")}/${newsletter.newsletter_id}`);
+  };
+
+  const handleBrandClick = (newsletter: Newsletter) => {
+    router.push(`/brand/${slugify(newsletter.sender || "")}`);
   };
 
   if (error) {
@@ -85,7 +89,7 @@ export const PopularNewsletters = () => {
               <Card
                 key={newsletter.newsletter_id}
                 className="group relative flex h-[450px] cursor-pointer flex-col text-white transition-transform duration-300 hover:scale-[1.02]"
-                onClick={() => handleCardClick(newsletter)}
+                onClick={() => handleNewsletterClick(newsletter)}
               >
                 <div
                   className="relative flex h-full flex-grow flex-col justify-between rounded-xl p-2"
@@ -127,7 +131,7 @@ export const PopularNewsletters = () => {
                       <div
                         onClick={e => {
                           e.stopPropagation();
-                          router.push(`/${slugify(newsletter.sender || "")}`);
+                          handleBrandClick(newsletter);
                         }}
                         className="transition-transform duration-300 hover:scale-105"
                       >

@@ -1,10 +1,13 @@
 // components/navigation/dynamic-back-button.tsx
 "use client";
 
-import { Tooltip } from "@nextui-org/react";
-import { IconChevronLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { Tooltip } from "@nextui-org/react";
+import { IconChevronLeft } from "@tabler/icons-react";
+
+// components/navigation/dynamic-back-button.tsx
 
 interface DynamicBackButtonProps {
   brandname: string;
@@ -20,7 +23,7 @@ export default function DynamicBackButton({ brandname, brandDisplayName }: Dynam
   useEffect(() => {
     // Get the previous path from sessionStorage
     const prevPath = sessionStorage.getItem("previousPath");
-    
+
     if (prevPath) {
       setPreviousPath(prevPath);
       // Set button text based on previous path
@@ -45,35 +48,32 @@ export default function DynamicBackButton({ brandname, brandDisplayName }: Dynam
   const handleFallback = () => {
     // Only use push if we need to fallback to the brand page
     if (window.history.length <= 1) {
-      router.push(`/${brandname}`);
+      router.push(`/brand/${brandname}`);
     }
   };
 
   // Set up the fallback after component mounts
   useEffect(() => {
     handleFallback();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="flex items-center gap-4 mb-6">
+    <div className="mb-6 flex items-center gap-4">
       <Tooltip
         content={`Back to ${buttonText}`}
         placement="right"
         classNames={{
-          content: [
-            "py-2 px-4 shadow-xl",
-            "text-white bg-zinc-800",
-          ],
+          content: ["py-2 px-4 shadow-xl", "text-white bg-zinc-800"],
         }}
       >
         <button
           onClick={handleBack}
-          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+          className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
           aria-label={`Back to ${buttonText}`}
         >
-          <IconChevronLeft 
-            size={20} 
+          <IconChevronLeft
+            size={20}
             className="text-gray-900 transition-transform group-hover:-translate-x-0.5"
           />
         </button>

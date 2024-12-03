@@ -9,6 +9,8 @@ import { IconMailOpened } from "@tabler/icons-react";
 
 // src/app/components/brand/newsletter/card/image.tsx
 
+// src/app/components/brand/newsletter/card/image.tsx
+
 interface NewsletterImageProps {
   imageUrl: string | null;
   subject: string | null;
@@ -70,7 +72,7 @@ const NewsletterImage = memo(
 
     return showHoverEffect ? (
       <Link
-        href={`/${brandname}/${newsletterId}`}
+        href={`/brand/${brandname}/${newsletterId}`}
         title={`Read ${subject || "Newsletter"} by ${brandname}`}
         aria-label={`Read ${subject || "Newsletter"} by ${brandname}`}
       >

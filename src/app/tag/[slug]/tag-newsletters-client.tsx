@@ -3,11 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@nextui-org/react";
 import axios from "axios";
 
 import { Newsletter } from "@/app/components/brand/newsletter/types";
-import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";
 import { NewsletterCardSkeleton } from "@/app/components/skeleton/newsletter-card-skeleton";
 import { TrendingPageSkeleton } from "@/app/components/skeleton/trending-page-skeleton";
@@ -26,143 +24,96 @@ const NEWSLETTERS_PER_PAGE = 15;
 export default function TagNewslettersClient({ tag }: TagNewslettersClientProps) {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const observer = useRef<IntersectionObserver | null>(null);
   const router = useRouter();
 
-  const observerRef = useRef<IntersectionObserver>();
-
-  const fetchNewsletters = useCallback(
-    async (pageNumber: number) => {
-      try {
-        setIsLoading(true);
-        const skip = pageNumber * NEWSLETTERS_PER_PAGE;
-        const response = await axios.get("/api/newsletters/by-tag", {
-          params: {
-            tagId: tag.id,
-            skip,
-            take: NEWSLETTERS_PER_PAGE,
-          },
-        });
-
-        const newNewsletters = response.data;
-
-        if (newNewsletters.length < NEWSLETTERS_PER_PAGE) {
-          setHasMore(false);
-        }
-
-        setNewsletters(prev => (pageNumber === 0 ? newNewsletters : [...prev, ...newNewsletters]));
-      } catch (error) {
-        console.error("Error fetching newsletters:", error);
-        setError("Failed to fetch newsletters. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [tag.id]
-  );
-
-  const lastNewsletterCallback = useCallback(
-    (node: HTMLDivElement | null) => {
+  const lastNewsletterRef = useCallback(
+    (node: HTMLDivElement) => {
       if (isLoading) return;
 
-      if (observerRef.current) observerRef.current.disconnect();
+      if (observer.current) observer.current.disconnect();
 
-      observerRef.current = new IntersectionObserver(entries => {
+      observer.current = new IntersectionObserver(entries => {
         if (entries[0].isIntersecting && hasMore) {
           setPage(prevPage => prevPage + 1);
         }
       });
 
-      if (node) observerRef.current.observe(node);
+      if (node) observer.current.observe(node);
     },
     [isLoading, hasMore]
   );
 
   useEffect(() => {
-    fetchNewsletters(page);
-  }, [page, fetchNewsletters]);
+    const fetchNewsletters = async () => {
+      try {
+        setIsLoading(true);
+        const skip = (page - 1) * NEWSLETTERS_PER_PAGE;
+        const response = await axios.get(
+          `/api/newsletters/by-tag?tagId=${tag.id}&skip=${skip}&take=${NEWSLETTERS_PER_PAGE}`
+        );
+        const newNewsletters = response.data;
 
-  useEffect(() => {
-    if (error) {
-      console.error("Failed to fetch newsletters:", error);
-    }
-  }, [error]);
+        setNewsletters(prev => [...prev, ...newNewsletters]);
+        setHasMore(newNewsletters.length === NEWSLETTERS_PER_PAGE);
+      } catch (error) {
+        console.error("Error fetching newsletters:", error);
+        setError("Failed to load newsletters");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNewsletters();
+  }, [tag.id, page]);
 
   if (error) {
-    return (
-      <ThreeColumnLayout>
-        <div className="flex min-h-[50vh] flex-col items-center justify-center p-4">
-          <div className="mb-4 text-red-500">{error}</div>
-          <Button
-            color="primary"
-            onClick={() => {
-              setError(null);
-              setPage(0);
-              fetchNewsletters(0);
-            }}
-          >
-            Try Again
-          </Button>
-        </div>
-      </ThreeColumnLayout>
-    );
+    return <div className="py-8 text-center text-red-500">{error}</div>;
   }
 
   if (isLoading && newsletters.length === 0) {
-    return (
-      <ThreeColumnLayout>
-        <TrendingPageSkeleton />
-      </ThreeColumnLayout>
-    );
+    return <TrendingPageSkeleton />;
   }
 
   return (
-    <ThreeColumnLayout>
-      <div role="main" className="px-4 py-8">
-        <header className="mb-8 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
-            {tag.name} Newsletters
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-200">
-            {tag.count > 0 ? (
-              <>
-                Discover {tag.count} curated {tag.name.toLowerCase()} newsletters in our database.
-              </>
-            ) : (
-              <>No newsletters found with this tag yet.</>
-            )}
-          </p>
-        </header>
+    <div className="px-4 py-8 md:px-6 lg:px-8">
+      <header className="mb-12 text-center">
+        <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl">
+          {tag.name} Newsletters
+        </h1>
+        <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+          Browse our curated collection of {tag.count}+ {tag.name.toLowerCase()} newsletters and
+          email subscriptions.
+        </p>
+      </header>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {newsletters.map((newsletter, index) => (
-            <div
-              ref={index === newsletters.length - 1 ? lastNewsletterCallback : null}
-              key={newsletter.newsletter_id}
-            >
-              <article>
-                <NewsletterCard newsletter={newsletter} priority={index < 6} />
-              </article>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {newsletters.map((newsletter, index) => {
+          const isLast = index === newsletters.length - 1;
+          return (
+            <div key={newsletter.newsletter_id} ref={isLast ? lastNewsletterRef : null}>
+              <NewsletterCard newsletter={newsletter} />
             </div>
-          ))}
-
-          {isLoading && (
-            <div className="col-span-full grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <NewsletterCardSkeleton key={`loading-${index}`} />
-              ))}
-            </div>
-          )}
-
-          {!hasMore && newsletters.length > 0 && (
-            <div className="col-span-1 p-8 text-center text-gray-600 md:col-span-2 lg:col-span-3">
-              You&apos;ve reached the end of {tag.name.toLowerCase()} newsletters.
-            </div>
-          )}
-        </div>
+          );
+        })}
       </div>
-    </ThreeColumnLayout>
+
+      {isLoading && (
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, index) => (
+            <NewsletterCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
+
+      {!hasMore && newsletters.length > 0 && (
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 dark:text-gray-400">No more newsletters to load.</p>
+        </div>
+      )}
+    </div>
   );
 }
