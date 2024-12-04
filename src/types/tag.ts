@@ -20,8 +20,15 @@ export interface TagWithNewsletters extends Tag {
   }[];
 }
 
+interface UnknownTag {
+  id: unknown;
+  name: unknown;
+  slug: unknown;
+  count: unknown;
+}
+
 // Add a type guard
-export function isValidTag(tag: any): tag is Tag {
+export function isValidTag(tag: UnknownTag): tag is Tag {
   return (
     tag &&
     typeof tag.id === "number" &&

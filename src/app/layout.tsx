@@ -22,6 +22,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "NewsletterMonster - Track and Discover the Best Email Newsletters",
   description:
     "Find, track and discover the best email newsletters all in one place. Join our community of newsletter enthusiasts.",
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
     description: "Find, track and discover the best email newsletters all in one place",
     images: [
       {
-        url: `${baseUrl}/social-share-image.png`,
+        url: "/social-share-image.png",
         width: 1200,
         height: 630,
         alt: "NewsletterMonster - Newsletter Discovery Platform",
@@ -71,11 +72,6 @@ export const metadata: Metadata = {
     title: "NewsletterMonster",
     description: "Find, track and discover the best email newsletters",
     images: ["/social-share-image.png"],
-  },
-  // Viewport settings
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
   },
   alternates: {
     canonical: baseUrl,

@@ -1,22 +1,18 @@
 // app/[brandname]/[newsletterId]/page.tsx
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 
-import { Tooltip } from "@nextui-org/react";
-import { IconWindowMaximize } from "@tabler/icons-react";
-
+import EmailContent from "@/app/components/brand/newsletter/email-content";
+import EmailHeader from "@/app/components/brand/newsletter/email-header";
+import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import NewsletterTags from "@/app/components/tags/newsletter-tags";
 import { prisma } from "@/lib/prisma-client";
 
 import {
   NewsletterStructuredData,
   generateNewsletterMetadata,
 } from "../../../components/brand/seo/newsletter-detail-seo";
-import DynamicBackButton from "../../../components/navigation/dynamic-back-button";
-import PageNavigationTracker from "../../../components/navigation/page-tracker";
 
 // Type definitions
 type NewsletterDetail = {
@@ -129,6 +125,40 @@ export default async function NewsletterPage({
   const brandDisplayName = formatBrandName(params.brandname);
   const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
 
+  // Generate structured data
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://newslettermonster.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: brandDisplayName,
+        item: `https://newslettermonster.com/${params.brandname}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: newsletter.subject || "Newsletter",
+        item: currentUrl,
+      },
+    ],
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: brandDisplayName,
+    url: `https://newslettermonster.com/${params.brandname}`,
+    sameAs: [`https://newslettermonster.com/${params.brandname}`],
+  };
+
   return (
     <>
       {/* SEO Structured Data */}
@@ -139,152 +169,57 @@ export default async function NewsletterPage({
         currentUrl={currentUrl}
       />
 
+      {/* Additional Schema.org structured data */}
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <Script
+        id="organization-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+
       <ThreeColumnLayout>
-        <PageNavigationTracker />
-        {/* Main content with semantic markup */}
+        {/* Main content with email-like interface */}
         <article
-          className="mx-auto max-w-3xl px-4 py-8"
+          className="mx-auto w-full max-w-4xl overflow-hidden rounded-lg border shadow-sm"
           itemScope
           itemType="https://schema.org/Article"
         >
-          <header className="mb-8 border-b-5 border-torch-600 pb-4">
-            <DynamicBackButton brandname={params.brandname} brandDisplayName={brandDisplayName} />
+          {/* Email header */}
+          <EmailHeader
+            subject={newsletter.subject}
+            sender={newsletter.sender}
+            brandname={params.brandname}
+            date={newsletter.created_at}
+          />
 
-            {/* SEO-optimized title */}
-            <h1 className="mb-4 text-4xl font-bold tracking-tight" itemProp="headline">
-              {newsletter.subject || "Untitled Newsletter"}
-            </h1>
+          {/* Email toolbar */}
+          <EmailToolbar
+            likesCount={newsletter.likes_count || 0}
+            isLiked={false}
+            currentUrl={currentUrl}
+            subject={newsletter.subject}
+            summary={newsletter.summary}
+          />
 
-            {/* Semantic metadata */}
-            <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
-            <meta itemProp="publisher" content="NewsletterMonster" />
-            <meta itemProp="author" content={brandDisplayName} />
-            {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
+          {/* Email content */}
+          <EmailContent
+            summary={newsletter.summary}
+            fullScreenshotUrl={newsletter.full_screenshot_url}
+            htmlFileUrl={newsletter.html_file_url}
+            subject={newsletter.subject}
+            tags={newsletter.NewsletterTag}
+            productsLink={newsletter.products_link}
+          />
 
-            <div className="space-y-2 text-[20px] leading-tight text-[#111] dark:text-white">
-              <div className="flex flex-col gap-2">
-                {/* Sender information */}
-                <div className="grid grid-cols-[auto,1fr] items-center gap-x-2">
-                  <span className="w-[110px] font-light">Sender:</span>
-                  <Link
-                    href={`/${params.brandname}`}
-                    className="flex items-center font-bold transition-colors hover:text-torch-600"
-                    itemProp="author"
-                  >
-                    <Tooltip
-                      placement="right"
-                      content="Check All Newsletters"
-                      classNames={{
-                        content: ["py-2 px-4 shadow-xl", "text-white bg-zinc-800"],
-                      }}
-                    >
-                      {newsletter.sender}
-                    </Tooltip>
-                    <IconWindowMaximize className="ml-2" />
-                  </Link>
-                </div>
-
-                {/* Publication date */}
-                {newsletter.created_at && (
-                  <div className="grid grid-cols-[auto,1fr] items-center gap-x-2">
-                    <span className="w-[110px] font-light">Date Sent:</span>
-                    <time dateTime={newsletter.created_at.toISOString()} itemProp="datePublished">
-                      {newsletter.created_at.toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </time>
-                  </div>
-                )}
-              </div>
-
-              {/* Tags */}
-              {newsletter.NewsletterTag?.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-8">
-                  {newsletter.NewsletterTag?.length > 0 && (
-                    <NewsletterTags
-                      tags={newsletter.NewsletterTag}
-                      className="pt-8"
-                      // Optional: customize the appearance
-                      // size="md"
-                      // variant="bordered"
-                      // color="warning"
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          </header>
-
-          {/* Main content */}
-          <div className="mt-4 space-y-8">
-            {/* Summary section */}
-            {newsletter.summary && (
-              <div className="prose max-w-none rounded-lg" itemProp="abstract">
-                <h2 className="mb-4 text-xl font-semibold text-[#111] dark:text-white">
-                  Quick summary of this {brandDisplayName} newsletter
-                </h2>
-                <p className="text-[#111] dark:text-[#ccc]">{newsletter.summary}</p>
-              </div>
-            )}
-
-            {/* Newsletter screenshot */}
-            {newsletter.full_screenshot_url && (
-              <div className="relative aspect-auto overflow-hidden rounded-lg shadow-lg">
-                <Image
-                  src={newsletter.full_screenshot_url}
-                  alt={newsletter.subject || "Newsletter content"}
-                  width={1200}
-                  height={800}
-                  className="h-auto w-full"
-                  priority
-                  itemProp="image"
-                />
-              </div>
-            )}
-
-            {/* Engagement metrics */}
-            <div className="flex space-x-6 text-gray-600">
-              {newsletter.likes_count !== null && (
-                <div itemProp="interactionStatistic">
-                  <span className="font-semibold">{newsletter.likes_count}</span> likes
-                </div>
-              )}
-              {newsletter.you_rocks_count !== null && (
-                <div itemProp="interactionStatistic">
-                  <span className="font-semibold">{newsletter.you_rocks_count}</span> rocks
-                </div>
-              )}
-            </div>
-
-            {/* Newsletter content iframe */}
-            {newsletter.html_file_url && (
-              <div className="overflow-hidden rounded-lg shadow-lg">
-                <iframe
-                  src={newsletter.html_file_url}
-                  className="h-screen w-full"
-                  title={newsletter.subject || "Newsletter content"}
-                  itemProp="articleBody"
-                />
-              </div>
-            )}
-
-            {/* Products link */}
-            {newsletter.products_link && (
-              <div className="mt-4">
-                <a
-                  href={newsletter.products_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800"
-                  itemProp="isBasedOn"
-                >
-                  View Products →
-                </a>
-              </div>
-            )}
-          </div>
+          {/* SEO metadata */}
+          <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
+          <meta itemProp="publisher" content="NewsletterMonster" />
+          <meta itemProp="author" content={brandDisplayName} />
+          {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
         </article>
       </ThreeColumnLayout>
     </>

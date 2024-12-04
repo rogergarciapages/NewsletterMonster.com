@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma-client";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -51,7 +53,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json(newsletters);
   } catch (error) {
-    console.error("Error fetching newsletters by tag:", error);
-    return NextResponse.json({ error: "Failed to fetch newsletters" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Failed to fetch newsletters",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
