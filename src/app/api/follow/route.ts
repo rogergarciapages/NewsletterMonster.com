@@ -1,91 +1,93 @@
 // src/app/api/follow/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getServerSession } from "next-auth";
 
-import authOptions from "@/config/auth";
+import { authOptions } from "@/config/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.user_id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { targetId } = await req.json();
-    if (!targetId) {
-      return NextResponse.json({ error: "Target ID required" }, { status: 400 });
+    const { brandId, action } = await req.json();
+    if (!brandId || !action) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Check if already following
-    const existingFollow = await prisma.follow.findFirst({
-      where: {
-        follower_id: session.user.user_id,
-        following_name: targetId,
-      },
-    });
+    const userId = session.user.user_id;
 
-    if (existingFollow) {
-      return NextResponse.json({ error: "Already following" }, { status: 400 });
+    if (action === "follow") {
+      await prisma.follow.create({
+        data: {
+          follower_id: userId,
+          brand_id: brandId,
+        },
+      });
+    } else if (action === "unfollow") {
+      await prisma.follow.delete({
+        where: {
+          follower_id_brand_id: {
+            follower_id: userId,
+            brand_id: brandId,
+          },
+        },
+      });
+    } else {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    // Create follow using following_name
-    await prisma.follow.create({
-      data: {
-        follower_id: session.user.user_id,
-        following_name: targetId,
-      },
-    });
-
-    // Get updated count
-    const count = await prisma.follow.count({
+    const followersCount = await prisma.follow.count({
       where: {
-        following_name: targetId,
+        brand_id: brandId,
       },
     });
 
-    return NextResponse.json({ success: true, count });
+    return NextResponse.json({ success: true, followersCount });
   } catch (error) {
-    console.error("Error following:", error);
-    return NextResponse.json({ error: "Failed to follow" }, { status: 500 });
+    console.error("Error in follow API:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.user_id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { targetId } = await req.json();
-    if (!targetId) {
-      return NextResponse.json({ error: "Target ID required" }, { status: 400 });
+    const { searchParams } = new URL(req.url);
+    const brandId = searchParams.get("brandId");
+
+    if (!brandId) {
+      return NextResponse.json({ error: "Missing brandId" }, { status: 400 });
     }
 
-    // Delete follow by name
-    const result = await prisma.follow.deleteMany({
+    const isFollowing = await prisma.follow.findUnique({
       where: {
-        follower_id: session.user.user_id,
-        following_name: targetId,
+        follower_id_brand_id: {
+          follower_id: session.user.user_id,
+          brand_id: brandId,
+        },
       },
     });
 
-    if (result.count === 0) {
-      return NextResponse.json({ error: "Not following" }, { status: 404 });
-    }
-
-    // Get updated count
-    const count = await prisma.follow.count({
+    const followersCount = await prisma.follow.count({
       where: {
-        following_name: targetId,
+        brand_id: brandId,
       },
     });
 
-    return NextResponse.json({ success: true, count });
+    return NextResponse.json({
+      isFollowing: !!isFollowing,
+      followersCount,
+    });
   } catch (error) {
-    console.error("Error unfollowing:", error);
-    return NextResponse.json({ error: "Failed to unfollow" }, { status: 500 });
+    console.error("Error in follow status API:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,68 +1,46 @@
 // src/app/api/follow/status/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/config/auth";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const targetId = searchParams.get("targetId");
     const session = await getServerSession(authOptions);
-
-    if (!targetId) {
-      return NextResponse.json({ error: "Target ID is required" }, { status: 400 });
+    if (!session?.user?.user_id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Sequential queries with basic error handling
-    let followStatus = null;
-    let followCount = 0;
+    const { searchParams } = new URL(req.url);
+    const brandId = searchParams.get("brandId");
 
-    try {
-      if (session?.user) {
-        followStatus = await prisma.follow.findFirst({
-          where: {
-            follower_id: session.user.user_id,
-            following_name: targetId,
-          },
-          select: { id: true },
-        });
-      }
+    if (!brandId) {
+      return NextResponse.json({ error: "Missing brandId" }, { status: 400 });
+    }
 
-      followCount = await prisma.follow.count({
-        where: {
-          following_name: targetId,
+    const isFollowing = await prisma.follow.findUnique({
+      where: {
+        follower_id_brand_id: {
+          follower_id: session.user.user_id,
+          brand_id: brandId,
         },
-      });
-    } catch (queryError) {
-      console.error("Database query error:", queryError);
-      return NextResponse.json(
-        { error: "Database query failed. Please try again." },
-        { status: 503 }
-      );
-    }
+      },
+    });
+
+    const followersCount = await prisma.follow.count({
+      where: {
+        brand_id: brandId,
+      },
+    });
 
     return NextResponse.json({
-      isFollowing: !!followStatus,
-      followersCount: followCount,
+      isFollowing: !!isFollowing,
+      followersCount,
     });
   } catch (error) {
-    console.error("Error checking follow status:", error);
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P5010") {
-        return NextResponse.json(
-          { error: "Database connection error. Please try again." },
-          { status: 503 }
-        );
-      }
-    }
-
-    return NextResponse.json({ error: "Failed to check follow status" }, { status: 500 });
+    console.error("Error in follow status API:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

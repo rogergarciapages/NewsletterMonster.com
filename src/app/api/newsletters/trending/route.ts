@@ -57,7 +57,6 @@ export async function GET(request: Request) {
           created_at: true,
           products_link: true,
           summary: true,
-          tags: true,
           user_id: true,
         },
       });

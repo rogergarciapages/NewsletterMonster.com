@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "Newsletter" ALTER COLUMN "sender" SET DATA TYPE TEXT,
-ALTER COLUMN "products_link" SET DATA TYPE TEXT,
-ALTER COLUMN "tags" SET DATA TYPE TEXT;

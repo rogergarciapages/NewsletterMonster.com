@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Button } from "@nextui-org/react";
-import { IconEdit } from "@tabler/icons-react";
+import { IconBuildingStore, IconEdit } from "@tabler/icons-react";
 import { getServerSession } from "next-auth/next";
 
 import NewsletterCard from "@/app/components/brand/newsletter/card";
@@ -98,20 +98,9 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
       select: {
         user_id: true,
         name: true,
-        surname: true,
-        company_name: true,
-        username: true,
         email: true,
         profile_photo: true,
         bio: true,
-        website: true,
-        website_domain: true,
-        domain_verified: true,
-        twitter_username: true,
-        instagram_username: true,
-        youtube_channel: true,
-        linkedin_profile: true,
-        role: true,
       },
     });
 
@@ -144,13 +133,30 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
 
     const followersCount = await prisma.follow.count({
       where: {
-        following_id: userId,
+        brand_id: userId,
       },
     });
 
     return {
       newsletters,
-      user: { ...user, domain_verified: user.domain_verified ?? false },
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        surname: "",
+        company_name: user.name,
+        username: user.user_id,
+        email: user.email,
+        profile_photo: user.profile_photo,
+        bio: user.bio,
+        website: null,
+        website_domain: null,
+        domain_verified: false,
+        twitter_username: null,
+        instagram_username: null,
+        youtube_channel: null,
+        linkedin_profile: null,
+        role: "USER",
+      },
       followersCount,
     };
   } catch (error) {
@@ -199,8 +205,32 @@ export default async function UserProfilePage({ params }: { params: { userId: st
     <ThreeColumnLayout>
       <div className="w-full">
         <BrandProfileHeaderWrapper
+          brandId={user.user_id}
           brandName={user.name}
-          user={user}
+          brand={{
+            brand_id: user.user_id,
+            name: user.name,
+            slug: user.username || user.user_id,
+            description: user.bio,
+            website: user.website,
+            domain: user.website_domain,
+            logo: user.profile_photo,
+            is_claimed: user.domain_verified,
+            is_verified: user.domain_verified,
+            created_at: null,
+            updated_at: null,
+            social_links: {
+              user_id: user.user_id,
+              brand_id: user.user_id,
+              id: user.user_id,
+              twitter: user.twitter_username,
+              instagram: user.instagram_username,
+              linkedin: user.linkedin_profile,
+              youtube: user.youtube_channel,
+              github: null,
+              facebook: null,
+            },
+          }}
           newsletterCount={newsletters.length}
           followersCount={followersCount}
           isFollowing={false}
@@ -209,7 +239,7 @@ export default async function UserProfilePage({ params }: { params: { userId: st
         />
 
         {isOwnProfile && (
-          <div className="mx-auto mt-4 max-w-6xl px-4">
+          <div className="mx-auto mt-4 flex max-w-6xl gap-4 px-4">
             <Button
               color="warning"
               variant="solid"
@@ -219,6 +249,16 @@ export default async function UserProfilePage({ params }: { params: { userId: st
               className="w-full sm:w-auto"
             >
               Edit my Profile
+            </Button>
+            <Button
+              color="primary"
+              variant="solid"
+              startContent={<IconBuildingStore size={20} />}
+              href="/brand/create"
+              as="a"
+              className="w-full sm:w-auto"
+            >
+              Create Brand Page
             </Button>
           </div>
         )}

@@ -1,75 +1,75 @@
 // src/app/components/brand/profile/header/follow-button.tsx
 "use client";
 
-import { useFollow } from "@/hooks/use-follow";
-import { Button } from "@nextui-org/react";
-import { IconCheck, IconPlus } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { FollowButtonProps } from "../types";
 
-interface ExtendedFollowButtonProps extends FollowButtonProps {
-  onNeedsLogin: () => void;
-  onCountUpdate: (count: number) => void;
+import { useSession } from "next-auth/react";
+
+import LoginModal from "@/app/components/login-modal";
+
+// src/app/components/brand/profile/header/follow-button.tsx
+
+interface FollowButtonProps {
+  brandId: string;
+  brandName: string;
+  isFollowing: boolean;
 }
 
 export default function FollowButton({
-  targetId,
-  initialIsFollowing = false,
-  onFollowStateChange,
-  onNeedsLogin,
-  onCountUpdate
-}: ExtendedFollowButtonProps) {
+  brandId,
+  brandName,
+  isFollowing: initialIsFollowing,
+}: FollowButtonProps) {
   const { data: session } = useSession();
-  const [isHovering, setIsHovering] = useState(false);
-  
-  const { isFollowing, isLoading, toggleFollow } = useFollow({
-    targetId,
-    initialIsFollowing,
-    onCountUpdate
-  });
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const handleClick = async () => {
+  const handleFollow = async () => {
     if (!session) {
-      onNeedsLogin();
+      setIsLoginModalOpen(true);
       return;
     }
 
-    if (session.user.user_id === targetId) {
-      return;
-    }
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/follow", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          brandId,
+          action: isFollowing ? "unfollow" : "follow",
+        }),
+      });
 
-    const success = await toggleFollow();
-    if (success) {
-      onFollowStateChange?.(!isFollowing);
+      if (response.ok) {
+        setIsFollowing(!isFollowing);
+      } else {
+        console.error("Failed to update follow status");
+      }
+    } catch (error) {
+      console.error("Error updating follow status:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Button
-      isLoading={isLoading}
-      color={isFollowing ? "default" : "primary"}
-      variant={isFollowing ? "bordered" : "solid"}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onClick={handleClick}
-      className="w-[140px] min-w-[140px]"
-      style={{
-        backgroundColor: isFollowing ? "rgba(0, 143, 119, 0.1)" : "#008f77",
-        borderColor: "#008f77",
-        color: isFollowing ? "#008f77" : "white",
-      }}
-      startContent={
-        !isLoading && (
-          isFollowing ? 
-            <IconCheck size={20} /> : 
-            <IconPlus size={20} />
-        )
-      }
-    >
-      {isFollowing 
-        ? (isHovering ? "Unfollow" : "Following") 
-        : "Follow"}
-    </Button>
+    <>
+      <button
+        onClick={handleFollow}
+        disabled={isLoading}
+        className={`rounded-md px-4 py-2 text-sm font-semibold shadow-sm ${
+          isFollowing
+            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        } disabled:cursor-not-allowed disabled:opacity-50`}
+      >
+        {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}
+      </button>
+      <LoginModal isOpen={isLoginModalOpen} onOpenChange={() => setIsLoginModalOpen(false)} />
+    </>
   );
 }

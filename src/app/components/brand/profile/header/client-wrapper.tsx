@@ -2,55 +2,51 @@
 
 import { useState } from "react";
 
-import { BrandProfileProps } from "../types";
+import { Brand, SocialLinks } from "@prisma/client";
+import { useSession } from "next-auth/react";
+
+import LoginModal from "@/app/components/login-modal";
+
 import BrandProfileHeader from "./index";
 
-type BrandProfileWrapperProps = Omit<BrandProfileProps, "onFollowChange"> & {
+interface BrandProfileHeaderWrapperProps {
+  brandId: string;
+  brandName: string;
+  brand: Brand & { social_links: SocialLinks | null };
+  newsletterCount: number;
   followersCount: number;
-  isFollowing?: boolean;
-};
+  isFollowing: boolean;
+  hideFollowButton?: boolean;
+  isOwnProfile?: boolean;
+}
 
 export default function BrandProfileHeaderWrapper({
+  brandId,
   brandName,
-  user,
+  brand,
   newsletterCount,
-  followersCount: initialFollowersCount,
-  isFollowing: initialIsFollowing = false,
+  followersCount,
+  isFollowing,
   hideFollowButton = false,
   isOwnProfile = false,
-  onClaimProfile,
-}: BrandProfileWrapperProps) {
-  const [currentFollowersCount, setFollowersCount] = useState(initialFollowersCount);
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
-
-  const handleFollowChange = async (newState: boolean) => {
-    if (isOwnProfile || (!user?.user_id && !brandName)) return;
-
-    try {
-      const response = await fetch(
-        `/api/follow/count?targetId=${user?.user_id || brandName}&isUnclaimed=${!user?.user_id}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setFollowersCount(data.count);
-        setIsFollowing(newState);
-      }
-    } catch (error) {
-      console.error("Error updating follow count:", error);
-    }
-  };
+}: BrandProfileHeaderWrapperProps) {
+  const { data: session } = useSession();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [localFollowersCount, setLocalFollowersCount] = useState(followersCount);
 
   return (
-    <BrandProfileHeader
-      brandName={brandName}
-      user={user}
-      newsletterCount={newsletterCount}
-      followersCount={currentFollowersCount}
-      isFollowing={isFollowing}
-      onFollowChange={handleFollowChange}
-      onClaimProfile={onClaimProfile}
-      hideFollowButton={hideFollowButton}
-      isOwnProfile={isOwnProfile}
-    />
+    <>
+      <BrandProfileHeader
+        brandId={brandId}
+        brandName={brandName}
+        brand={brand}
+        newsletterCount={newsletterCount}
+        followersCount={localFollowersCount}
+        isFollowing={isFollowing}
+        hideFollowButton={hideFollowButton}
+        isOwnProfile={isOwnProfile}
+      />
+      <LoginModal isOpen={isLoginModalOpen} onOpenChange={() => setIsLoginModalOpen(false)} />
+    </>
   );
 }

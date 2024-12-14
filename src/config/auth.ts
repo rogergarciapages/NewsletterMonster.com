@@ -35,6 +35,14 @@ async function _signInCallback(_req: unknown, user: AuthUser) {
   }
 }
 
+interface GitHubProfile {
+  id: number;
+  email: string | null;
+  name: string | null;
+  login: string;
+  avatar_url: string | null;
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prismaWithoutExtensions),
   providers: [
@@ -44,7 +52,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req): Promise<User | null> {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
@@ -72,7 +80,6 @@ export const authOptions: NextAuthOptions = {
           username: user.username,
           role: user.role,
           emailVerified: user.emailVerified,
-          domain_verified: user.domain_verified,
           status: user.status,
         } as User;
       },
@@ -80,7 +87,7 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      profile(profile: any): User {
+      profile(profile: GitHubProfile): User {
         return {
           id: profile.id.toString(),
           user_id: profile.id.toString(),
@@ -90,7 +97,6 @@ export const authOptions: NextAuthOptions = {
           username: profile.login,
           role: "FREE",
           emailVerified: null,
-          domain_verified: false,
           status: "active",
         } as User;
       },
@@ -111,20 +117,19 @@ export const authOptions: NextAuthOptions = {
           username: null,
           role: "FREE",
           emailVerified: null,
-          domain_verified: false,
           status: "active",
         } as User;
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "github" || account?.provider === "linkedin") {
         try {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
             include: {
-              Account: true,
+              accounts: true,
             },
           });
 
@@ -199,14 +204,13 @@ export const authOptions: NextAuthOptions = {
             profile_photo: user.profile_photo || null,
             role: "FREE",
             status: "active",
-            domain_verified: false,
             updated_at: new Date(),
             last_login: new Date(),
           },
         });
       }
     },
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       if (user.email) {
         await prisma.user.update({
           where: { email: user.email },

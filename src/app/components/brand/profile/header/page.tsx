@@ -15,19 +15,12 @@ async function getBrandData(brandId: string) {
         user_id: true,
         name: true,
         email: true,
-        surname: true,
-        company_name: true,
-        username: true,
         profile_photo: true,
         bio: true,
         website: true,
-        website_domain: true,
-        domain_verified: true,
-        twitter_username: true,
-        instagram_username: true,
-        youtube_channel: true,
-        linkedin_profile: true,
+        emailVerified: true,
         role: true,
+        status: true,
       },
     });
 
@@ -36,11 +29,26 @@ async function getBrandData(brandId: string) {
     });
 
     const followersCount = await prisma.follow.count({
-      where: { following_id: brandId },
+      where: { brand_id: brandId },
     });
 
     return {
-      user: user ? { ...user, domain_verified: user.domain_verified ?? false } : null,
+      user: user
+        ? {
+            brand_id: user.user_id,
+            name: user.name,
+            slug: user.user_id,
+            description: user.bio,
+            website: user.website,
+            domain: null,
+            logo: user.profile_photo,
+            is_claimed: user.emailVerified !== null,
+            is_verified: user.emailVerified !== null,
+            created_at: null,
+            updated_at: null,
+            social_links: null,
+          }
+        : null,
       newsletterCount,
       followersCount,
     };
@@ -60,15 +68,31 @@ export default async function BrandProfilePage({ params }: { params: { brandId: 
   return (
     <ErrorBoundary>
       <Suspense fallback={<Loading />}>
-        <BrandProfileHeaderWrapper
-          brandName={params.brandId}
-          user={user}
-          newsletterCount={newsletterCount}
-          followersCount={followersCount}
-          isFollowing={false}
-          hideFollowButton={false}
-          isOwnProfile={false}
-        />
+        {user && (
+          <BrandProfileHeaderWrapper
+            brandId={params.brandId}
+            brandName={user.name}
+            brand={{
+              brand_id: user.brand_id,
+              name: user.name,
+              slug: user.slug,
+              description: user.description,
+              website: user.website,
+              domain: user.domain,
+              logo: user.logo,
+              is_claimed: user.is_claimed,
+              is_verified: user.is_verified,
+              created_at: user.created_at,
+              updated_at: user.updated_at,
+              social_links: user.social_links,
+            }}
+            newsletterCount={newsletterCount}
+            followersCount={followersCount}
+            isFollowing={false}
+            hideFollowButton={false}
+            isOwnProfile={false}
+          />
+        )}
       </Suspense>
     </ErrorBoundary>
   );
