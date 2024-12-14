@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "next/dist/client/link";
 
 // Fixed import
 import { Chip } from "@nextui-org/chip";

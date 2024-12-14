@@ -1,5 +1,6 @@
 // src/app/components/login-modal.tsx
-import { getPasswordStrength, validateEmail, validatePassword } from "@/lib/validation";
+import { useState } from "react";
+
 import {
   Button,
   Checkbox,
@@ -22,8 +23,9 @@ import {
   IconMail,
 } from "@tabler/icons-react";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
 import { toast } from "sonner";
+
+import { getPasswordStrength, validateEmail, validatePassword } from "@/lib/validation";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -56,19 +58,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
   const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginFormData((prev) => ({ ...prev, [name]: value }));
+    setLoginFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSignupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSignupFormData((prev) => ({ ...prev, [name]: value }));
+    setSignupFormData(prev => ({ ...prev, [name]: value }));
 
     if (name === "password") {
       setPasswordStrength(getPasswordStrength(value));
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, formType: "login" | "signup") => {
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    formType: "login" | "signup"
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (formType === "login") {
@@ -140,12 +145,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
     try {
       setIsLoading(true);
-      
+
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           name: signupFormData.name,
@@ -210,17 +215,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
     });
   };
 
+  const handleSubmit = async (_onClose: () => void) => {
+    // ... existing code ...
+  };
+
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onOpenChange={onOpenChange} 
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       placement="top-center"
       classNames={{
         base: "max-w-md",
       }}
     >
       <ModalContent>
-        {(onClose) => (
+        {onClose => (
           <>
             {!showSignup ? (
               <>
@@ -231,17 +240,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                 <ModalBody>
                   <Input
                     autoFocus
-                    endContent={<IconMail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    endContent={
+                      <IconMail className="pointer-events-none flex-shrink-0 text-2xl text-default-400" />
+                    }
                     label="Email"
                     placeholder="Enter your email"
                     variant="bordered"
                     name="email"
                     value={loginFormData.email}
                     onChange={handleLoginInputChange}
-                    onKeyPress={(e) => handleKeyPress(e, "login")}
+                    onKeyPress={e => handleKeyPress(e, "login")}
                   />
                   <Input
-                    endContent={<IconLock className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
+                    endContent={
+                      <IconLock className="pointer-events-none flex-shrink-0 text-2xl text-default-400" />
+                    }
                     label="Password"
                     placeholder="Enter your password"
                     type="password"
@@ -249,9 +262,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                     name="password"
                     value={loginFormData.password}
                     onChange={handleLoginInputChange}
-                    onKeyPress={(e) => handleKeyPress(e, "login")}
+                    onKeyPress={e => handleKeyPress(e, "login")}
                   />
-                  <div className="flex py-2 px-1 justify-between">
+                  <div className="flex justify-between px-1 py-2">
                     <Checkbox
                       isSelected={rememberMe}
                       onValueChange={setRememberMe}
@@ -287,7 +300,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                   <Button
                     onClick={() => handleOAuthSignIn("github")}
                     startContent={<IconBrandGithub />}
-                    className="w-full bg-[#4078c0] text-white mt-2"
+                    className="mt-2 w-full bg-[#4078c0] text-white"
                     isLoading={isLoading}
                   >
                     Continue with GitHub
@@ -295,7 +308,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                   <Button
                     onClick={() => handleOAuthSignIn("discord")}
                     startContent={<IconBrandDiscord />}
-                    className="w-full bg-[#5865F2] text-white mt-2"
+                    className="mt-2 w-full bg-[#5865F2] text-white"
                     isLoading={isLoading}
                   >
                     Continue with Discord
@@ -303,7 +316,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                   <Button
                     onClick={() => handleOAuthSignIn("linkedin")}
                     startContent={<IconBrandLinkedin />}
-                    className="w-full bg-[#0A66C2] text-white mt-2"
+                    className="mt-2 w-full bg-[#0A66C2] text-white"
                     isLoading={isLoading}
                   >
                     Continue with LinkedIn
@@ -372,13 +385,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                           passwordStrength.score < 2
                             ? "danger"
                             : passwordStrength.score < 4
-                            ? "warning"
-                            : "success"
+                              ? "warning"
+                              : "success"
                         }
                       />
-                      <p className="text-sm text-default-500 mt-1">
-                        {passwordStrength.feedback}
-                      </p>
+                      <p className="mt-1 text-sm text-default-500">{passwordStrength.feedback}</p>
                     </div>
                   )}
                   <Input
@@ -405,15 +416,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                     color="danger"
                     variant="light"
                     onPress={() => handleSwitchMode(false)}
-                    className="w-full mt-2"
+                    className="mt-2 w-full"
                   >
                     Back to login
                   </Button>
                   <div className="mt-4 text-center text-small text-default-500">
                     <p>
                       By clicking "Create account", you agree to our{" "}
-                      <Link href="#" size="sm">Terms of Service</Link> and{" "}
-                      <Link href="#" size="sm">Privacy Policy</Link>.
+                      <Link href="#" size="sm">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="#" size="sm">
+                        Privacy Policy
+                      </Link>
+                      .
                     </p>
                   </div>
                 </ModalFooter>

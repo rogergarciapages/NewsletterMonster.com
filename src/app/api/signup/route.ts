@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import bcrypt from "bcryptjs";
 
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 
 const validateEmail = (email: string) => {
   const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;

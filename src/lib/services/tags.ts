@@ -1,6 +1,5 @@
+import { prisma } from "@/lib/prisma";
 import type { Newsletter, Tag, TagWithNewsletters } from "@/types/newsletter";
-
-import { prisma } from "../prisma-client";
 
 export async function getTagBySlug(slug: string): Promise<Tag | null> {
   const tag = await prisma.tag.findUnique({

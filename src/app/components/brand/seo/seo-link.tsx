@@ -1,9 +1,13 @@
 // src/app/components/brand/seo/seo-link.tsx
+"use client";
+
 import type { Route } from "next";
-import Link from "next/link";
+import Link from "next/dist/client/link";
 import { ComponentProps, PropsWithChildren } from "react";
 
 import { UrlObject } from "url";
+
+// src/app/components/brand/seo/seo-link.tsx
 
 type Url = UrlObject | Route;
 

@@ -1,7 +1,6 @@
 // src/lib/services/user.ts
 import { BrandUser } from "@/app/components/brand/profile/types";
-
-import { prisma } from "../prisma-client";
+import { prisma } from "@/lib/prisma";
 
 export interface UserProfileData {
   user: BrandUser;

@@ -1,12 +1,11 @@
 // src/app/api/users/[userId]/route.ts
-import { prisma } from "@/lib/prisma-client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { userId: string } }
-) {
+import { getServerSession } from "next-auth";
+
+import { prisma } from "@/lib/prisma";
+
+export async function GET(request: Request, { params }: { params: { userId: string } }) {
   try {
     const session = await getServerSession();
     if (!session?.user?.email) {
@@ -29,7 +28,7 @@ export async function GET(
         youtube_channel: true,
         linkedin_profile: true,
         profile_photo: true,
-      }
+      },
     });
 
     if (!user) {

@@ -13,8 +13,8 @@ import {
 } from "@tabler/icons-react";
 
 type EmailToolbarProps = {
-  onShare?: () => void;
-  onPrint?: () => void;
+  _onShare?: () => void;
+  _onPrint?: () => void;
   onArchive?: () => void;
   onDelete?: () => void;
   onBookmark?: () => void;
@@ -27,8 +27,8 @@ type EmailToolbarProps = {
 };
 
 export default function EmailToolbar({
-  onShare,
-  onPrint,
+  _onShare,
+  _onPrint,
   onArchive,
   onDelete,
   onBookmark,

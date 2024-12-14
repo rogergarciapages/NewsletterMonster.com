@@ -15,6 +15,12 @@ import ProfileInfo from "./profile-info";
 
 // src/app/components/brand/profile/header/index.tsx
 
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
 function getBrandDomain(brandName: string): string {
   const cleanName = brandName.toLowerCase().replace(/[^a-z0-9]/g, "");
   return `${cleanName}.com`;
@@ -26,8 +32,6 @@ export default function BrandProfileHeader({
   newsletterCount,
   followersCount,
   isFollowing,
-  onFollowChange,
-  onClaimProfile,
   hideFollowButton,
   isOwnProfile,
 }: BrandProfileProps) {
@@ -61,8 +65,8 @@ export default function BrandProfileHeader({
                     targetId={user?.user_id || brandName}
                     isUnclaimed={!user}
                     initialIsFollowing={isFollowing}
-                    onFollowStateChange={newState => {
-                      onFollowChange?.(newState);
+                    onFollowStateChange={_newState => {
+                      // Future implementation
                     }}
                     onNeedsLogin={() => setIsLoginModalOpen(true)}
                     onCountUpdate={count => {

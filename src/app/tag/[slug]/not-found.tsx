@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import NextLink from "next/dist/client/link";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 
@@ -10,12 +12,12 @@ export default function TagNotFound() {
         <p className="mb-8 text-gray-600">
           The tag you're looking for doesn't exist or has been removed.
         </p>
-        <Link
+        <NextLink
           href="/trending"
           className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
         >
           Browse Trending Newsletters
-        </Link>
+        </NextLink>
       </div>
     </ThreeColumnLayout>
   );

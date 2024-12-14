@@ -1,13 +1,15 @@
 // components/brand-newsletter-list.tsx
 "use client";
 
-import Link from "next/link";
+import Link from "next/dist/client/link";
 
 import { formatDistanceToNow } from "date-fns";
 
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+
+// components/brand-newsletter-list.tsx
 
 // components/brand-newsletter-list.tsx
 

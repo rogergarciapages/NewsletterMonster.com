@@ -1,20 +1,21 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { AvatarIcon, Avatar as NextAvatar } from "@nextui-org/react"; // Correct import from NextUI
+// Correct import from NextUI
 import * as React from "react";
+
+import { AvatarIcon, Avatar as NextAvatar } from "@nextui-org/react";
+
+import { cn } from "@/lib/utils";
 
 type AvatarProps = React.ComponentPropsWithoutRef<typeof NextAvatar>;
 
-const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
-  ({ className, ...props }, ref) => (
-    <NextAvatar
-      ref={ref}
-      className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
-      {...props}
-    />
-  )
-);
+const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(({ className, ...props }, ref) => (
+  <NextAvatar
+    ref={ref}
+    className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
+    {...props}
+  />
+));
 
 Avatar.displayName = "Avatar";
 
@@ -23,6 +24,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarProps>(
     <img
       ref={ref}
       className={cn("aspect-square h-full w-full", className)}
+      alt="User avatar"
       {...props}
     />
   )
@@ -34,7 +36,10 @@ const AvatarFallback = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex h-full w-full items-center justify-center rounded-full bg-muted", className)}
+      className={cn(
+        "flex h-full w-full items-center justify-center rounded-full bg-muted",
+        className
+      )}
       {...props}
     >
       <AvatarIcon />
@@ -45,4 +50,3 @@ const AvatarFallback = React.forwardRef<HTMLDivElement, AvatarProps>(
 AvatarFallback.displayName = "AvatarFallback";
 
 export { Avatar, AvatarFallback, AvatarImage };
-

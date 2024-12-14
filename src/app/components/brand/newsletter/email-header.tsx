@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import Link from "next/dist/client/link";
 
 import { Button, Tooltip } from "@nextui-org/react";
 import { IconMail, IconMailForward, IconStar } from "@tabler/icons-react";

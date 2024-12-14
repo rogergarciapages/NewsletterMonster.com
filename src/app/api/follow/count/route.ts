@@ -1,6 +1,7 @@
 // src/app/api/follow/count/route.ts
-import { prisma } from "@/lib/prisma-client";
 import { NextResponse } from "next/server";
+
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function GET(req: Request) {
     const count = await prisma.follow.count({
       where: {
         following_name: targetId, // Use following_name for brand names
-      }
+      },
     });
 
     return NextResponse.json({ count });

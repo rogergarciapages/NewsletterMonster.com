@@ -1,15 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@nextui-org/react";
 import { IconPlus } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/assets/avatar";
 import { useMediaQuery } from "@/hooks/use-media-query";
-
-import FollowButton from "./follow-button";
 
 interface SuggestedUser {
   id: string;
@@ -48,10 +45,6 @@ export default function WhoToFollow() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isLarge = useMediaQuery("(min-width: 1024px)");
 
-  useEffect(() => {
-    setActiveUser(null);
-  }, [isMobile]);
-
   const handleUserInteraction = (userId: string | null) => {
     if (isMobile) {
       setActiveUser(activeUser === userId ? null : userId);
@@ -72,11 +65,7 @@ export default function WhoToFollow() {
             onMouseLeave={() => !isMobile && handleUserInteraction(null)}
             onClick={() => isMobile && handleUserInteraction(user.id)}
           >
-            <Link
-              href={`/user/${user.username}`}
-              className="flex items-center gap-2"
-              onClick={(e: React.MouseEvent) => isMobile && e.preventDefault()}
-            >
+            <div className="flex items-center gap-2">
               <Avatar className="h-10 w-10 flex-shrink-0">
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -85,12 +74,10 @@ export default function WhoToFollow() {
                 <div className="truncate font-medium">{user.name}</div>
                 <div className="truncate text-sm text-muted-foreground">@{user.username}</div>
               </div>
-              {isMobile && (
-                <Button isIconOnly variant="ghost" size="sm" className="ml-auto">
-                  <IconPlus className="h-4 w-4" />
-                </Button>
-              )}
-            </Link>
+              <Button isIconOnly variant="ghost" size="sm" className="ml-auto">
+                <IconPlus className="h-4 w-4" />
+              </Button>
+            </div>
             {!isMobile && (
               <div
                 className={`absolute inset-0 flex items-center justify-center bg-background/80 transition-opacity ${
@@ -98,10 +85,13 @@ export default function WhoToFollow() {
                 }`}
               >
                 <div className={isLarge ? "w-full px-2" : "w-[90%]"}>
-                  <FollowButton
-                    targetId={user.username}
+                  <Button
                     className={isLarge ? "w-full" : undefined}
-                  />
+                    variant="solid"
+                    color="primary"
+                  >
+                    Follow
+                  </Button>
                 </div>
               </div>
             )}

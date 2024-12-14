@@ -1,5 +1,6 @@
 // src/config/auth.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { User } from "next-auth";
 import { NextAuthOptions } from "next-auth";
@@ -7,10 +8,35 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
+
+// Initialize PrismaAdapter with raw PrismaClient
+const prismaWithoutExtensions = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
+  log: ["error", "warn"],
+});
+
+interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+async function _signInCallback(_req: unknown, user: AuthUser) {
+  if (user.email) {
+    await prisma.user.update({
+      where: { email: user.email },
+      data: {
+        last_login: new Date(),
+        updated_at: new Date(),
+        status: "active",
+      },
+    });
+  }
+}
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prismaWithoutExtensions),
   providers: [
     CredentialsProvider({
       name: "credentials",

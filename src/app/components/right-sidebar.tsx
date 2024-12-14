@@ -1,9 +1,13 @@
 // src/app/components/right-sidebar.tsx
-import Link from "next/link";
+"use client";
+
+import NextLink from "next/dist/client/link";
 
 import PopularTags from "@/app/components/tags/popular-tags";
 
 import WhoToFollow from "./who-to-follow";
+
+// src/app/components/right-sidebar.tsx
 
 const RightSidebar = () => {
   return (
@@ -15,33 +19,33 @@ const RightSidebar = () => {
           <h3 className="text-lg font-bold">Trends for you</h3>
           <div className="mt-4 grid gap-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Link
+              <NextLink
                 href="#"
                 className="rounded-md bg-primary/80 px-2 py-1 text-sm text-accent-foreground transition-colors hover:bg-primary"
                 prefetch={false}
               >
                 #coding
-              </Link>
+              </NextLink>
               <div className="truncate text-sm text-muted-foreground">Trending in Technology</div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link
+              <NextLink
                 href="#"
                 className="rounded-md bg-primary px-2 py-1 text-sm text-accent-foreground"
                 prefetch={false}
               >
                 #foodie
-              </Link>
+              </NextLink>
               <div className="truncate text-sm text-muted-foreground">Trending in Lifestyle</div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link
+              <NextLink
                 href="#"
                 className="rounded-md bg-primary px-2 py-1 text-sm text-accent-foreground"
                 prefetch={false}
               >
                 #travel
-              </Link>
+              </NextLink>
               <div className="truncate text-sm text-muted-foreground">Trending in Travel</div>
             </div>
           </div>

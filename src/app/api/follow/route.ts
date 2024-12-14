@@ -1,8 +1,10 @@
 // src/app/api/follow/route.ts
-import authOptions from "@/config/auth";
-import { prisma } from "@/lib/prisma-client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
+import { getServerSession } from "next-auth";
+
+import authOptions from "@/config/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +23,7 @@ export async function POST(req: Request) {
       where: {
         follower_id: session.user.user_id,
         following_name: targetId,
-      }
+      },
     });
 
     if (existingFollow) {
@@ -33,14 +35,14 @@ export async function POST(req: Request) {
       data: {
         follower_id: session.user.user_id,
         following_name: targetId,
-      }
+      },
     });
 
     // Get updated count
     const count = await prisma.follow.count({
       where: {
         following_name: targetId,
-      }
+      },
     });
 
     return NextResponse.json({ success: true, count });
@@ -67,7 +69,7 @@ export async function DELETE(req: Request) {
       where: {
         follower_id: session.user.user_id,
         following_name: targetId,
-      }
+      },
     });
 
     if (result.count === 0) {
@@ -78,7 +80,7 @@ export async function DELETE(req: Request) {
     const count = await prisma.follow.count({
       where: {
         following_name: targetId,
-      }
+      },
     });
 
     return NextResponse.json({ success: true, count });

@@ -1,8 +1,10 @@
 // src/app/api/follow/check/route.ts
-import authOptions from "@/config/auth";
-import { prisma } from "@/lib/prisma-client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
+import { getServerSession } from "next-auth";
+
+import authOptions from "@/config/auth";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +27,7 @@ export async function GET(req: Request) {
       where: {
         follower_id: session.user.user_id,
         following_name: targetId, // Use following_name for brand names
-      }
+      },
     });
 
     return NextResponse.json({ isFollowing: !!follow });

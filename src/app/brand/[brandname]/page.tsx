@@ -10,7 +10,7 @@ import {
   generateBrandMetadata,
 } from "@/app/components/brand/seo/brand-page-seo";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 
 interface BrandData {
   newsletters: Newsletter[];
@@ -107,7 +107,9 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
 
     return {
       newsletters,
-      user: verifiedUser || defaultUser,
+      user: verifiedUser
+        ? { ...verifiedUser, domain_verified: verifiedUser.domain_verified ?? false }
+        : defaultUser,
       followersCount,
     };
   } catch (error) {

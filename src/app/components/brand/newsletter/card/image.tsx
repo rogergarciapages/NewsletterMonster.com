@@ -1,11 +1,13 @@
 // src/app/components/brand/newsletter/card/image.tsx
 "use client";
 
+import Link from "next/dist/client/link";
 import Image from "next/image";
-import Link from "next/link";
 import { memo } from "react";
 
 import { IconMailOpened } from "@tabler/icons-react";
+
+// src/app/components/brand/newsletter/card/image.tsx
 
 // src/app/components/brand/newsletter/card/image.tsx
 

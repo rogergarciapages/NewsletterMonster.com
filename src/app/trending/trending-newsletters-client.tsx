@@ -7,11 +7,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@nextui-org/react";
 import axios from "axios";
 
-import { Newsletter } from "../components/brand/newsletter/types";
-import ThreeColumnLayout from "../components/layouts/three-column-layout";
-import { NewsletterCard } from "../components/newsletters/newsletter-card";
-import { NewsletterCardSkeleton } from "../components/skeleton/newsletter-card-skeleton";
-import { TrendingPageSkeleton } from "../components/skeleton/trending-page-skeleton";
+import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";
+import { NewsletterCardSkeleton } from "@/app/components/skeleton/newsletter-card-skeleton";
+import { TrendingPageSkeleton } from "@/app/components/skeleton/trending-page-skeleton";
+import { Newsletter } from "@/types/newsletter";
 
 // src/app/trending/trending-newsletters-client.tsx
 

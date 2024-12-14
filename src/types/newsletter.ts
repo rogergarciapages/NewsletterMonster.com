@@ -18,7 +18,7 @@ export interface Tag {
   id: number;
   name: string;
   slug: string;
-  count: number;
+  count: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

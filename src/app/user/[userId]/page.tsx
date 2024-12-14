@@ -13,7 +13,7 @@ import { BrandUser } from "@/app/components/brand/profile/types";
 import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/config/auth";
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
 
 export const revalidate = 0;
@@ -150,7 +150,7 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
 
     return {
       newsletters,
-      user,
+      user: { ...user, domain_verified: user.domain_verified ?? false },
       followersCount,
     };
   } catch (error) {

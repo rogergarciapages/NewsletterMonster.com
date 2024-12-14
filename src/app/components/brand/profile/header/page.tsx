@@ -1,7 +1,7 @@
 // src/app/components/brand/profile/header/page.tsx
 import { Suspense } from "react";
 
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 
 import BrandProfileHeaderWrapper from "./client-wrapper";
 import { ErrorBoundary } from "./error-boundary";
@@ -40,7 +40,7 @@ async function getBrandData(brandId: string) {
     });
 
     return {
-      user,
+      user: user ? { ...user, domain_verified: user.domain_verified ?? false } : null,
       newsletterCount,
       followersCount,
     };

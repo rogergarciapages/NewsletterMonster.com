@@ -7,7 +7,7 @@ import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
 import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 
 import {
   NewsletterStructuredData,

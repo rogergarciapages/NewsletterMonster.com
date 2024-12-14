@@ -28,7 +28,7 @@ export default function TagNewslettersClient({ tag }: TagNewslettersClientProps)
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
-  const router = useRouter();
+  const _router = useRouter();
 
   const lastNewsletterRef = useCallback(
     (node: HTMLDivElement) => {

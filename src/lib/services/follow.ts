@@ -1,5 +1,5 @@
 // Create new file: src/lib/services/follow.ts
-import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma";
 
 export class FollowService {
   static async checkFollowStatus(followerId: string, targetId: string, isUnclaimed: boolean) {
@@ -9,9 +9,9 @@ export class FollowService {
           follower_id: followerId,
           OR: [
             { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined }
-          ]
-        }
+            { following_name: isUnclaimed ? targetId : undefined },
+          ],
+        },
       });
       return !!follow;
     } catch (error) {
@@ -26,8 +26,8 @@ export class FollowService {
         where: {
           OR: [
             { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined }
-          ]
+            { following_name: isUnclaimed ? targetId : undefined },
+          ],
         },
       });
       return count;
@@ -42,10 +42,8 @@ export class FollowService {
       const follow = await prisma.follow.create({
         data: {
           follower_id: followerId,
-          ...(isUnclaimed
-            ? { following_name: targetId }
-            : { following_id: targetId })
-        }
+          ...(isUnclaimed ? { following_name: targetId } : { following_id: targetId }),
+        },
       });
       return follow;
     } catch (error) {
@@ -61,9 +59,9 @@ export class FollowService {
           follower_id: followerId,
           OR: [
             { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined }
-          ]
-        }
+            { following_name: isUnclaimed ? targetId : undefined },
+          ],
+        },
       });
       return result.count > 0;
     } catch (error) {

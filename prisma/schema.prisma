@@ -1,20 +1,22 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DATABASE_URL_POOLED")
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
 }
 
 model Account {
   id                Int     @id @default(autoincrement())
-  userId            String  @db.Uuid 
+  userId            String  @db.Uuid
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? 
+  refresh_token     String?
   access_token      String?
   expires_at        Int?
   token_type        String?
@@ -53,22 +55,22 @@ model Comment {
   id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content     String
   user_id     String        @db.Uuid
-  post_id     Int 
   created_at  DateTime?     @default(now()) @db.Timestamp(6)
   updated_at  DateTime?     @default(now()) @db.Timestamp(6)
-  User        User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  CommentLike CommentLike[]
   parent_id   String?       @db.Uuid
+  post_id     Int
   parent      Comment?      @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
   replies     Comment[]     @relation("CommentReplies")
+  User        User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  CommentLike CommentLike[]
 }
 
 model CommentLike {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   comment_id String    @db.Uuid
   user_id    String    @db.Uuid
-  like_type  String 
   created_at DateTime? @default(now()) @db.Timestamp(6)
+  like_type  String
   Comment    Comment   @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   User       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
@@ -82,13 +84,13 @@ model Favorite {
 }
 
 model Follow {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  follower_id    String   @db.Uuid
-  following_id   String?  @db.Uuid
+  id           Int       @id @default(autoincrement())
+  follower_id  String    @db.Uuid
+  following_id String?   @db.Uuid
   following_name String?
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  follower       User     @relation("UserFollows", fields: [follower_id], references: [user_id], onDelete: Cascade)
-  following      User?    @relation("UserFollowers", fields: [following_id], references: [user_id], onDelete: Cascade)
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  follower     User      @relation("UserFollows", fields: [follower_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  following    User?     @relation("UserFollowers", fields: [following_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([follower_id, following_id])
   @@unique([follower_id, following_name])
@@ -106,18 +108,18 @@ model Like {
 model Newsletter {
   newsletter_id       Int             @id @default(autoincrement())
   user_id             String?         @db.Uuid
-  sender              String?         @db.Text
+  sender              String?
   date                DateTime?       @default(now()) @db.Timestamp(6)
-  subject             String?         @db.Text
-  html_file_url       String?         @db.Text
-  full_screenshot_url String?         @db.Text
-  top_screenshot_url  String?         @db.Text
+  html_file_url       String?
+  full_screenshot_url String?
+  top_screenshot_url  String?
   likes_count         Int?            @default(0)
   you_rocks_count     Int?            @default(0)
   created_at          DateTime?       @default(now()) @db.Timestamp(6)
-  products_link       String?         @db.Text
-  summary             String?         @db.Text
-  tags                String?         @db.Text
+  subject             String?
+  products_link       String?
+  summary             String?
+  tags                String?
   Like                Like[]
   User                User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
   NewsletterTag       NewsletterTag[]
@@ -135,48 +137,50 @@ model Post {
 }
 
 model User {
-  user_id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String        @db.VarChar(255)
-  surname            String?       @db.VarChar(255)
-  company_name       String?       @db.VarChar(255)
-  username           String?       @unique @db.VarChar(255)
-  email              String        @unique
-  profile_photo      String?
-  password           String?
-  created_at         DateTime?     @default(now()) @db.Timestamp(6)
-  role               String        @default("FREE") @db.VarChar
-  full_name          String?       @db.VarChar(255)
-  bio                String?       @db.Text
-  website            String?       @db.Text
-  location           String?       @db.VarChar(255)
-  date_of_birth      DateTime?     @db.Date
-  updated_at         DateTime?     @default(now()) @db.Timestamp(6)
-  status             String?       @default("active") @db.VarChar(255)
-  last_login         DateTime?     @db.Timestamp(6)
-  emailVerified      DateTime?     @db.Timestamp(6)
-  twitter_username   String?       @db.VarChar(255)
-  instagram_username String?       @db.VarChar(255)
-  youtube_channel    String?       @db.Text
-  linkedin_profile   String?       @db.Text
-  provider           String?       @db.VarChar(255)
-  website_domain     String?       @db.VarChar(255)
-  facebook_url      String?       @db.Text
-  domain_verified   Boolean       @default(false)
-  verification_token String?      @db.VarChar(255)
-  verification_sent DateTime?     @db.Timestamp(6)
-  Account            Account[]
-  Session            Session[]
-  Bookmark           Bookmark[]
-  Comment            Comment[]
-  CommentLike        CommentLike[]
-  Favorite           Favorite[]
-  Like               Like[]
-  Newsletter         Newsletter[]
-  Post               Post[]
-  UserTag            UserTag[]
-  YouRocks           YouRock[]
-  followers          Follow[]      @relation("UserFollowers")
-  following          Follow[]      @relation("UserFollows")
+  user_id                             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                String        @db.VarChar(255)
+  surname                             String?       @db.VarChar(255)
+  company_name                        String?       @db.VarChar(255)
+  username                            String?       @unique @db.VarChar(255)
+  email                               String        @unique
+  profile_photo                       String?
+  password                            String?
+  created_at                          DateTime?     @default(now()) @db.Timestamp(6)
+  role                                String        @default("FREE") @db.VarChar
+  full_name                           String?       @db.VarChar(255)
+  bio                                 String?
+  website                             String?
+  location                            String?       @db.VarChar(255)
+  date_of_birth                       DateTime?     @db.Date
+  updated_at                          DateTime?     @default(now()) @db.Timestamp(6)
+  status                              String?       @default("active") @db.VarChar(255)
+  last_login                          DateTime?     @db.Timestamp(6)
+  instagram_username                  String?       @db.VarChar(255)
+  twitter_username                    String?       @db.VarChar(255)
+  emailVerified                       DateTime?     @db.Timestamp(6)
+  youtube_channel                     String?
+  linkedin_profile                    String?
+  provider                            String?       @db.VarChar(255)
+  facebook_url                        String?
+  website_domain                      String?       @db.VarChar(255)
+  domain_verified                     Boolean?      @default(false)
+  verification_token                  String?       @db.VarChar(255)
+  verification_sent                   DateTime?     @db.Timestamp(6)
+  Account                             Account[]
+  Bookmark                            Bookmark[]
+  Comment                             Comment[]
+  CommentLike                         CommentLike[]
+  Favorite                            Favorite[]
+  following                           Follow[]      @relation("UserFollows")
+  followers                           Follow[]      @relation("UserFollowers")
+  Follower_Follower_follower_idToUser Follower[]    @relation("Follower_follower_idToUser")
+  Follower_Follower_user_idToUser     Follower[]    @relation("Follower_user_idToUser")
+  Like                                Like[]
+  Newsletter                          Newsletter[]
+  Post                                Post[]
+  Session                             Session[]
+  UserTag                             UserTag[]
+  YouRocks                            YouRock[]
 }
 
 model UserTag {
@@ -191,18 +195,18 @@ model UserTag {
 model YouRock {
   yourock_id        Int       @id @default(autoincrement())
   user_id           String?   @db.Uuid
-  yourocked_item_id Int
   created_at        DateTime? @default(now()) @db.Timestamp(6)
+  yourocked_item_id Int
   User              User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model NewsletterTag {
   newsletter_id Int
   tag_id        Int
+  userTagTag_id Int?
   Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
   Tag           Tag        @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   UserTag       UserTag?   @relation(fields: [userTagTag_id], references: [tag_id])
-  userTagTag_id Int?
 
   @@id([newsletter_id, tag_id])
 }
@@ -219,9 +223,17 @@ model PostTag {
 model Tag {
   id          Int             @id @default(autoincrement())
   name        String          @unique
-  slug        String          @unique    
-  count       Int             @default(0)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @default(now())
+  slug        String          @unique
+  count       Int?            @default(0)
   Newsletters NewsletterTag[]
+}
+
+model Follower {
+  id                              Int    @id @default(autoincrement())
+  user_id                         String @db.Uuid
+  follower_id                     String @db.Uuid
+  User_Follower_follower_idToUser User   @relation("Follower_follower_idToUser", fields: [follower_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  User_Follower_user_idToUser     User   @relation("Follower_user_idToUser", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }

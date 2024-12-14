@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma-client";
+import { prisma } from "../lib/prisma";
 import adjectives from "./adjectives.json";
 import nouns from "./nouns.json";
 
@@ -7,7 +7,8 @@ export async function generateUniqueUsername(): Promise<string> {
   let username = "";
 
   while (!unique) {
-    const randomAdjective = adjectives.adjectives[Math.floor(Math.random() * adjectives.adjectives.length)];
+    const randomAdjective =
+      adjectives.adjectives[Math.floor(Math.random() * adjectives.adjectives.length)];
     const randomNoun = nouns.nouns[Math.floor(Math.random() * nouns.nouns.length)];
     username = `${randomAdjective}${randomNoun}`;
 

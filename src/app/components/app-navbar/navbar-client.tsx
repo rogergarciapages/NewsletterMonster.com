@@ -1,20 +1,22 @@
 // src/app/components/app-navbar/navbar-client.tsx
 "use client";
 
+import Link from "next/dist/client/link";
+import { memo, useCallback, useEffect, useState } from "react";
+
 import {
-    Link,
-    Navbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarItem,
-    NavbarMenu,
-    NavbarMenuItem,
-    NavbarMenuToggle,
-    useDisclosure,
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
+  Link as NextUILink,
+  useDisclosure,
 } from "@nextui-org/react";
 import { useTheme } from "next-themes";
-import NextLink from "next/link";
-import { memo, useCallback, useEffect, useState } from "react";
+
 import LoginModal from "../login-modal";
 import AuthButton from "./auth-button";
 import { MENU_ITEMS } from "./constants";
@@ -22,9 +24,15 @@ import LogoNewsletterMonsterdark from "./logo-newsletter-monster-dark";
 import LogoNewsletterMonsterlight from "./logo-newsletter-monster-light";
 import { ThemeSwitcher } from "./theme-switcher";
 
+// src/app/components/app-navbar/navbar-client.tsx
+
 const NavbarClient = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isOpen: isLoginModalOpen, onOpen: onLoginModalOpen, onOpenChange: onLoginModalOpenChange } = useDisclosure();
+  const {
+    isOpen: isLoginModalOpen,
+    onOpen: onLoginModalOpen,
+    onOpenChange: onLoginModalOpenChange,
+  } = useDisclosure();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -42,7 +50,7 @@ const NavbarClient = memo(() => {
 
   return (
     <>
-      <Navbar 
+      <Navbar
         onMenuOpenChange={handleMenuOpenChange}
         classNames={{
           base: "z-50",
@@ -54,28 +62,24 @@ const NavbarClient = memo(() => {
             className="sm:hidden"
           />
           <NavbarBrand>
-            <NextLink href="/" className="cursor-pointer">
+            <Link href="/" className="cursor-pointer">
               <div className={logoClassName}>
-                {(!mounted || resolvedTheme === "dark") ? (
+                {!mounted || resolvedTheme === "dark" ? (
                   <LogoNewsletterMonsterdark aria-label="NewsletterMonster Logo Dark Theme - Home" />
                 ) : (
                   <LogoNewsletterMonsterlight aria-label="NewsletterMonster Logo Light Theme - Home" />
                 )}
               </div>
-            </NextLink>
+            </Link>
           </NavbarBrand>
         </NavbarContent>
 
         <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-          {MENU_ITEMS.map((item) => (
+          {MENU_ITEMS.map(item => (
             <NavbarItem key={item.label}>
-              <Link 
-                className={itemClassName}
-                href={item.href} 
-                size="md"
-              >
+              <NextUILink className={itemClassName} href={item.href} size="md">
                 {item.label}
-              </Link>
+              </NextUILink>
             </NavbarItem>
           ))}
           <NavbarItem>
@@ -94,11 +98,11 @@ const NavbarClient = memo(() => {
           <NavbarMenuItem>
             <ThemeSwitcher showLabel />
           </NavbarMenuItem>
-          {MENU_ITEMS.map((item) => (
+          {MENU_ITEMS.map(item => (
             <NavbarMenuItem key={item.label}>
-              <Link className="w-full" href={item.href} size="lg">
+              <NextUILink className="w-full" href={item.href} size="lg">
                 {item.label}
-              </Link>
+              </NextUILink>
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem>

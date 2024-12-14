@@ -1,5 +1,6 @@
-// src/app/[brandname]/not-found.tsx
-import Link from "next/link";
+"use client";
+
+import Link from "next/dist/client/link";
 
 export default function NotFound() {
   return (

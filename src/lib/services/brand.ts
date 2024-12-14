@@ -1,4 +1,4 @@
-import { prisma } from "../prisma-client";
+import { prisma } from "@/lib/prisma";
 
 interface Newsletter {
   newsletter_id: number;
@@ -50,22 +50,22 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
           follower_id: true,
         },
         where: {
-          following_id: { not: null } // Only count claimed profile follows
-        }
+          following_id: { not: null }, // Only count claimed profile follows
+        },
       },
       following: {
         select: {
           following_id: true,
           following_name: true,
-        }
+        },
       },
       _count: {
         select: {
           followers: true,
-          following: true
-        }
-      }
-    }
+          following: true,
+        },
+      },
+    },
   });
 
   if (!user) return null;
@@ -86,6 +86,6 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
     linkedin_profile: user.linkedin_profile,
     newsletters: user.Newsletter,
     followers_count: followersCount,
-    following_count: followingCount
+    following_count: followingCount,
   };
 }

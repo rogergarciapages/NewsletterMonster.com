@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/dist/client/link";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 
 import { MotionValue, motion, useScroll, useSpring, useTransform } from "framer-motion";
@@ -12,19 +12,27 @@ interface Product {
   thumbnail: string;
 }
 
-const SafeLink = ({ href, ...props }: { href: string } & any) => (
-  <Link href={href as any} {...props} />
-);
+interface SafeLinkProps {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}
 
-export const HeroParallax = ({
-  products,
-}: {
-  products: {
+interface HeroParallaxProps {
+  products: Array<{
     title: string;
     link: string;
     thumbnail: string;
-  }[];
-}) => {
+  }>;
+}
+
+const _SafeLink = ({ href, children, className }: SafeLinkProps) => (
+  <Link href={href} className={className}>
+    {children}
+  </Link>
+);
+
+export const HeroParallax = ({ products }: HeroParallaxProps) => {
   const firstRow = products.slice(0, 5);
   const secondRow = products.slice(5, 10);
   const thirdRow = products.slice(10, 15);

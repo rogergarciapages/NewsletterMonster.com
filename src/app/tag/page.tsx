@@ -1,50 +1,8 @@
-/* eslint-disable react/jsx-no-undef */
-// src/app/tag/page.tsx
-import Link from "next/link";
-
-import { Chip } from "@nextui-org/chip";
-
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { getTopTags } from "@/lib/services/tag-service";
 import type { TagWithNewsletters } from "@/types/newsletter";
 
-import { NewsletterGrid } from "../components/tags/tag-grid";
-
-function _NewsletterGridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <_NewsletterGridSkeleton key={i} />
-      ))}
-    </div>
-  );
-}
-
-function TagSection({ tag }: { tag: TagWithNewsletters }) {
-  return (
-    <section className="border-b border-gray-200 pb-12 last:border-0">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{tag.name}</h2>
-        <Link href={`/tag/${encodeURIComponent(tag.slug)}`}>
-          <Chip variant="solid" color="warning" className="cursor-pointer">
-            {tag.count} Newsletters
-          </Chip>
-        </Link>
-      </div>
-
-      <NewsletterGrid newsletters={tag.Newsletters.map(nt => nt.Newsletter)} />
-
-      <div className="mt-6 text-center">
-        <Link
-          href={`/tag/${encodeURIComponent(tag.slug)}`}
-          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          View all {tag.count} newsletters in {tag.name} →
-        </Link>
-      </div>
-    </section>
-  );
-}
+import { TagSectionClient } from "./tag-section-client";
 
 export const metadata = {
   title: "Newsletter Topics | Discover Newsletters by Category",
@@ -69,7 +27,7 @@ export default async function TagsLandingPage() {
 
         <div className="space-y-16">
           {topTags.map((tag: TagWithNewsletters) => (
-            <TagSection key={tag.id} tag={tag} />
+            <TagSectionClient key={tag.id} tag={tag} />
           ))}
         </div>
       </div>
