@@ -2,14 +2,21 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
 
 import { Brand, SocialLinks } from "@prisma/client";
-import { useSession } from "next-auth/react";
 import { FaGithub, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 
 import FollowButton from "./follow-button";
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
 
 // src/app/components/brand/profile/header/index.tsx
 
@@ -38,13 +45,6 @@ export default function BrandProfileHeader({
   hideFollowButton = false,
   isOwnProfile = false,
 }: BrandProfileHeaderProps) {
-  const { data: session } = useSession();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [localFollowersCount, setLocalFollowersCount] = useState(followersCount);
-
-  // Check if brand is claimed
-  const isClaimed = brand.is_claimed;
-
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -83,14 +83,14 @@ export default function BrandProfileHeader({
                     <span className="ml-1">followers</span>
                   </div>
                   {brand.website && (
-                    <Link
+                    <a
                       href={brand.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       {new URL(brand.website).hostname}
-                    </Link>
+                    </a>
                   )}
                 </div>
               </div>
@@ -105,54 +105,54 @@ export default function BrandProfileHeader({
         {brand.social_links && (
           <div className="mt-4 flex space-x-4">
             {brand.social_links.twitter && (
-              <Link
+              <a
                 href={`https://twitter.com/${brand.social_links.twitter}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <FaTwitter className="h-5 w-5" />
-              </Link>
+              </a>
             )}
             {brand.social_links.instagram && (
-              <Link
+              <a
                 href={`https://instagram.com/${brand.social_links.instagram}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <FaInstagram className="h-5 w-5" />
-              </Link>
+              </a>
             )}
             {brand.social_links.linkedin && (
-              <Link
+              <a
                 href={brand.social_links.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <FaLinkedin className="h-5 w-5" />
-              </Link>
+              </a>
             )}
             {brand.social_links.youtube && (
-              <Link
+              <a
                 href={brand.social_links.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <FaYoutube className="h-5 w-5" />
-              </Link>
+              </a>
             )}
             {brand.social_links.github && (
-              <Link
+              <a
                 href={`https://github.com/${brand.social_links.github}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500"
               >
                 <FaGithub className="h-5 w-5" />
-              </Link>
+              </a>
             )}
           </div>
         )}
