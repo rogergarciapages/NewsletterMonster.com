@@ -31,7 +31,7 @@ async function getBrandData(brandname: string): Promise<BrandData | null> {
     const newsletters = await prisma.newsletter.findMany({
       where: {
         sender: {
-          contains: brandname.replace(/-/g, " "),
+          contains: formatBrandName(brandname),
           mode: "insensitive",
         },
       },
