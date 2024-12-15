@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { Brand, SocialLinks } from "@prisma/client";
-import { useSession } from "next-auth/react";
 
 import LoginModal from "@/app/components/login-modal";
 
@@ -30,9 +29,7 @@ export default function BrandProfileHeaderWrapper({
   hideFollowButton = false,
   isOwnProfile = false,
 }: BrandProfileHeaderWrapperProps) {
-  const { data: session } = useSession();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [localFollowersCount, setLocalFollowersCount] = useState(followersCount);
 
   return (
     <>
@@ -41,7 +38,7 @@ export default function BrandProfileHeaderWrapper({
         brandName={brandName}
         brand={brand}
         newsletterCount={newsletterCount}
-        followersCount={localFollowersCount}
+        followersCount={followersCount}
         isFollowing={isFollowing}
         hideFollowButton={hideFollowButton}
         isOwnProfile={isOwnProfile}

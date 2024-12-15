@@ -24,6 +24,8 @@ import FollowButton from "./follow-button";
 
 // src/app/components/brand/profile/header/index.tsx
 
+// src/app/components/brand/profile/header/index.tsx
+
 interface BrandProfileHeaderProps {
   brandId: string;
   brandName: string;
@@ -98,7 +100,7 @@ export default function BrandProfileHeader({
           </div>
           <div className="mt-6 flex space-x-3 md:ml-4 md:mt-0">
             {!hideFollowButton && !isOwnProfile && (
-              <FollowButton brandId={brandId} brandName={brandName} isFollowing={isFollowing} />
+              <FollowButton brandId={brandId} isFollowing={isFollowing} />
             )}
           </div>
         </div>

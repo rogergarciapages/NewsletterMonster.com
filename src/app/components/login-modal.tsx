@@ -215,10 +215,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
     });
   };
 
-  const handleSubmit = async (_onClose: () => void) => {
-    // ... existing code ...
-  };
-
   return (
     <Modal
       isOpen={isOpen}
@@ -229,7 +225,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
       }}
     >
       <ModalContent>
-        {onClose => (
+        {() => (
           <>
             {!showSignup ? (
               <>

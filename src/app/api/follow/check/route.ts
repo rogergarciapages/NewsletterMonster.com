@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     const follow = await prisma.follow.findFirst({
       where: {
         follower_id: session.user.user_id,
-        following_name: targetId, // Use following_name for brand names
+        brand_id: targetId,
       },
     });
 

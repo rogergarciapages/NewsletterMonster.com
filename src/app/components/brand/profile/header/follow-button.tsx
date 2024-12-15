@@ -9,15 +9,15 @@ import LoginModal from "@/app/components/login-modal";
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
+// src/app/components/brand/profile/header/follow-button.tsx
+
 interface FollowButtonProps {
   brandId: string;
-  brandName: string;
   isFollowing: boolean;
 }
 
 export default function FollowButton({
   brandId,
-  brandName,
   isFollowing: initialIsFollowing,
 }: FollowButtonProps) {
   const { data: session } = useSession();

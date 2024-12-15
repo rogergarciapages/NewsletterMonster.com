@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     // Count followers by name
     const count = await prisma.follow.count({
       where: {
-        following_name: targetId, // Use following_name for brand names
+        brand_id: targetId,
       },
     });
 

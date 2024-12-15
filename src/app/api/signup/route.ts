@@ -17,7 +17,7 @@ const validatePassword = (password: string) => {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, name, surname, company_name } = body;
+    const { email, password, name, surname } = body;
 
     // Validate required fields
     if (!email || !password || !name) {
@@ -73,7 +73,6 @@ export async function POST(req: Request) {
         password: hashedPassword,
         name,
         surname: surname || null,
-        company_name: company_name || null,
         role: "FREE",
         status: "active",
         created_at: new Date(),
