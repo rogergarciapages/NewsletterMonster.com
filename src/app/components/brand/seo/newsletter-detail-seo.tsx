@@ -19,7 +19,7 @@ interface NewsletterDetail {
   newsletter_id: number;
   user_id: string | null;
   sender: string | null;
-  date: Date | null;
+  published_at: Date | null;
   subject: string | null;
   html_file_url: string | null;
   full_screenshot_url: string | null;
@@ -29,8 +29,12 @@ interface NewsletterDetail {
   created_at: Date | null;
   products_link: string | null;
   summary: string | null;
-  tags: string | null;
-  NewsletterTag: NewsletterTag[];
+  NewsletterTag: {
+    Tag: {
+      id: number;
+      name: string;
+    };
+  }[];
 }
 
 interface NewsletterSEOProps {
@@ -55,7 +59,6 @@ export function generateNewsletterMetadata({
     newsletter.subject,
     brandDisplayName,
     "email newsletter",
-    newsletter.tags,
     ...(newsletter.NewsletterTag.map(({ Tag }) => Tag.name) || []),
   ]
     .filter(Boolean)

@@ -19,7 +19,7 @@ type NewsletterDetail = {
   newsletter_id: number;
   user_id: string | null;
   sender: string | null;
-  date: Date | null;
+  published_at: Date | null;
   subject: string | null;
   html_file_url: string | null;
   full_screenshot_url: string | null;
@@ -29,7 +29,6 @@ type NewsletterDetail = {
   created_at: Date | null;
   products_link: string | null;
   summary: string | null;
-  tags: string | null;
   NewsletterTag: {
     Tag: {
       id: number;
@@ -62,7 +61,7 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
         newsletter_id: true,
         user_id: true,
         sender: true,
-        date: true,
+        published_at: true,
         subject: true,
         html_file_url: true,
         full_screenshot_url: true,
@@ -72,7 +71,6 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
         created_at: true,
         products_link: true,
         summary: true,
-        tags: true,
         NewsletterTag: {
           select: {
             Tag: {

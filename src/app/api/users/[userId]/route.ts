@@ -17,17 +17,13 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       select: {
         name: true,
         surname: true,
-        company_name: true,
         username: true,
         bio: true,
         website: true,
         location: true,
         date_of_birth: true,
-        twitter_username: true,
-        instagram_username: true,
-        youtube_channel: true,
-        linkedin_profile: true,
         profile_photo: true,
+        social_links: true,
       },
     });
 
