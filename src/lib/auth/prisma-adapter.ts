@@ -11,17 +11,14 @@ interface DbUser {
   username: string | null;
   role: string;
   password: string | null;
-  domain_verified: boolean;
   status: string;
 }
 
-// Extend AdapterUser with our custom fields
-interface CustomUser extends AdapterUser {
+type CustomUser = AdapterUser & {
   user_id: string;
   role: string;
-  domain_verified: boolean;
   status: string;
-}
+};
 
 function convertToAdapterUser(user: DbUser): CustomUser {
   return {
@@ -32,8 +29,8 @@ function convertToAdapterUser(user: DbUser): CustomUser {
     emailVerified: user.emailVerified,
     image: user.profile_photo ?? undefined,
     role: user.role,
-    domain_verified: user.domain_verified,
-    status: user.status || "active", // Ensure status is never null
+    status: user.status || "active",
+    domain_verified: false,
   };
 }
 
@@ -48,7 +45,6 @@ export function createPrismaAdapter(p: PrismaClient): Adapter {
           emailVerified: data.emailVerified,
           role: "FREE",
           status: "active",
-          domain_verified: false,
         },
       });
       return convertToAdapterUser(user as DbUser);

@@ -28,24 +28,8 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
   try {
     const user = await prisma.user.findUnique({
       where: { user_id: userId },
-      select: {
-        user_id: true,
-        name: true,
-        surname: true,
-        company_name: true,
-        username: true,
-        email: true,
-        profile_photo: true,
-        bio: true,
-        website: true,
-        website_domain: true, // Added this
-        domain_verified: true, // Added this
-        twitter_username: true,
-        instagram_username: true,
-        youtube_channel: true,
-        linkedin_profile: true,
-        role: true,
-        Newsletter: {
+      include: {
+        newsletters: {
           orderBy: {
             created_at: "desc",
           },
@@ -63,10 +47,10 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
         },
         _count: {
           select: {
-            followers: true,
-            following: true,
+            follows: true,
           },
         },
+        social_links: true,
       },
     });
 
@@ -76,7 +60,7 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
     const firstName = getFirstName(user.name);
 
     // Transform newsletters to ensure non-null values where required
-    const transformedNewsletters = user.Newsletter.map(newsletter => ({
+    const transformedNewsletters = user.newsletters.map(newsletter => ({
       newsletter_id: newsletter.newsletter_id,
       sender: newsletter.sender || firstName,
       subject: newsletter.subject || "Untitled",
@@ -94,25 +78,25 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
       name: firstName,
       email: user.email,
       surname: user.surname,
-      company_name: user.company_name,
+      company_name: null,
       username: user.username,
       profile_photo: user.profile_photo,
       bio: user.bio,
       website: user.website,
-      website_domain: user.website_domain || null, // Added with default
-      domain_verified: user.domain_verified || false, // Added with default
-      twitter_username: user.twitter_username,
-      instagram_username: user.instagram_username,
-      youtube_channel: user.youtube_channel,
-      linkedin_profile: user.linkedin_profile,
+      website_domain: null,
+      domain_verified: false,
+      twitter_username: user.social_links?.twitter || null,
+      instagram_username: user.social_links?.instagram || null,
+      youtube_channel: user.social_links?.youtube || null,
+      linkedin_profile: user.social_links?.linkedin || null,
       role: user.role,
     };
 
     return {
       user: brandUser,
       newsletters: transformedNewsletters,
-      followersCount: user._count.followers,
-      followingCount: user._count.following,
+      followersCount: user._count.follows,
+      followingCount: 0,
     };
   } catch (error) {
     console.error("Error fetching user profile:", error);

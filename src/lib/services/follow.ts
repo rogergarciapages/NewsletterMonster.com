@@ -2,15 +2,12 @@
 import { prisma } from "@/lib/prisma";
 
 export class FollowService {
-  static async checkFollowStatus(followerId: string, targetId: string, isUnclaimed: boolean) {
+  static async checkFollowStatus(followerId: string, targetId: string) {
     try {
       const follow = await prisma.follow.findFirst({
         where: {
           follower_id: followerId,
-          OR: [
-            { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined },
-          ],
+          brand_id: targetId,
         },
       });
       return !!follow;
@@ -20,14 +17,11 @@ export class FollowService {
     }
   }
 
-  static async getFollowerCount(targetId: string, isUnclaimed: boolean) {
+  static async getFollowerCount(targetId: string) {
     try {
       const count = await prisma.follow.count({
         where: {
-          OR: [
-            { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined },
-          ],
+          brand_id: targetId,
         },
       });
       return count;
@@ -37,12 +31,12 @@ export class FollowService {
     }
   }
 
-  static async followUser(followerId: string, targetId: string, isUnclaimed: boolean) {
+  static async followUser(followerId: string, targetId: string) {
     try {
       const follow = await prisma.follow.create({
         data: {
           follower_id: followerId,
-          ...(isUnclaimed ? { following_name: targetId } : { following_id: targetId }),
+          brand_id: targetId,
         },
       });
       return follow;
@@ -52,15 +46,12 @@ export class FollowService {
     }
   }
 
-  static async unfollowUser(followerId: string, targetId: string, isUnclaimed: boolean) {
+  static async unfollowUser(followerId: string, targetId: string) {
     try {
       const result = await prisma.follow.deleteMany({
         where: {
           follower_id: followerId,
-          OR: [
-            { following_id: isUnclaimed ? undefined : targetId },
-            { following_name: isUnclaimed ? targetId : undefined },
-          ],
+          brand_id: targetId,
         },
       });
       return result.count > 0;
