@@ -13,15 +13,16 @@ const prismaClientSingleton = () => {
         url: process.env.DATABASE_URL,
       },
     },
-    log: ["error", "warn"],
+    log: ["error", "warn", "info", "query"],
   });
 };
 
 const globalForPrisma = globalThis as { prisma?: PrismaClient };
-export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+if (!globalForPrisma.prisma) {
+  globalForPrisma.prisma = prismaClientSingleton();
 }
+
+export const prisma = globalForPrisma.prisma;
 
 export default prisma;

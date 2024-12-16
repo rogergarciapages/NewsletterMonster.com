@@ -86,8 +86,8 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
     console.log(`Fetching brand data for slug: ${brandSlug}`);
     const session = await getServerSession(authOptions);
 
-    // Find brand by slug
-    const brand = await prisma.brand.findUnique({
+    // First try to find brand by slug
+    let brand = await prisma.brand.findUnique({
       where: { slug: brandSlug },
       include: {
         social_links: true,
@@ -112,6 +112,42 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
         },
       },
     });
+
+    // If not found by slug, try to find by newsletter sender_slug
+    if (!brand) {
+      console.log(`No brand found by slug, trying newsletter sender_slug: ${brandSlug}`);
+      const newsletter = await prisma.newsletter.findFirst({
+        where: { sender_slug: brandSlug },
+        include: {
+          Brand: {
+            include: {
+              social_links: true,
+              newsletters: {
+                orderBy: { created_at: "desc" },
+                select: {
+                  newsletter_id: true,
+                  sender: true,
+                  subject: true,
+                  top_screenshot_url: true,
+                  likes_count: true,
+                  you_rocks_count: true,
+                  created_at: true,
+                  summary: true,
+                  user_id: true,
+                },
+              },
+              _count: {
+                select: {
+                  followers: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      brand = newsletter?.Brand || null;
+    }
 
     if (!brand) {
       console.log(`No brand found for slug: ${brandSlug}`);
