@@ -1,3 +1,6 @@
+import anthropic
+from anthropic import Anthropic
+
 def extract_brand_info(self, sender_email: str, sender_name: str) -> Dict[str, str]:
     """Extract brand information from the email sender."""
     # Extract domain from email
@@ -203,3 +206,120 @@ async def process_newsletter(self, email_msg) -> Optional[Dict]:
         logger.error(f"Error processing newsletter: {e}")
         traceback.print_exc()
         return None 
+
+async def _generate_content_with_gemini(self, text_content: str, subject: str) -> Dict:
+    """Try to generate content using Gemini API."""
+    try:
+        prompt = f"Subject: {subject}\n\nContent: {text_content}\n\n{self.system_prompt}"
+        response = await self.model.generate_content_async(prompt)
+        
+        # Parse the response into structured data
+        lines = response.text.split('\n')
+        result = {}
+        current_key = None
+        
+        for line in lines:
+            if line.startswith('Summary:'):
+                current_key = 'summary'
+                result[current_key] = line.replace('Summary:', '').strip()
+            elif line.startswith('Tags:'):
+                current_key = 'tags'
+                tags_text = line.replace('Tags:', '').strip()
+                result[current_key] = [tag.strip() for tag in tags_text.split(',')]
+            elif line.startswith('Products:'):
+                current_key = 'products'
+                products_text = line.replace('Products:', '').strip()
+                result[current_key] = [prod.strip() for prod in products_text.split(',')]
+            elif line.startswith('Key Insights:'):
+                current_key = 'insights'
+                result[current_key] = []
+            elif current_key == 'insights' and line.strip().startswith('-'):
+                result[current_key].append(line.strip()[2:])
+            elif current_key and line.strip():
+                if isinstance(result[current_key], list):
+                    result[current_key].append(line.strip())
+                else:
+                    result[current_key] += ' ' + line.strip()
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        return None
+
+async def _generate_content_with_anthropic(self, text_content: str, subject: str) -> Dict:
+    """Try to generate content using Anthropic API."""
+    try:
+        prompt = f"Subject: {subject}\n\nContent: {text_content}\n\n{self.system_prompt}"
+        
+        message = await self.anthropic.messages.create(
+            model="claude-3-opus-20240229",
+            max_tokens=1000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+        
+        # Parse the response into structured data
+        lines = message.content[0].text.split('\n')
+        result = {}
+        current_key = None
+        
+        for line in lines:
+            if line.startswith('Summary:'):
+                current_key = 'summary'
+                result[current_key] = line.replace('Summary:', '').strip()
+            elif line.startswith('Tags:'):
+                current_key = 'tags'
+                tags_text = line.replace('Tags:', '').strip()
+                result[current_key] = [tag.strip() for tag in tags_text.split(',')]
+            elif line.startswith('Products:'):
+                current_key = 'products'
+                products_text = line.replace('Products:', '').strip()
+                result[current_key] = [prod.strip() for prod in products_text.split(',')]
+            elif line.startswith('Key Insights:'):
+                current_key = 'insights'
+                result[current_key] = []
+            elif current_key == 'insights' and line.strip().startswith('-'):
+                result[current_key].append(line.strip()[2:])
+            elif current_key and line.strip():
+                if isinstance(result[current_key], list):
+                    result[current_key].append(line.strip())
+                else:
+                    result[current_key] += ' ' + line.strip()
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Anthropic API error: {e}")
+        return None
+
+async def process_email(self, email_content: str, subject: str) -> Dict:
+    """Process raw email content and extract structured information."""
+    soup = BeautifulSoup(email_content, 'html.parser')
+    text_content = self._extract_text_with_structure(soup)
+    
+    # Try Gemini first
+    analysis = await self._generate_content_with_gemini(text_content, subject)
+    
+    # If Gemini fails, try Anthropic
+    if analysis is None:
+        logger.info("Gemini API failed, falling back to Anthropic API")
+        analysis = await self._generate_content_with_anthropic(text_content, subject)
+        
+    # If both APIs fail, return minimal structure
+    if analysis is None:
+        logger.error("Both Gemini and Anthropic APIs failed")
+        analysis = {
+            'summary': f"Failed to generate summary for: {subject}",
+            'tags': [],
+            'products': [],
+            'insights': []
+        }
+    
+    return {
+        'content': text_content,
+        'analysis': analysis,
+        'processed_at': datetime.now(timezone.utc).isoformat()
+    } 
