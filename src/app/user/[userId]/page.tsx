@@ -90,26 +90,22 @@ export async function generateMetadata({
 
 async function getUserData(userId: string): Promise<UserProfileData | null> {
   try {
-    const timestamp = Date.now();
+    console.log(`Fetching user data for ID: ${userId}`);
     const user = await prisma.user.findUnique({
       where: {
         user_id: userId,
       },
-      select: {
-        user_id: true,
-        name: true,
-        email: true,
-        profile_photo: true,
-        bio: true,
+      include: {
+        social_links: true,
       },
     });
 
-    if (!user) return null;
-
-    // Add cache busting to profile photo URL
-    if (user.profile_photo) {
-      user.profile_photo = `${user.profile_photo}?t=${timestamp}`;
+    if (!user) {
+      console.log(`No user found for ID: ${userId}`);
+      return null;
     }
+
+    console.log(`Found user: ${user.name}`);
 
     const newsletters = await prisma.newsletter.findMany({
       where: {
@@ -141,27 +137,27 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
       newsletters,
       user: {
         user_id: user.user_id,
-        name: user.name,
+        name: user.name || "",
         surname: "",
-        company_name: user.name,
-        username: user.user_id,
-        email: user.email,
+        company_name: user.name || "",
+        username: user.username || user.user_id,
+        email: user.email || "",
         profile_photo: user.profile_photo,
-        bio: user.bio,
-        website: null,
+        bio: user.bio || "",
+        website: user.website || null,
         website_domain: null,
         domain_verified: false,
-        twitter_username: null,
-        instagram_username: null,
-        youtube_channel: null,
-        linkedin_profile: null,
+        twitter_username: user.social_links?.twitter || null,
+        instagram_username: user.social_links?.instagram || null,
+        youtube_channel: user.social_links?.youtube || null,
+        linkedin_profile: user.social_links?.linkedin || null,
         role: "USER",
       },
       followersCount,
     };
   } catch (error) {
     console.error("Error fetching user data:", error);
-    return null;
+    throw error; // Re-throw to trigger error boundary
   }
 }
 

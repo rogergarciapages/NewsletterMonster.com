@@ -83,6 +83,7 @@ export const viewport = {
 
 async function getBrandData(brandSlug: string): Promise<BrandData | null> {
   try {
+    console.log(`Fetching brand data for slug: ${brandSlug}`);
     const session = await getServerSession(authOptions);
 
     // Find brand by slug
@@ -113,8 +114,11 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
     });
 
     if (!brand) {
+      console.log(`No brand found for slug: ${brandSlug}`);
       return null;
     }
+
+    console.log(`Found brand: ${brand.name}`);
 
     // Check if the current user is following this brand
     let isFollowing = false;
@@ -160,7 +164,7 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
     };
   } catch (error) {
     console.error("Error in getBrandData:", error);
-    return null;
+    throw error; // Re-throw to trigger error boundary
   }
 }
 
