@@ -90,19 +90,34 @@ def get_or_create_brand(self, cur, brand_info: Dict[str, str]) -> str:
         # Create new brand with unique slug
         cur.execute(
             '''INSERT INTO "Brand" (
-                name, slug, domain, is_claimed, is_verified,
-                created_at, updated_at, email_pattern
-            ) VALUES (%s, %s, %s, false, false, NOW(), NOW(), %s)
+                brand_id, name, slug, domain, 
+                is_claimed, is_verified,
+                created_at, updated_at
+            ) VALUES (
+                gen_random_uuid(), %s, %s, %s, 
+                false, false, 
+                NOW(), NOW()
+            )
             RETURNING brand_id''',
             (
                 brand_info['name'],
                 unique_slug,
-                brand_info['domain'],
-                f"@{email_domain}"  # Store email pattern for future matching
+                brand_info['domain']
             )
         )
         
         brand_id = cur.fetchone()[0]
+        
+        # Create social links entry for the brand
+        cur.execute(
+            '''INSERT INTO "SocialLinks" (
+                id, brand_id
+            ) VALUES (
+                gen_random_uuid(), %s
+            )''',
+            (brand_id,)
+        )
+        
         logger.info(f"Created new brand: {brand_info['name']} (ID: {brand_id}, slug: {unique_slug})")
         return brand_id
         
