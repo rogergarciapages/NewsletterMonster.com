@@ -6,64 +6,104 @@ def extract_brand_info(self, sender_email: str, sender_name: str) -> Dict[str, s
     # Create brand name from sender name or email
     name = sender_name or sender_email.split('@')[0]
     
-    # Create a slug from the name
-    slug = self.create_slug(name)
+    # Create initial slug from the name
+    base_slug = self.create_base_slug(name)
     
     return {
         'name': name,
-        'slug': slug,
+        'slug': base_slug,
         'domain': domain,
         'email': sender_email
     }
 
-def create_slug(self, text: str) -> str:
-    """Create a URL-friendly slug from text."""
+def create_base_slug(self, text: str) -> str:
+    """Create a base URL-friendly slug from text."""
     # Convert to lowercase and replace spaces/special chars with hyphens
     slug = text.lower()
     slug = re.sub(r'[^a-z0-9]+', '-', slug)
     slug = slug.strip('-')
     return slug
 
-def get_or_create_brand(self, cur, brand_info: Dict[str, str]) -> str:
-    """Get existing brand or create a new one."""
-    try:
-        # First try to find by slug
+def get_unique_slug(self, cur, base_slug: str, domain: str = None) -> str:
+    """Generate a unique slug for a brand, considering domain if available."""
+    # First try the base slug
+    slug = base_slug
+    counter = 1
+    
+    while True:
+        # Check if this slug is already used
         cur.execute(
-            'SELECT brand_id FROM "Brand" WHERE slug = %s',
-            (brand_info['slug'],)
+            'SELECT domain FROM "Brand" WHERE slug = %s',
+            (slug,)
         )
         result = cur.fetchone()
         
-        if result:
-            return result[0]
+        if not result:
+            # Slug is unique, we can use it
+            return slug
             
-        # If not found, try by domain
+        existing_domain = result[0]
+        if existing_domain == domain:
+            # Same domain means it's the same brand
+            return slug
+            
+        # Add domain-based suffix if available
+        if counter == 1 and domain:
+            # Extract first part of domain (e.g., 'india' from 'company.india.com')
+            domain_parts = domain.split('.')
+            if len(domain_parts) > 2:
+                location_hint = domain_parts[-3]  # Get the subdomain
+                slug = f"{base_slug}-{location_hint}"
+                counter += 1
+                continue
+                
+        # If still not unique or no domain available, add number
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+def get_or_create_brand(self, cur, brand_info: Dict[str, str]) -> str:
+    """Get existing brand or create a new one with unique slug."""
+    try:
+        # First try to find by domain (most specific identifier)
         if brand_info['domain']:
             cur.execute(
                 'SELECT brand_id FROM "Brand" WHERE domain = %s',
                 (brand_info['domain'],)
             )
             result = cur.fetchone()
-            
             if result:
                 return result[0]
         
-        # If still not found, create new brand
+        # Then try to find by email pattern
+        email_domain = brand_info['email'].split('@')[1]
+        cur.execute(
+            'SELECT brand_id FROM "Brand" WHERE domain LIKE %s',
+            (f'%.{email_domain}',)
+        )
+        result = cur.fetchone()
+        if result:
+            return result[0]
+        
+        # Generate unique slug
+        unique_slug = self.get_unique_slug(cur, brand_info['slug'], brand_info['domain'])
+        
+        # Create new brand with unique slug
         cur.execute(
             '''INSERT INTO "Brand" (
                 name, slug, domain, is_claimed, is_verified,
-                created_at, updated_at
-            ) VALUES (%s, %s, %s, false, false, NOW(), NOW())
+                created_at, updated_at, email_pattern
+            ) VALUES (%s, %s, %s, false, false, NOW(), NOW(), %s)
             RETURNING brand_id''',
             (
                 brand_info['name'],
-                brand_info['slug'],
-                brand_info['domain']
+                unique_slug,
+                brand_info['domain'],
+                f"@{email_domain}"  # Store email pattern for future matching
             )
         )
         
         brand_id = cur.fetchone()[0]
-        logger.info(f"Created new brand: {brand_info['name']} (ID: {brand_id})")
+        logger.info(f"Created new brand: {brand_info['name']} (ID: {brand_id}, slug: {unique_slug})")
         return brand_id
         
     except Exception as e:
