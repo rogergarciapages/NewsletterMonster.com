@@ -3,7 +3,9 @@
 
 import { useState } from "react";
 
+import { Button } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
+import { FaUserCheck, FaUserPlus } from "react-icons/fa";
 
 import LoginModal from "@/app/components/login-modal";
 
@@ -58,17 +60,19 @@ export default function FollowButton({
 
   return (
     <>
-      <button
+      <Button
         onClick={handleFollow}
-        disabled={isLoading}
-        className={`rounded-md px-4 py-2 text-sm font-semibold shadow-sm ${
-          isFollowing
-            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            : "bg-blue-600 text-white hover:bg-blue-700"
-        } disabled:cursor-not-allowed disabled:opacity-50`}
+        isDisabled={isLoading}
+        color={isFollowing ? "default" : "warning"}
+        variant={isFollowing ? "bordered" : "solid"}
+        startContent={
+          isFollowing ? <FaUserCheck className="text-xl" /> : <FaUserPlus className="text-xl" />
+        }
+        className="h-[44px] w-full font-medium"
+        size="lg"
       >
         {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}
-      </button>
+      </Button>
       <LoginModal isOpen={isLoginModalOpen} onOpenChange={() => setIsLoginModalOpen(false)} />
     </>
   );

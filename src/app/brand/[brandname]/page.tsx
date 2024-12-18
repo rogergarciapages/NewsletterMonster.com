@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { Card } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 
-import NewsletterCard from "@/app/components/brand/newsletter/card";
+import NewsletterGrid from "@/app/components/brand/newsletter/grid";
 import { Newsletter } from "@/app/components/brand/newsletter/types";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
 import {
@@ -245,54 +246,48 @@ export default async function BrandPage({ params }: { params: { brandname: strin
       />
 
       <ThreeColumnLayout>
-        <div className="w-full text-[#111]">
-          <BrandProfileHeaderWrapper
-            brandId={brand.brand_id}
-            brandName={brand.name}
-            brand={{
-              ...brand,
-              social_links: brand.social_links
-                ? {
-                    brand_id: brand.brand_id,
-                    user_id: null,
-                    id: brand.brand_id,
-                    instagram: brand.social_links.instagram || null,
-                    twitter: brand.social_links.twitter || null,
-                    linkedin: brand.social_links.linkedin || null,
-                    facebook: brand.social_links.facebook || null,
-                    youtube: brand.social_links.youtube || null,
-                    github: brand.social_links.github || null,
-                  }
-                : null,
-            }}
-            newsletterCount={newsletters.length}
-            followersCount={followersCount}
-            isFollowing={isFollowing}
-            hideFollowButton={false}
-            isOwnProfile={isOwnProfile}
-          />
+        <div className="w-full space-y-4">
+          {/* Brand Profile Header */}
+          <Card className="mt-4 border-none bg-background/60 dark:bg-default-100/50">
+            <BrandProfileHeaderWrapper
+              brandId={brand.brand_id}
+              brandName={brand.name}
+              brand={{
+                brand_id: brand.brand_id,
+                name: brand.name,
+                slug: brand.slug,
+                description: brand.description,
+                website: brand.website,
+                domain: brand.domain,
+                logo: brand.logo,
+                is_claimed: brand.is_claimed,
+                is_verified: brand.is_verified,
+                created_at: brand.created_at,
+                updated_at: brand.updated_at,
+                social_links: brand.social_links
+                  ? {
+                      id: brand.brand_id,
+                      brand_id: brand.brand_id,
+                      user_id: null,
+                      instagram: brand.social_links.instagram || null,
+                      twitter: brand.social_links.twitter || null,
+                      linkedin: brand.social_links.linkedin || null,
+                      facebook: brand.social_links.facebook || null,
+                      youtube: brand.social_links.youtube || null,
+                      github: brand.social_links.github || null,
+                    }
+                  : null,
+              }}
+              newsletterCount={newsletters.length}
+              followersCount={followersCount}
+              isFollowing={isFollowing}
+              hideFollowButton={false}
+              isOwnProfile={isOwnProfile}
+            />
+          </Card>
 
-          <main className="mx-auto max-w-6xl px-1 py-8">
-            <h1 className="sr-only">{brand.name} Newsletters</h1>
-            {newsletters.length > 0 ? (
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                {newsletters.map(newsletter => (
-                  <NewsletterCard
-                    key={newsletter.newsletter_id}
-                    newsletter={newsletter}
-                    brandname={params.brandname}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="py-12 text-center">
-                <h2 className="mb-2 text-xl font-semibold">No Newsletters Yet</h2>
-                <p className="text-gray-600">
-                  This brand hasn&apos;t published any newsletters yet.
-                </p>
-              </div>
-            )}
-          </main>
+          {/* Newsletters Grid */}
+          <NewsletterGrid initialNewsletters={newsletters} brandname={params.brandname} />
         </div>
       </ThreeColumnLayout>
     </>
