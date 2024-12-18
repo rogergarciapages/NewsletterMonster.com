@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
+// Add caching configuration
+export const revalidate = 60; // Cache for 1 minute
+export const dynamic = "force-dynamic"; // Required for pagination to work
+
 export async function GET(request: NextRequest, { params }: { params: { brandname: string } }) {
   try {
     const { searchParams } = new URL(request.url);

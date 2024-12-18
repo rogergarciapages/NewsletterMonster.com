@@ -5,23 +5,14 @@ import Image from "next/image";
 
 import { Button, CardBody, Chip, Link } from "@nextui-org/react";
 import { Brand, SocialLinks } from "@prisma/client";
+import { AnimatePresence, motion } from "framer-motion";
 import { BsPatchCheckFill } from "react-icons/bs";
 import { FaGithub, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 
+import { useFollowCount } from "@/hooks/use-follow-count";
+
 import FollowButton from "./follow-button";
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
 
 // src/app/components/brand/profile/header/index.tsx
 
@@ -41,11 +32,20 @@ export default function BrandProfileHeader({
   brandName,
   brand,
   newsletterCount,
-  followersCount,
-  isFollowing,
+  followersCount: initialFollowersCount,
+  isFollowing: initialIsFollowing,
   hideFollowButton = false,
   isOwnProfile = false,
 }: BrandProfileHeaderProps) {
+  const { count: followersCount, updateFollowCount } = useFollowCount({
+    initialCount: initialFollowersCount,
+    brandId,
+  });
+
+  const handleFollowChange = (newIsFollowing: boolean) => {
+    updateFollowCount(newIsFollowing);
+  };
+
   const handleClaimBrand = () => {
     // TODO: Implement brand claiming functionality
     console.log("Claim brand clicked");
@@ -77,7 +77,9 @@ export default function BrandProfileHeader({
         <div className="ml-6 flex-grow">
           {/* Brand Name with Verified Badge */}
           <div className="flex items-center gap-2">
-            <h1 className="truncate text-2xl font-bold text-foreground sm:text-3xl">{brandName}</h1>
+            <h1 className="truncate text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
+              {brandName}
+            </h1>
             {brand.is_claimed && (
               <Chip
                 className="border-none bg-primary/10 dark:bg-primary/20"
@@ -116,7 +118,17 @@ export default function BrandProfileHeader({
                 <span className="text-sm text-default-500">newsletters</span>
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-3xl font-bold text-foreground">{followersCount}</span>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={followersCount}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-3xl font-bold text-foreground"
+                  >
+                    {followersCount}
+                  </motion.span>
+                </AnimatePresence>
                 <span className="text-sm text-default-500">followers</span>
               </div>
             </div>
@@ -124,7 +136,11 @@ export default function BrandProfileHeader({
             {/* Buttons */}
             <div className="flex w-full flex-col gap-2 md:w-[160px]">
               {!hideFollowButton && !isOwnProfile && (
-                <FollowButton brandId={brandId} isFollowing={isFollowing} />
+                <FollowButton
+                  brandId={brandId}
+                  isFollowing={initialIsFollowing}
+                  onFollowChange={handleFollowChange}
+                />
               )}
               {!brand.is_claimed && !isOwnProfile && (
                 <Button

@@ -1,7 +1,7 @@
 // src/app/components/brand/profile/header/follow-button.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { Button } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
@@ -11,58 +11,68 @@ import LoginModal from "@/app/components/login-modal";
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
-// src/app/components/brand/profile/header/follow-button.tsx
-
 interface FollowButtonProps {
   brandId: string;
   isFollowing: boolean;
+  onFollowChange?: (isFollowing: boolean) => void;
 }
 
 export default function FollowButton({
   brandId,
   isFollowing: initialIsFollowing,
+  onFollowChange,
 }: FollowButtonProps) {
-  const { data: session } = useSession();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { data: session, status } = useSession();
 
-  const handleFollow = async () => {
-    if (!session) {
+  const handleClick = async () => {
+    if (status !== "authenticated") {
       setIsLoginModalOpen(true);
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/follow", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          brandId,
-          action: isFollowing ? "unfollow" : "follow",
-        }),
-      });
+    const newIsFollowing = !isFollowing;
 
-      if (response.ok) {
-        setIsFollowing(!isFollowing);
-      } else {
-        console.error("Failed to update follow status");
+    // Optimistically update the UI
+    setIsFollowing(newIsFollowing);
+    onFollowChange?.(newIsFollowing);
+
+    // Update the database
+    startTransition(async () => {
+      try {
+        const response = await fetch("/api/follow", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            brandId,
+            action: newIsFollowing ? "follow" : "unfollow",
+          }),
+        });
+
+        if (!response.ok) {
+          // If the server request fails, revert the optimistic update
+          setIsFollowing(!newIsFollowing);
+          onFollowChange?.(!newIsFollowing);
+          console.error("Failed to update follow status");
+        }
+      } catch (error) {
+        // If there's an error, revert the optimistic update
+        setIsFollowing(!newIsFollowing);
+        onFollowChange?.(!newIsFollowing);
+        console.error("Error updating follow status:", error);
       }
-    } catch (error) {
-      console.error("Error updating follow status:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
     <>
       <Button
-        onClick={handleFollow}
-        isDisabled={isLoading}
+        onClick={handleClick}
+        isDisabled={isPending}
         color={isFollowing ? "default" : "warning"}
         variant={isFollowing ? "bordered" : "solid"}
         startContent={
@@ -70,8 +80,9 @@ export default function FollowButton({
         }
         className="h-[44px] w-full font-medium"
         size="lg"
+        isLoading={isPending}
       >
-        {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}
+        {isFollowing ? "Following" : "Follow"}
       </Button>
       <LoginModal isOpen={isLoginModalOpen} onOpenChange={() => setIsLoginModalOpen(false)} />
     </>

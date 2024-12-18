@@ -15,6 +15,10 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/config/auth";
 import { prisma } from "@/lib/prisma";
 
+// Add dynamic configuration
+export const dynamic = "force-dynamic"; // Always fetch fresh data since we have real-time follower counts
+export const revalidate = 300; // Revalidate every 5 minutes for SEO metadata
+
 interface BrandData {
   brand: {
     brand_id: string;

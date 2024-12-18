@@ -5,22 +5,25 @@ import NewsletterImage from "./image";
 interface NewsletterCardProps {
   newsletter: Newsletter;
   brandname: string;
+  priority?: boolean;
 }
 
-export default function NewsletterCard({ newsletter, brandname }: NewsletterCardProps) {
+export default function NewsletterCard({
+  newsletter,
+  brandname,
+  priority = false,
+}: NewsletterCardProps) {
   return (
-    <article className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
-      <NewsletterImage 
+    <article className="flex flex-col overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl dark:bg-zinc-800">
+      <NewsletterImage
         imageUrl={newsletter.top_screenshot_url}
         subject={newsletter.subject}
         brandname={brandname}
         newsletterId={newsletter.newsletter_id}
+        priority={priority}
       />
-      
-      <NewsletterContent 
-        newsletter={newsletter}
-        brandname={brandname}
-      />
+
+      <NewsletterContent newsletter={newsletter} brandname={brandname} />
     </article>
   );
 }

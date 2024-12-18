@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { Card } from "@nextui-org/react";
 import { useInView } from "react-intersection-observer";
 
 import NewsletterCard from "./card";
@@ -22,6 +21,9 @@ export default function NewsletterGrid({ initialNewsletters, brandname }: Newsle
   const [hasMore, setHasMore] = useState(true);
   const { ref, inView } = useInView();
 
+  // Keep track of seen newsletter IDs to prevent duplicates
+  const [seenIds] = useState(new Set(initialNewsletters.map(n => n.newsletter_id)));
+
   useEffect(() => {
     const loadMore = async () => {
       if (loading || !hasMore) return;
@@ -33,11 +35,21 @@ export default function NewsletterGrid({ initialNewsletters, brandname }: Newsle
         );
         const data = await response.json();
 
-        if (data.newsletters.length < ITEMS_PER_PAGE) {
+        // Filter out any newsletters we've already seen
+        const newNewsletters = data.newsletters.filter(
+          (newsletter: Newsletter) => !seenIds.has(newsletter.newsletter_id)
+        );
+
+        // Update seen IDs
+        newNewsletters.forEach((newsletter: Newsletter) => {
+          seenIds.add(newsletter.newsletter_id);
+        });
+
+        if (newNewsletters.length < ITEMS_PER_PAGE) {
           setHasMore(false);
         }
 
-        setNewsletters(prev => [...prev, ...data.newsletters]);
+        setNewsletters(prev => [...prev, ...newNewsletters]);
         setPage(prev => prev + 1);
       } catch (error) {
         console.error("Error loading more newsletters:", error);
@@ -49,21 +61,26 @@ export default function NewsletterGrid({ initialNewsletters, brandname }: Newsle
     if (inView) {
       loadMore();
     }
-  }, [inView, loading, hasMore, page, brandname]);
+  }, [inView, loading, hasMore, page, brandname, seenIds]);
+
+  // Create a unique key combining newsletter ID and position
+  const getUniqueKey = (newsletter: Newsletter, index: number) =>
+    `${newsletter.newsletter_id}-${index}`;
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {newsletters.map(newsletter => (
+      {newsletters.map((newsletter, index) => (
         <NewsletterCard
-          key={newsletter.newsletter_id}
+          key={getUniqueKey(newsletter, index)}
           newsletter={newsletter}
           brandname={brandname}
+          priority={index < 3}
         />
       ))}
       {newsletters.length === 0 && (
-        <Card className="col-span-full border-none bg-background/60 p-6 text-center dark:bg-default-100/50">
-          <p className="text-default-500">No newsletters found for this brand.</p>
-        </Card>
+        <div className="col-span-full text-center text-gray-500">
+          No newsletters found for this brand.
+        </div>
       )}
       {hasMore && (
         <div ref={ref} className="col-span-full flex justify-center p-4">
