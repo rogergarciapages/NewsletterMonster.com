@@ -60,7 +60,7 @@ export function useInfiniteScroll<_T>({
   // Initial load
   useEffect(() => {
     loadMore(true);
-  }, []);
+  }, [loadMore]);
 
   useEffect(() => {
     if (!isLoading && hasMore) {

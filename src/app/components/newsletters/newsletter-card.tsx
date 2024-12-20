@@ -7,11 +7,8 @@ import { useEffect, useState } from "react";
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import { Newsletter } from "@/types/newsletter";
 import { slugify } from "@/utils/slugify";
-
-import { Newsletter } from "../../../types/newsletter";
-
-// src/components/newsletters/newsletter-card.tsx
 
 interface NewsletterCardProps {
   newsletter: Newsletter;
@@ -37,6 +34,7 @@ export function NewsletterCard({ newsletter, priority = false }: NewsletterCardP
       </div>
     );
   }
+
   const handleBrandClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();

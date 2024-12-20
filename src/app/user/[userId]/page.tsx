@@ -6,132 +6,82 @@ import { Button } from "@nextui-org/react";
 import { IconBuildingStore, IconEdit } from "@tabler/icons-react";
 import { getServerSession } from "next-auth/next";
 
-import NewsletterCard from "@/app/components/brand/newsletter/card";
-import { Newsletter } from "@/app/components/brand/newsletter/types";
 import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
-import { BrandUser } from "@/app/components/brand/profile/types";
 import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";
 import { authOptions } from "@/config/auth";
 import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
-
 interface UserProfileData {
-  newsletters: Newsletter[];
-  user: BrandUser;
+  newsletters: Array<{
+    newsletter_id: number;
+    sender: string | null;
+    subject: string | null;
+    top_screenshot_url: string | null;
+    likes_count: number | null;
+    you_rocks_count: number | null;
+    created_at: Date | null;
+    summary: string | null;
+    user_id: string | null;
+  }>;
+  user: {
+    user_id: string;
+    name: string;
+    surname: string;
+    company_name: string;
+    username: string;
+    email: string;
+    profile_photo: string | null;
+    bio: string;
+    website: string | null;
+    website_domain: string | null;
+    domain_verified: boolean;
+    twitter_username: string | null;
+    instagram_username: string | null;
+    youtube_channel: string | null;
+    linkedin_profile: string | null;
+    role: string;
+  };
   followersCount: number;
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({
-  params,
-}: {
-  params: { userId: string };
-}): Promise<Metadata> {
-  const userData = await getUserData(params.userId);
+// Add caching configuration
+export const revalidate = 60; // Revalidate every 60 seconds
 
-  if (!userData) {
-    return {
-      title: "User Not Found | Newsletter Monster",
-      description: "This user profile could not be found.",
-      other: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
-    };
-  }
-
-  const { user, newsletters, followersCount } = userData;
-  const displayName = user.username || user.name || "User";
-
-  return {
-    title: `${displayName}&quot;s Profile | Newsletter Monster`,
-    description: `View ${displayName} profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
-    openGraph: {
-      title: `${displayName} Profile | Newsletter Monster`,
-      description: `Check out ${displayName}&quot;s newsletters and updates on Newsletter Monster`,
-      images: user.profile_photo ? [{ url: user.profile_photo }] : undefined,
-      type: "profile",
-      firstName: user.name || undefined,
-      username: user.username || undefined,
-      siteName: "Newsletter Monster",
-      locale: "en_US",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${displayName}/'s Profile | Newsletter Monster`,
-      description: `Check out ${displayName} newsletters and updates on Newsletter Monster`,
-      creator: user.twitter_username ? `@${user.twitter_username}` : undefined,
-      images: user.profile_photo ? [user.profile_photo] : undefined,
-    },
-    alternates: {
-      canonical: `/user/${params.userId}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      nocache: true,
-      googleBot: {
-        index: true,
-        follow: true,
-      },
-    },
-    other: {
-      "Cache-Control": "no-cache, no-store, must-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  };
-}
-
+// Cache the user data fetch function
 async function getUserData(userId: string): Promise<UserProfileData | null> {
   try {
-    console.log(`Fetching user data for ID: ${userId}`);
-    const user = await prisma.user.findUnique({
-      where: {
-        user_id: userId,
-      },
-      include: {
-        social_links: true,
-      },
-    });
+    // Use Promise.all to parallelize database queries
+    const [user, newsletters, followersCount] = await Promise.all([
+      prisma!.user.findUnique({
+        where: { user_id: userId },
+        include: { social_links: true },
+      }),
+      prisma!.newsletter.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: "desc" },
+        select: {
+          newsletter_id: true,
+          sender: true,
+          subject: true,
+          top_screenshot_url: true,
+          likes_count: true,
+          you_rocks_count: true,
+          created_at: true,
+          summary: true,
+          user_id: true,
+        },
+      }),
+      prisma!.follow.count({
+        where: { brand_id: userId },
+      }),
+    ]);
 
     if (!user) {
-      console.log(`No user found for ID: ${userId}`);
       return null;
     }
-
-    console.log(`Found user: ${user.name}`);
-
-    const newsletters = await prisma.newsletter.findMany({
-      where: {
-        user_id: userId,
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-      select: {
-        newsletter_id: true,
-        sender: true,
-        subject: true,
-        top_screenshot_url: true,
-        likes_count: true,
-        you_rocks_count: true,
-        created_at: true,
-        summary: true,
-        user_id: true,
-      },
-    });
-
-    const followersCount = await prisma.follow.count({
-      where: {
-        brand_id: userId,
-      },
-    });
 
     return {
       newsletters,
@@ -157,11 +107,65 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
     };
   } catch (error) {
     console.error("Error fetching user data:", error);
-    throw error; // Re-throw to trigger error boundary
+    throw error;
   }
 }
 
+// Generate metadata with caching
+export async function generateMetadata({
+  params,
+}: {
+  params: { userId: string };
+}): Promise<Metadata> {
+  const userData = await getUserData(params.userId);
+
+  if (!userData) {
+    return {
+      title: "User Not Found | Newsletter Monster",
+      description: "This user profile could not be found.",
+    };
+  }
+
+  const { user, newsletters, followersCount } = userData;
+  const displayName = user.username || user.name || "User";
+
+  return {
+    title: `${displayName}'s Profile | Newsletter Monster`,
+    description: `View ${displayName}'s profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
+    openGraph: {
+      title: `${displayName}'s Profile | Newsletter Monster`,
+      description: `Check out ${displayName}'s newsletters and updates on Newsletter Monster`,
+      images: user.profile_photo ? [{ url: user.profile_photo }] : undefined,
+      type: "profile",
+      firstName: user.name || undefined,
+      username: user.username || undefined,
+      siteName: "Newsletter Monster",
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${displayName}'s Profile | Newsletter Monster`,
+      description: `Check out ${displayName}'s newsletters and updates on Newsletter Monster`,
+      creator: user.twitter_username ? `@${user.twitter_username}` : undefined,
+      images: user.profile_photo ? [user.profile_photo] : undefined,
+    },
+    alternates: {
+      canonical: `/user/${params.userId}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
+    },
+  };
+}
+
 export default async function UserProfilePage({ params }: { params: { userId: string } }) {
+  // Parallel data fetching
   const [data, session] = await Promise.all([
     getUserData(params.userId),
     getServerSession(authOptions),
@@ -194,7 +198,7 @@ export default async function UserProfilePage({ params }: { params: { userId: st
       you_rocks_count: newsletter.you_rocks_count || 0,
     })),
     followers_count: followersCount,
-    following_count: 0, // You might want to fetch this if needed
+    following_count: 0,
   };
 
   return (
@@ -266,14 +270,11 @@ export default async function UserProfilePage({ params }: { params: { userId: st
               <NewsletterCard
                 key={newsletter.newsletter_id}
                 newsletter={newsletter}
-                brandname={user.username || user.name}
+                priority={false}
               />
             ))}
           </div>
-          <EmailCopyProfile
-            user={brandProfile} // Now includes website_domain and domain_verified
-            isOwnProfile={isOwnProfile}
-          />
+          <EmailCopyProfile user={brandProfile} isOwnProfile={isOwnProfile} />
         </main>
       </div>
     </ThreeColumnLayout>
