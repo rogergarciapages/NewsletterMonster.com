@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import prisma from "../lib/prisma";
 import adjectives from "./adjectives.json";
 import nouns from "./nouns.json";
 

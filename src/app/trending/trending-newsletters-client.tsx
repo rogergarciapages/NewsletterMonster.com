@@ -1,7 +1,6 @@
 // src/app/trending/trending-newsletters-client.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@nextui-org/react";
@@ -15,6 +14,8 @@ import { Newsletter } from "@/types/newsletter";
 
 // src/app/trending/trending-newsletters-client.tsx
 
+// src/app/trending/trending-newsletters-client.tsx
+
 const NEWSLETTERS_PER_PAGE = 15;
 
 export default function TrendingNewslettersClient() {
@@ -23,7 +24,6 @@ export default function TrendingNewslettersClient() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const router = useRouter();
 
   // Reference for our observer
   const observerRef = useRef<IntersectionObserver>();

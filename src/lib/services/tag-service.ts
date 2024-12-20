@@ -1,5 +1,5 @@
 // src/lib/services/tag-service.ts
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF = 1000; // 1 second

@@ -16,6 +16,8 @@ import FollowButton from "./follow-button";
 
 // src/app/components/brand/profile/header/index.tsx
 
+// src/app/components/brand/profile/header/index.tsx
+
 interface BrandProfileHeaderProps {
   brandId: string;
   brandName: string;
@@ -48,7 +50,7 @@ export default function BrandProfileHeader({
 
   const handleClaimBrand = () => {
     // TODO: Implement brand claiming functionality
-    console.log("Claim brand clicked");
+    return;
   };
 
   return (

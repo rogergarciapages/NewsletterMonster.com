@@ -3,17 +3,6 @@ import { Metadata } from "next";
 
 import { Article, BreadcrumbList, WithContext } from "schema-dts";
 
-// Define the Tag type
-interface Tag {
-  id: number;
-  name: string;
-}
-
-// Define the NewsletterTag type
-interface NewsletterTag {
-  Tag: Tag;
-}
-
 // Define the complete NewsletterDetail type
 interface NewsletterDetail {
   newsletter_id: number;
@@ -59,7 +48,7 @@ export function generateNewsletterMetadata({
     newsletter.subject,
     brandDisplayName,
     "email newsletter",
-    ...(newsletter.NewsletterTag.map(({ Tag }) => Tag.name) || []),
+    ...(newsletter.NewsletterTag?.map(({ Tag }) => Tag.name) || []),
   ]
     .filter(Boolean)
     .join(", ");
@@ -139,7 +128,7 @@ export function generateNewsletterJsonLd({
       name: "NewsletterMonster",
       url: baseUrl,
     },
-    keywords: newsletter.NewsletterTag.map(({ Tag }) => Tag.name).join(", "),
+    keywords: newsletter.NewsletterTag?.map(({ Tag }) => Tag.name).join(", ") || "",
     articleBody: newsletter.summary || "",
     isAccessibleForFree: true,
   };

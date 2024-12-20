@@ -11,6 +11,8 @@ import LoginModal from "@/app/components/login-modal";
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
+// src/app/components/brand/profile/header/follow-button.tsx
+
 interface FollowButtonProps {
   brandId: string;
   isFollowing: boolean;
@@ -25,7 +27,7 @@ export default function FollowButton({
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const handleClick = async () => {
     if (status !== "authenticated") {

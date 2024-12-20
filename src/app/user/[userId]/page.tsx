@@ -13,7 +13,7 @@ import { BrandUser } from "@/app/components/brand/profile/types";
 import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/config/auth";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
 
 export const revalidate = 0;

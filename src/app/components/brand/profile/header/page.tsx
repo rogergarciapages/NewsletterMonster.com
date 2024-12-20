@@ -1,7 +1,7 @@
 // src/app/components/brand/profile/header/page.tsx
 import { Suspense } from "react";
 
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 import BrandProfileHeaderWrapper from "./client-wrapper";
 import { ErrorBoundary } from "./error-boundary";

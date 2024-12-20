@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // Add caching configuration
 export const revalidate = 60; // Cache for 1 minute

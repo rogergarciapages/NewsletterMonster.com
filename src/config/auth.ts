@@ -8,7 +8,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // Initialize PrismaAdapter with raw PrismaClient
 const prismaWithoutExtensions = new PrismaClient({

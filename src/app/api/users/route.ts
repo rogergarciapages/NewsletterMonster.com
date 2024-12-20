@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getServerSession } from "next-auth";
 
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { userProfileSchema } from "@/lib/schemas/user-profile";
 import { deleteUserProfileImages, isMinioUrl } from "@/lib/utils/minio";
 

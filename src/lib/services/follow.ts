@@ -1,5 +1,5 @@
 // Create new file: src/lib/services/follow.ts
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export class FollowService {
   static async checkFollowStatus(followerId: string, targetId: string) {

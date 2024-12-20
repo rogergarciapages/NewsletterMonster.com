@@ -13,7 +13,7 @@ import {
 } from "@/app/components/brand/seo/brand-page-seo";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/config/auth";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // Add dynamic configuration
 export const dynamic = "force-dynamic"; // Always fetch fresh data since we have real-time follower counts

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import type { Newsletter, Tag, TagWithNewsletters } from "@/types/newsletter";
 
 export async function getTagBySlug(slug: string): Promise<Tag | null> {

@@ -5,7 +5,7 @@ import { Client } from "minio";
 import { getServerSession } from "next-auth";
 
 import authOptions from "@/config/auth";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
