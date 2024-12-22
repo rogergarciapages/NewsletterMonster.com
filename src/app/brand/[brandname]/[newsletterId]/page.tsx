@@ -5,8 +5,9 @@ import Script from "next/script";
 
 import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
-import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { LikeButton } from "@/app/components/newsletters/like-button";
+import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
 import prisma from "@/lib/prisma";
 
 import {
@@ -195,13 +196,21 @@ export default async function NewsletterPage({
           />
 
           {/* Email toolbar */}
-          <EmailToolbar
-            likesCount={newsletter.likes_count || 0}
-            isLiked={false}
-            currentUrl={currentUrl}
-            subject={newsletter.subject}
-            summary={newsletter.summary}
-          />
+          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-800">
+            <div className="flex items-center space-x-2">
+              <LikeButton
+                newsletterId={newsletter.newsletter_id}
+                initialLikesCount={newsletter.likes_count || 0}
+                size="md"
+              />
+              <YouRockButton
+                newsletterId={newsletter.newsletter_id}
+                initialYouRocksCount={newsletter.you_rocks_count || 0}
+                size="md"
+              />
+            </div>
+            <div className="flex items-center space-x-2">{/* Add other toolbar items here */}</div>
+          </div>
 
           {/* Email content */}
           <EmailContent
