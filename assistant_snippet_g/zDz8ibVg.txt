@@ -1,0 +1,3 @@
+import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
+
+1|import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper"; 
