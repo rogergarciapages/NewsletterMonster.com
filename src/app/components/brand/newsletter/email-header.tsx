@@ -2,7 +2,7 @@
 
 import Link from "next/dist/client/link";
 
-import { Button, Tooltip } from "@nextui-org/react";
+import { Button, Chip, Tooltip } from "@nextui-org/react";
 import { IconMail, IconMailForward, IconStar } from "@tabler/icons-react";
 
 type EmailHeaderProps = {
@@ -46,8 +46,15 @@ export default function EmailHeader({
       <div className="space-y-2 text-sm">
         <div className="grid grid-cols-[80px,1fr] items-center">
           <span className="text-gray-500">From:</span>
-          <Link href={`/${brandname}`} className="font-medium hover:text-torch-600">
-            {sender} &lt;{brandname}@newslettermonster.com&gt;
+          <Link href={`/brand/${brandname}`} className="inline-flex items-center gap-2">
+            <Chip
+              as="span"
+              variant="flat"
+              color="primary"
+              className="cursor-pointer transition-colors hover:bg-primary-100"
+            >
+              {sender || brandname}
+            </Chip>
           </Link>
         </div>
 
