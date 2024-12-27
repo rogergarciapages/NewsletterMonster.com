@@ -4,6 +4,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Badge as BadgeType } from "@prisma/client";
+
+import { Badge } from "@/app/components/newsletters/badge";
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
@@ -13,16 +16,40 @@ import { slugify } from "@/utils/slugify";
 interface NewsletterCardProps {
   newsletter: Newsletter;
   priority?: boolean;
+  showBadges?: boolean;
 }
 
-export function NewsletterCard({ newsletter, priority = false }: NewsletterCardProps) {
+export function NewsletterCard({
+  newsletter,
+  priority = false,
+  showBadges = true,
+}: NewsletterCardProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [badges, setBadges] = useState<BadgeType[]>([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (showBadges) {
+      const fetchBadges = async () => {
+        try {
+          const response = await fetch(`/api/badges/newsletter/${newsletter.newsletter_id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setBadges(data);
+          }
+        } catch (error) {
+          console.error("Error fetching badges:", error);
+        }
+      };
+
+      fetchBadges();
+    }
+  }, [newsletter.newsletter_id, showBadges]);
 
   if (!mounted) {
     // Return a placeholder with the same dimensions
@@ -119,6 +146,14 @@ export function NewsletterCard({ newsletter, priority = false }: NewsletterCardP
           </CardFooter>
         </div>
       </div>
+
+      {showBadges && badges.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {badges.map(badge => (
+            <Badge key={badge.id} badge={badge} size="sm" />
+          ))}
+        </div>
+      )}
     </Card>
   );
 }

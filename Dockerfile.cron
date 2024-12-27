@@ -1,0 +1,29 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install cron
+RUN apk add --no-cache dcron curl
+
+# Copy only the necessary files
+COPY package*.json ./
+COPY prisma ./prisma/
+COPY src/lib/services/badge.ts ./src/lib/services/
+COPY src/lib/prisma.ts ./src/lib/
+
+# Install dependencies
+RUN npm install
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Create cron job script
+RUN echo '#!/bin/sh' > /app/calculate-badges.sh && \
+    echo 'curl -X POST http://localhost:3000/api/badges/calculate' >> /app/calculate-badges.sh && \
+    chmod +x /app/calculate-badges.sh
+
+# Add cron job
+RUN echo '59 23 * * * /app/calculate-badges.sh' > /etc/crontabs/root
+
+# Start cron daemon
+CMD ["crond", "-f", "-d", "8"] 

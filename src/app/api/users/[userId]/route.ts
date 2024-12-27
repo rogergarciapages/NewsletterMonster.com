@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
         location: true,
         date_of_birth: true,
         profile_photo: true,
-        social_links: true,
+        SocialLinks: true,
       },
     });
 

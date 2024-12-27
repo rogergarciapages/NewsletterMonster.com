@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/dist/client/link";
+import Image from "next/image";
 
 import { Button, Chip, Tooltip } from "@nextui-org/react";
 import { IconMail, IconMailForward, IconStar } from "@tabler/icons-react";
+
+type Badge = {
+  id: string;
+  type: string;
+  category: string;
+  rank: string;
+  earned_at: Date;
+};
 
 type EmailHeaderProps = {
   subject: string | null;
@@ -11,7 +20,14 @@ type EmailHeaderProps = {
   brandname: string;
   date: Date | null;
   recipientEmail?: string;
+  badges?: Badge[];
 };
+
+function getBadgeImage(type: string, category: string, rank: string): string {
+  const rankNumber = rank === "FIRST" ? "1" : rank === "SECOND" ? "2" : "3";
+  const categoryLetter = category === "DAY" ? "d" : category === "WEEK" ? "w" : "m";
+  return `${rankNumber}${categoryLetter}.png`;
+}
 
 export default function EmailHeader({
   subject,
@@ -19,11 +35,33 @@ export default function EmailHeader({
   brandname,
   date,
   recipientEmail = "you@newslettermonster.com",
+  badges = [],
 }: EmailHeaderProps) {
   return (
     <div className="rounded-t-lg border-b bg-white p-4 dark:bg-zinc-900">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>
+          {badges.length > 0 && (
+            <div className="flex gap-2">
+              {badges.map(badge => (
+                <Tooltip
+                  key={badge.id}
+                  content={`${badge.rank.charAt(0) + badge.rank.slice(1).toLowerCase()} place for ${badge.type === "LIKE" ? "likes" : "you rocks"} of the ${badge.category.toLowerCase()}`}
+                >
+                  <div className="relative h-8 w-8">
+                    <Image
+                      src={`/badges/${getBadgeImage(badge.type, badge.category, badge.rank)}`}
+                      alt={`${badge.rank} ${badge.type} ${badge.category} badge`}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </Tooltip>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex gap-2">
           <Tooltip content="Star this newsletter">
             <Button isIconOnly variant="light" aria-label="Star">

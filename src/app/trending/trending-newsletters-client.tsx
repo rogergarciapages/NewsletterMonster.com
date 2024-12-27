@@ -14,10 +14,6 @@ import { Newsletter } from "@/types/newsletter";
 
 // src/app/trending/trending-newsletters-client.tsx
 
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
 const NEWSLETTERS_PER_PAGE = 15;
 
 export default function TrendingNewslettersClient() {

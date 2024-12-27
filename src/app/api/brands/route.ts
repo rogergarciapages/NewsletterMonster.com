@@ -95,11 +95,11 @@ export async function GET(req: Request) {
       include: {
         _count: {
           select: {
-            followers: true,
-            newsletters: true,
+            Follow: true,
+            Newsletter: true,
           },
         },
-        social_links: true,
+        SocialLinks: true,
       },
       take: limit,
       skip: offset,

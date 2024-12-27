@@ -96,7 +96,7 @@ export async function getTopTags(limit = 6) {
       orderBy: { count: "desc" },
       take: limit,
       include: {
-        Newsletters: {
+        NewsletterTag: {
           take: 6,
           include: {
             Newsletter: {

@@ -27,19 +27,11 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
   const user = await prisma.user.findUnique({
     where: { username },
     include: {
-      newsletters: {
-        select: {
-          newsletter_id: true,
-          published_at: true,
-          subject: true,
-          likes_count: true,
-          you_rocks_count: true,
-        },
-      },
-      social_links: true,
+      Newsletter: true,
+      SocialLinks: true,
       _count: {
         select: {
-          follows: true,
+          Follow: true,
         },
       },
     },
@@ -47,8 +39,10 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
 
   if (!user) return null;
 
-  const followersCount = user._count.follows ?? 0;
+  const followersCount = user._count.Follow ?? 0;
   const followingCount = 0; // Since we don't track following anymore
+
+  const newsletterCount = user.Newsletter?.length ?? 0;
 
   return {
     user_id: user.user_id,
@@ -56,11 +50,11 @@ export async function getBrandProfile(username: string): Promise<BrandProfile | 
     profile_photo: user.profile_photo,
     bio: user.bio,
     website: user.website,
-    twitter_username: user.social_links?.twitter ?? null,
-    instagram_username: user.social_links?.instagram ?? null,
-    youtube_channel: user.social_links?.youtube ?? null,
-    linkedin_profile: user.social_links?.linkedin ?? null,
-    newsletters: user.newsletters,
+    twitter_username: user.SocialLinks?.twitter ?? null,
+    instagram_username: user.SocialLinks?.instagram ?? null,
+    youtube_channel: user.SocialLinks?.youtube ?? null,
+    linkedin_profile: user.SocialLinks?.linkedin ?? null,
+    newsletters: user.Newsletter,
     followers_count: followersCount,
     following_count: followingCount,
   };

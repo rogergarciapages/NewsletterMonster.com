@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { brandnam
     let brand = await prisma.brand.findUnique({
       where: { slug: params.brandname },
       include: {
-        newsletters: {
+        Newsletter: {
           orderBy: { created_at: "desc" },
           skip: offset,
           take: limit,
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: { brandnam
         include: {
           Brand: {
             include: {
-              newsletters: {
+              Newsletter: {
                 orderBy: { created_at: "desc" },
                 skip: offset,
                 take: limit,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest, { params }: { params: { brandnam
     }
 
     return NextResponse.json({
-      newsletters: brand.newsletters,
+      newsletters: brand.Newsletter,
     });
   } catch (error) {
     console.error("Error fetching newsletters:", error);

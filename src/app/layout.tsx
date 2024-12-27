@@ -6,8 +6,14 @@ import { Toaster } from "sonner";
 import AppNavbar from "@/app/components/app-navbar";
 import Footer from "@/app/components/footer";
 import Providers from "@/app/components/providers";
+import { initCronJobs } from "@/lib/cron";
 
 import "./globals.css";
+
+// Initialize cron jobs in development
+if (process.env.NODE_ENV === "development") {
+  initCronJobs();
+}
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL ??

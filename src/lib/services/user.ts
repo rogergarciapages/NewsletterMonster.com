@@ -29,39 +29,26 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
     const user = await prisma.user.findUnique({
       where: { user_id: userId },
       include: {
-        newsletters: {
-          orderBy: {
-            created_at: "desc",
-          },
-          select: {
-            newsletter_id: true,
-            sender: true,
-            subject: true,
-            top_screenshot_url: true,
-            likes_count: true,
-            you_rocks_count: true,
-            created_at: true,
-            summary: true,
-            user_id: true,
-          },
-        },
+        Newsletter: true,
         _count: {
           select: {
-            follows: true,
+            Follow: true,
           },
         },
-        social_links: true,
+        SocialLinks: true,
       },
     });
 
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     // Get first name only
-    const firstName = getFirstName(user.name);
+    const firstName = user.name.split(" ")[0];
 
-    // Transform newsletters to ensure non-null values where required
-    const transformedNewsletters = user.newsletters.map(newsletter => ({
+    const transformedNewsletters = user.Newsletter.map(newsletter => ({
       newsletter_id: newsletter.newsletter_id,
+      user_id: newsletter.user_id || user.user_id,
       sender: newsletter.sender || firstName,
       subject: newsletter.subject || "Untitled",
       top_screenshot_url: newsletter.top_screenshot_url,
@@ -69,37 +56,35 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
       you_rocks_count: newsletter.you_rocks_count || 0,
       created_at: newsletter.created_at || new Date(),
       summary: newsletter.summary,
-      user_id: newsletter.user_id || user.user_id,
     }));
 
-    // Create BrandUser object with all required fields
     const brandUser: BrandUser = {
       user_id: user.user_id,
       name: firstName,
-      email: user.email,
       surname: user.surname,
       company_name: null,
       username: user.username,
+      email: user.email,
       profile_photo: user.profile_photo,
       bio: user.bio,
       website: user.website,
       website_domain: null,
       domain_verified: false,
-      twitter_username: user.social_links?.twitter || null,
-      instagram_username: user.social_links?.instagram || null,
-      youtube_channel: user.social_links?.youtube || null,
-      linkedin_profile: user.social_links?.linkedin || null,
+      twitter_username: user.SocialLinks?.twitter || null,
+      instagram_username: user.SocialLinks?.instagram || null,
+      youtube_channel: user.SocialLinks?.youtube || null,
+      linkedin_profile: user.SocialLinks?.linkedin || null,
       role: user.role,
     };
 
     return {
       user: brandUser,
       newsletters: transformedNewsletters,
-      followersCount: user._count.follows,
+      followersCount: user._count.Follow,
       followingCount: 0,
     };
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    return null;
+    console.error("Error in getUserProfile:", error);
+    throw error;
   }
 }

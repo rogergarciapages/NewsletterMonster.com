@@ -20,10 +20,14 @@ import FollowButton from "./follow-button";
 
 // src/app/components/brand/profile/header/index.tsx
 
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
 interface BrandProfileHeaderProps {
   brandId: string;
   brandName: string;
-  brand: Brand & { social_links: SocialLinks | null };
+  brand: Brand & { SocialLinks: SocialLinks | null };
   newsletterCount: number;
   followersCount: number;
   isFollowing: boolean;
@@ -177,54 +181,41 @@ export default function BrandProfileHeader({
             )}
 
             {/* Social Links */}
-            {brand.social_links && (
+            {brand.SocialLinks && (
               <div className="mt-4 flex space-x-4">
-                {brand.social_links.twitter && (
+                {brand.SocialLinks.twitter && (
                   <Link
-                    href={`https://twitter.com/${brand.social_links.twitter}`}
+                    href={`https://twitter.com/${brand.SocialLinks.twitter}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-default-400 hover:text-default-500"
                   >
                     <FaTwitter className="h-5 w-5" />
                   </Link>
                 )}
-                {brand.social_links.instagram && (
+                {brand.SocialLinks.instagram && (
                   <Link
-                    href={`https://instagram.com/${brand.social_links.instagram}`}
+                    href={`https://instagram.com/${brand.SocialLinks.instagram}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-default-400 hover:text-default-500"
                   >
                     <FaInstagram className="h-5 w-5" />
                   </Link>
                 )}
-                {brand.social_links.linkedin && (
-                  <Link
-                    href={brand.social_links.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-default-400 hover:text-default-500"
-                  >
+                {brand.SocialLinks.linkedin && (
+                  <Link href={brand.SocialLinks.linkedin} target="_blank" rel="noopener noreferrer">
                     <FaLinkedin className="h-5 w-5" />
                   </Link>
                 )}
-                {brand.social_links.youtube && (
-                  <Link
-                    href={brand.social_links.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-default-400 hover:text-default-500"
-                  >
+                {brand.SocialLinks.youtube && (
+                  <Link href={brand.SocialLinks.youtube} target="_blank" rel="noopener noreferrer">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
                 )}
-                {brand.social_links.github && (
+                {brand.SocialLinks.github && (
                   <Link
-                    href={`https://github.com/${brand.social_links.github}`}
+                    href={`https://github.com/${brand.SocialLinks.github}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-default-400 hover:text-default-500"
                   >
                     <FaGithub className="h-5 w-5" />
                   </Link>

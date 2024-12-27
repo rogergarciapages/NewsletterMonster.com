@@ -1,13 +1,11 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DATABASE_URL_POOLED")
-  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
 }
 
 model Account {
@@ -23,24 +21,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  User              User    @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           Int      @id @default(autoincrement())
-  sessionToken String   @unique
-  userId       String   @db.Uuid
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  id         Int      @id @default(autoincrement())
-  identifier String
-  token      String   @unique
-  expires    DateTime
 }
 
 model Bookmark {
@@ -51,18 +34,57 @@ model Bookmark {
   User               User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+model Brand {
+  brand_id     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String         @db.VarChar(255)
+  slug         String         @unique
+  logo         String?
+  description  String?
+  website      String?
+  domain       String?        @unique
+  is_claimed   Boolean        @default(false)
+  is_verified  Boolean        @default(false)
+  created_at   DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?      @default(now()) @db.Timestamp(6)
+  BrandManager BrandManager[]
+  Follow       Follow[]
+  Newsletter   Newsletter[]
+  Post         Post[]
+  SocialLinks  SocialLinks?
+
+  @@index([domain])
+  @@index([slug])
+}
+
+model BrandManager {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String   @db.Uuid
+  brand_id    String   @db.Uuid
+  role        String   @default("OWNER")
+  permissions String[] @default(["VIEW"])
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  created_by  String?  @db.Uuid
+  Brand       Brand    @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
+  User        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, brand_id])
+  @@index([brand_id])
+  @@index([user_id])
+}
+
 model Comment {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  content     String
-  user_id     String        @db.Uuid
-  created_at  DateTime?     @default(now()) @db.Timestamp(6)
-  updated_at  DateTime?     @default(now()) @db.Timestamp(6)
-  parent_id   String?       @db.Uuid
-  post_id     Int
-  parent      Comment?      @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
-  replies     Comment[]     @relation("CommentReplies")
-  User        User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  CommentLike CommentLike[]
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content       String
+  user_id       String        @db.Uuid
+  created_at    DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?     @default(now()) @db.Timestamp(6)
+  parent_id     String?       @db.Uuid
+  post_id       Int
+  Comment       Comment?      @relation("CommentToComment", fields: [parent_id], references: [id], onDelete: Cascade)
+  other_Comment Comment[]     @relation("CommentToComment")
+  User          User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  CommentLike   CommentLike[]
 }
 
 model CommentLike {
@@ -88,12 +110,12 @@ model Follow {
   follower_id String   @db.Uuid
   brand_id    String   @db.Uuid
   created_at  DateTime @default(now()) @db.Timestamp(6)
-  brand       Brand    @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
-  follower    User     @relation("UserFollows", fields: [follower_id], references: [user_id], onDelete: Cascade)
+  Brand       Brand    @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
+  User        User     @relation(fields: [follower_id], references: [user_id], onDelete: Cascade)
 
   @@unique([follower_id, brand_id])
-  @@index([follower_id])
   @@index([brand_id])
+  @@index([follower_id])
 }
 
 model Like {
@@ -103,6 +125,9 @@ model Like {
   created_at    DateTime?  @default(now()) @db.Timestamp(6)
   Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
   User          User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([newsletter_id, user_id])
+  @@index([created_at])
 }
 
 model Newsletter {
@@ -127,10 +152,30 @@ model Newsletter {
   Brand               Brand?          @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
   User                User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   NewsletterTag       NewsletterTag[]
+  badges              Badge[]
 
-  @@index([user_id])
   @@index([brand_id])
   @@index([sender_slug])
+  @@index([user_id])
+  @@index([published_at])
+  @@index([likes_count])
+  @@index([you_rocks_count])
+  @@index([created_at])
+  @@index([likes_count, created_at])
+  @@index([you_rocks_count, created_at])
+  @@index([published_at, likes_count])
+  @@index([published_at, you_rocks_count])
+}
+
+model NewsletterTag {
+  newsletter_id Int
+  tag_id        Int
+  userTagTag_id Int?
+  Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
+  Tag           Tag        @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  UserTag       UserTag?   @relation(fields: [userTagTag_id], references: [tag_id])
+
+  @@id([newsletter_id, tag_id])
 }
 
 model Post {
@@ -141,88 +186,29 @@ model Post {
   brand_id   String?   @db.Uuid
   created_at DateTime? @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
-  brand      Brand?    @relation("BrandPosts", fields: [brand_id], references: [brand_id], onDelete: Cascade)
-  user       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  post_tags  PostTag[]
+  Brand      Brand?    @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
+  User       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  PostTag    PostTag[]
 
-  @@index([user_id])
   @@index([brand_id])
-}
-
-model User {
-  user_id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String         @db.VarChar(255)
-  surname        String?        @db.VarChar(255)
-  username       String?        @unique @db.VarChar(255)
-  email          String         @unique
-  profile_photo  String?
-  password       String?
-  created_at     DateTime?      @default(now()) @db.Timestamp(6)
-  role           String         @default("FREE") @db.VarChar
-  bio            String?
-  website        String?
-  location       String?        @db.VarChar(255)
-  date_of_birth  DateTime?      @db.Date
-  updated_at     DateTime?      @default(now()) @db.Timestamp(6)
-  status         String?        @default("active") @db.VarChar(255)
-  last_login     DateTime?      @db.Timestamp(6)
-  emailVerified  DateTime?      @db.Timestamp(6)
-  provider       String?        @db.VarChar(255)
-  accounts       Account[]
-  bookmarks      Bookmark[]
-  managed_brands BrandManager[]
-  comments       Comment[]
-  comment_likes  CommentLike[]
-  favorites      Favorite[]
-  follows        Follow[]       @relation("UserFollows")
-  likes          Like[]
-  newsletters    Newsletter[]
-  posts          Post[]
-  sessions       Session[]
-  social_links   SocialLinks?
-  user_tags      UserTag[]
-  you_rocks      YouRock[]
-
-  @@index([username])
-}
-
-model Brand {
-  brand_id     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String         @db.VarChar(255)
-  slug         String         @unique
-  logo         String?
-  description  String?
-  website      String?
-  domain       String?        @unique
-  is_claimed   Boolean        @default(false)
-  is_verified  Boolean        @default(false)
-  created_at   DateTime?      @default(now()) @db.Timestamp(6)
-  updated_at   DateTime?      @default(now()) @db.Timestamp(6)
-  managers     BrandManager[]
-  followers    Follow[]
-  newsletters  Newsletter[]
-  posts        Post[]         @relation("BrandPosts")
-  social_links SocialLinks?
-
-  @@index([slug])
-  @@index([domain])
-}
-
-model BrandManager {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id     String   @db.Uuid
-  brand_id    String   @db.Uuid
-  role        String   @default("OWNER")
-  permissions String[] @default(["VIEW"])
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
-  created_by  String?  @db.Uuid
-  brand       Brand    @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
-  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-
-  @@unique([user_id, brand_id])
   @@index([user_id])
-  @@index([brand_id])
+}
+
+model PostTag {
+  post_id String  @db.Uuid
+  tag_id  Int
+  Post    Post    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  UserTag UserTag @relation(fields: [tag_id], references: [tag_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, tag_id])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 }
 
 model SocialLinks {
@@ -239,6 +225,53 @@ model SocialLinks {
   User      User?   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
+model Tag {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  slug          String          @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now())
+  count         Int?            @default(0)
+  NewsletterTag NewsletterTag[]
+}
+
+model User {
+  user_id       String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String         @db.VarChar(255)
+  surname       String?        @db.VarChar(255)
+  username      String?        @unique @db.VarChar(255)
+  email         String         @unique
+  profile_photo String?
+  password      String?
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  role          String         @default("FREE") @db.VarChar
+  bio           String?
+  website       String?
+  location      String?        @db.VarChar(255)
+  date_of_birth DateTime?      @db.Date
+  updated_at    DateTime?      @default(now()) @db.Timestamp(6)
+  status        String?        @default("active") @db.VarChar(255)
+  last_login    DateTime?      @db.Timestamp(6)
+  emailVerified DateTime?      @db.Timestamp(6)
+  provider      String?        @db.VarChar(255)
+  Account       Account[]
+  Bookmark      Bookmark[]
+  BrandManager  BrandManager[]
+  Comment       Comment[]
+  CommentLike   CommentLike[]
+  Favorite      Favorite[]
+  Follow        Follow[]
+  Like          Like[]
+  Newsletter    Newsletter[]
+  Post          Post[]
+  Session       Session[]
+  SocialLinks   SocialLinks?
+  UserTag       UserTag[]
+  YouRock       YouRock[]
+
+  @@index([username])
+}
+
 model UserTag {
   tag_id        Int             @id @default(autoincrement())
   user_id       String?         @db.Uuid
@@ -246,6 +279,13 @@ model UserTag {
   NewsletterTag NewsletterTag[]
   PostTag       PostTag[]
   User          User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
 }
 
 model YouRock {
@@ -256,32 +296,36 @@ model YouRock {
   User              User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model NewsletterTag {
+model Badge {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          BadgeType  // Using enum
+  category      BadgeCategory // Using enum
+  rank          BadgeRank  // Using enum
+  count         Int       // Track the count that earned this badge
+  earned_at     DateTime   @default(now()) @db.Timestamp(6)
   newsletter_id Int
-  tag_id        Int
-  userTagTag_id Int?
-  Newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade, onUpdate: NoAction)
-  Tag           Tag        @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  UserTag       UserTag?   @relation(fields: [userTagTag_id], references: [tag_id])
+  newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade)
 
-  @@id([newsletter_id, tag_id])
+  @@unique([type, category, rank, earned_at])
+  @@index([newsletter_id])
+  @@index([type, category, rank])
+  @@index([earned_at])
+  @@map("badges")
 }
 
-model PostTag {
-  post_id String  @db.Uuid
-  tag_id  Int
-  Post    Post    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  UserTag UserTag @relation(fields: [tag_id], references: [tag_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@id([post_id, tag_id])
+enum BadgeType {
+  LIKE
+  YOU_ROCK
 }
 
-model Tag {
-  id          Int             @id @default(autoincrement())
-  name        String          @unique
-  slug        String          @unique
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @default(now())
-  count       Int?            @default(0)
-  Newsletters NewsletterTag[]
+enum BadgeCategory {
+  DAY
+  WEEK
+  MONTH
+}
+
+enum BadgeRank {
+  FIRST
+  SECOND
+  THIRD
 }

@@ -32,7 +32,7 @@ interface BrandData {
     is_verified: boolean;
     created_at: Date | null;
     updated_at: Date | null;
-    social_links: {
+    SocialLinks: {
       instagram?: string;
       twitter?: string;
       linkedin?: string;
@@ -71,10 +71,10 @@ export async function generateMetadata({
       website: data.brand.website,
       website_domain: data.brand.domain,
       domain_verified: data.brand.is_verified,
-      twitter_username: data.brand.social_links?.twitter || null,
-      instagram_username: data.brand.social_links?.instagram || null,
-      youtube_channel: data.brand.social_links?.youtube || null,
-      linkedin_profile: data.brand.social_links?.linkedin || null,
+      twitter_username: data.brand.SocialLinks?.twitter || null,
+      instagram_username: data.brand.SocialLinks?.instagram || null,
+      youtube_channel: data.brand.SocialLinks?.youtube || null,
+      linkedin_profile: data.brand.SocialLinks?.linkedin || null,
       role: "BRAND",
     },
   });
@@ -95,8 +95,8 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
     let brand = await prisma.brand.findUnique({
       where: { slug: brandSlug },
       include: {
-        social_links: true,
-        newsletters: {
+        SocialLinks: true,
+        Newsletter: {
           orderBy: { created_at: "desc" },
           select: {
             newsletter_id: true,
@@ -112,7 +112,7 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
         },
         _count: {
           select: {
-            followers: true,
+            Follow: true,
           },
         },
       },
@@ -126,8 +126,8 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
         include: {
           Brand: {
             include: {
-              social_links: true,
-              newsletters: {
+              SocialLinks: true,
+              Newsletter: {
                 orderBy: { created_at: "desc" },
                 select: {
                   newsletter_id: true,
@@ -143,7 +143,7 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
               },
               _count: {
                 select: {
-                  followers: true,
+                  Follow: true,
                 },
               },
             },
@@ -188,19 +188,19 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
         is_verified: brand.is_verified,
         created_at: brand.created_at,
         updated_at: brand.updated_at,
-        social_links: brand.social_links
+        SocialLinks: brand.SocialLinks
           ? {
-              instagram: brand.social_links.instagram || undefined,
-              twitter: brand.social_links.twitter || undefined,
-              linkedin: brand.social_links.linkedin || undefined,
-              facebook: brand.social_links.facebook || undefined,
-              youtube: brand.social_links.youtube || undefined,
-              github: brand.social_links.github || undefined,
+              instagram: brand.SocialLinks.instagram || undefined,
+              twitter: brand.SocialLinks.twitter || undefined,
+              linkedin: brand.SocialLinks.linkedin || undefined,
+              facebook: brand.SocialLinks.facebook || undefined,
+              youtube: brand.SocialLinks.youtube || undefined,
+              github: brand.SocialLinks.github || undefined,
             }
           : null,
       },
-      newsletters: brand.newsletters,
-      followersCount: brand._count.followers,
+      newsletters: brand.Newsletter,
+      followersCount: brand._count.Follow,
       isFollowing,
     };
   } catch (error) {
@@ -241,10 +241,10 @@ export default async function BrandPage({ params }: { params: { brandname: strin
           website: brand.website,
           website_domain: brand.domain,
           domain_verified: brand.is_verified,
-          twitter_username: brand.social_links?.twitter || null,
-          instagram_username: brand.social_links?.instagram || null,
-          youtube_channel: brand.social_links?.youtube || null,
-          linkedin_profile: brand.social_links?.linkedin || null,
+          twitter_username: brand.SocialLinks?.twitter || null,
+          instagram_username: brand.SocialLinks?.instagram || null,
+          youtube_channel: brand.SocialLinks?.youtube || null,
+          linkedin_profile: brand.SocialLinks?.linkedin || null,
           role: "BRAND",
         }}
       />
@@ -268,17 +268,17 @@ export default async function BrandPage({ params }: { params: { brandname: strin
                 is_verified: brand.is_verified,
                 created_at: brand.created_at,
                 updated_at: brand.updated_at,
-                social_links: brand.social_links
+                SocialLinks: brand.SocialLinks
                   ? {
                       id: brand.brand_id,
                       brand_id: brand.brand_id,
                       user_id: null,
-                      instagram: brand.social_links.instagram || null,
-                      twitter: brand.social_links.twitter || null,
-                      linkedin: brand.social_links.linkedin || null,
-                      facebook: brand.social_links.facebook || null,
-                      youtube: brand.social_links.youtube || null,
-                      github: brand.social_links.github || null,
+                      instagram: brand.SocialLinks.instagram || null,
+                      twitter: brand.SocialLinks.twitter || null,
+                      linkedin: brand.SocialLinks.linkedin || null,
+                      facebook: brand.SocialLinks.facebook || null,
+                      youtube: brand.SocialLinks.youtube || null,
+                      github: brand.SocialLinks.github || null,
                     }
                   : null,
               }}

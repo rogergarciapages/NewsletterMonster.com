@@ -57,7 +57,7 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
     const [user, newsletters, followersCount] = await Promise.all([
       prisma!.user.findUnique({
         where: { user_id: userId },
-        include: { social_links: true },
+        include: { SocialLinks: true },
       }),
       prisma!.newsletter.findMany({
         where: { user_id: userId },
@@ -97,10 +97,10 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
         website: user.website || null,
         website_domain: null,
         domain_verified: false,
-        twitter_username: user.social_links?.twitter || null,
-        instagram_username: user.social_links?.instagram || null,
-        youtube_channel: user.social_links?.youtube || null,
-        linkedin_profile: user.social_links?.linkedin || null,
+        twitter_username: user.SocialLinks?.twitter || null,
+        instagram_username: user.SocialLinks?.instagram || null,
+        youtube_channel: user.SocialLinks?.youtube || null,
+        linkedin_profile: user.SocialLinks?.linkedin || null,
         role: "USER",
       },
       followersCount,
@@ -219,7 +219,7 @@ export default async function UserProfilePage({ params }: { params: { userId: st
             is_verified: user.domain_verified,
             created_at: null,
             updated_at: null,
-            social_links: {
+            SocialLinks: {
               user_id: user.user_id,
               brand_id: user.user_id,
               id: user.user_id,

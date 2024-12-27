@@ -8,10 +8,12 @@ import LoginModal from "@/app/components/login-modal";
 
 import BrandProfileHeader from "./index";
 
-interface BrandProfileHeaderWrapperProps {
+interface BrandProfileHeaderProps {
+  brand: Brand & {
+    SocialLinks: SocialLinks | null;
+  };
   brandId: string;
   brandName: string;
-  brand: Brand & { social_links: SocialLinks | null };
   newsletterCount: number;
   followersCount: number;
   isFollowing: boolean;
@@ -20,15 +22,15 @@ interface BrandProfileHeaderWrapperProps {
 }
 
 export default function BrandProfileHeaderWrapper({
+  brand,
   brandId,
   brandName,
-  brand,
   newsletterCount,
   followersCount,
   isFollowing,
-  hideFollowButton = false,
-  isOwnProfile = false,
-}: BrandProfileHeaderWrapperProps) {
+  hideFollowButton,
+  isOwnProfile,
+}: BrandProfileHeaderProps) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (

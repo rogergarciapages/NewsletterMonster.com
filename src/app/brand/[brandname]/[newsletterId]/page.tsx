@@ -30,6 +30,14 @@ type NewsletterDetail = {
   created_at: Date | null;
   products_link: string | null;
   summary: string | null;
+  badges: {
+    id: string;
+    type: BadgeType;
+    category: BadgeCategory;
+    rank: BadgeRank;
+    earned_at: Date;
+    count: number;
+  }[];
   NewsletterTag: {
     Tag: {
       id: number;
@@ -37,6 +45,24 @@ type NewsletterDetail = {
     };
   }[];
 };
+
+// Add enum types from Prisma schema
+enum BadgeType {
+  LIKE = "LIKE",
+  YOU_ROCK = "YOU_ROCK",
+}
+
+enum BadgeCategory {
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+}
+
+enum BadgeRank {
+  FIRST = "FIRST",
+  SECOND = "SECOND",
+  THIRD = "THIRD",
+}
 
 // Helper function to format brand name
 function formatBrandName(brandname: string): string {
@@ -72,6 +98,19 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
         created_at: true,
         products_link: true,
         summary: true,
+        badges: {
+          select: {
+            id: true,
+            type: true,
+            category: true,
+            rank: true,
+            earned_at: true,
+            count: true,
+          },
+          orderBy: {
+            earned_at: "desc",
+          },
+        },
         NewsletterTag: {
           select: {
             Tag: {
@@ -85,7 +124,7 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
       },
     });
 
-    return newsletter;
+    return newsletter as NewsletterDetail | null;
   } catch (error) {
     console.error("Error fetching newsletter:", error);
     return null;
@@ -193,6 +232,7 @@ export default async function NewsletterPage({
             sender={newsletter.sender}
             brandname={params.brandname}
             date={newsletter.created_at}
+            badges={newsletter.badges}
           />
 
           {/* Email toolbar */}

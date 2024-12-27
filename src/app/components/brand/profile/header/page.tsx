@@ -21,6 +21,7 @@ async function getBrandData(brandId: string) {
         emailVerified: true,
         role: true,
         status: true,
+        SocialLinks: true,
       },
     });
 
@@ -46,7 +47,7 @@ async function getBrandData(brandId: string) {
             is_verified: user.emailVerified !== null,
             created_at: null,
             updated_at: null,
-            social_links: null,
+            SocialLinks: user.SocialLinks,
           }
         : null,
       newsletterCount,
@@ -84,7 +85,7 @@ export default async function BrandProfilePage({ params }: { params: { brandId: 
               is_verified: user.is_verified,
               created_at: user.created_at,
               updated_at: user.updated_at,
-              social_links: user.social_links,
+              SocialLinks: user.SocialLinks,
             }}
             newsletterCount={newsletterCount}
             followersCount={followersCount}

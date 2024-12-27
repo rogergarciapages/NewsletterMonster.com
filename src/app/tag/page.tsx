@@ -1,6 +1,5 @@
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { getTopTags } from "@/lib/services/tag-service";
-import type { TagWithNewsletters } from "@/types/newsletter";
+import { getTopTagsWithNewsletters } from "@/lib/services/tags";
 
 import { TagSectionClient } from "./tag-section-client";
 
@@ -11,7 +10,7 @@ export const metadata = {
 };
 
 export default async function TagsLandingPage() {
-  const topTags = await getTopTags();
+  const transformedTags = await getTopTagsWithNewsletters();
 
   return (
     <ThreeColumnLayout>
@@ -26,7 +25,7 @@ export default async function TagsLandingPage() {
         </header>
 
         <div className="space-y-16">
-          {topTags.map((tag: TagWithNewsletters) => (
+          {transformedTags.map(tag => (
             <TagSectionClient key={tag.id} tag={tag} />
           ))}
         </div>

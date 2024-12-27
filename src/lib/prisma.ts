@@ -5,36 +5,30 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const prismaClientSingleton = () => {
-  const prisma = new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+const prisma =
+  global.prisma ||
+  new PrismaClient({
+    log: [{ emit: "event", level: "query" }],
   });
 
-  // Add query performance monitoring
-  prisma.$use(async (params, next) => {
-    const start = performance.now();
-    const result = await next(params);
-    const end = performance.now();
-
-    if (end - start > 100) {
-      console.warn(`Slow query detected (${Math.round(end - start)}ms):`, {
-        model: params.model,
-        operation: params.action,
-        args: params.args,
+// Log slow queries in development
+if (process.env.NODE_ENV === "development") {
+  (prisma.$on as any)("query", (e: any) => {
+    if (e.duration >= 500) {
+      // Only log queries slower than 500ms
+      console.log(`Slow query (${e.duration}ms):`, {
+        query: e.query,
+        params: e.params,
       });
     }
-
-    return result;
   });
-
-  return prisma;
-};
-
-// Check if we already have an instance of Prisma Client
-if (!global.prisma) {
-  global.prisma = prismaClientSingleton();
 }
 
-const prisma = global.prisma;
+// Soft shutdown
+process.on("beforeExit", async () => {
+  await prisma.$disconnect();
+});
+
+if (process.env.NODE_ENV !== "production") global.prisma = prisma;
 
 export default prisma;

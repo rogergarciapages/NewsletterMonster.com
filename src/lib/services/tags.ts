@@ -68,19 +68,15 @@ export async function getNewslettersByTag(
   return result;
 }
 
-export async function getTopTags(limit = 6): Promise<TagWithNewsletters[]> {
+export async function getTopTagsWithNewsletters(limit = 6): Promise<TagWithNewsletters[]> {
   const tags = await prisma.tag.findMany({
     where: {
-      count: {
-        gt: 0,
-      },
+      count: { gt: 0 },
     },
-    orderBy: {
-      count: "desc",
-    },
+    orderBy: { count: "desc" },
     take: limit,
     include: {
-      Newsletters: {
+      NewsletterTag: {
         take: 6,
         include: {
           Newsletter: {
@@ -106,5 +102,16 @@ export async function getTopTags(limit = 6): Promise<TagWithNewsletters[]> {
     },
   });
 
-  return tags;
+  // Transform the data to match TagWithNewsletters type
+  return tags.map(tag => ({
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    count: tag.count,
+    createdAt: tag.createdAt,
+    updatedAt: tag.updatedAt,
+    Newsletters: tag.NewsletterTag.map(nt => ({
+      Newsletter: nt.Newsletter,
+    })),
+  }));
 }

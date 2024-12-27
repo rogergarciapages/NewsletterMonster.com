@@ -1,2 +1,0 @@
-import { BrandProfile } from "@/types/brands"; 
-import ThreeColumnLayout from "@/components/layouts/three-column-layout"; 

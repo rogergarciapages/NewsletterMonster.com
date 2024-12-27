@@ -69,11 +69,11 @@ export function createPrismaAdapter(p: PrismaClient): Adapter {
           providerAccountId: providerAccount.providerAccountId,
         },
         select: {
-          user: true,
+          User: true,
         },
       });
-      if (!account?.user) return null;
-      return convertToAdapterUser(account.user as DbUser);
+      if (!account?.User) return null;
+      return convertToAdapterUser(account.User as DbUser);
     },
 
     updateUser: async (data: Partial<CustomUser> & { id: string }) => {
@@ -142,19 +142,19 @@ export function createPrismaAdapter(p: PrismaClient): Adapter {
     getSessionAndUser: async (sessionToken: string) => {
       const result = await p.session.findUnique({
         where: { sessionToken },
-        include: { user: true },
+        include: { User: true },
       });
 
       if (!result) return null;
 
-      const { user, ...session } = result;
+      const { User, ...session } = result;
       return {
         session: {
           userId: session.userId,
           sessionToken: session.sessionToken,
           expires: session.expires,
         },
-        user: convertToAdapterUser(user as DbUser),
+        user: convertToAdapterUser(User as DbUser),
       };
     },
 

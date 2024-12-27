@@ -1,3 +1,0 @@
-import EmailCopyProfile from "@/app/components/email-copy-profile";
-
-1|import EmailCopyProfile from "@/app/components/email-copy-profile"; 

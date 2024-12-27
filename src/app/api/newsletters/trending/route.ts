@@ -74,9 +74,7 @@ export async function GET(request: Request) {
 
     if (!newsletters || newsletters.length === 0) {
       console.log("No newsletters found");
-      return addCacheHeaders(
-        NextResponse.json({ message: "No newsletters found" }, { status: 404 })
-      );
+      return addCacheHeaders(NextResponse.json([]));
     }
 
     // Add cache headers to successful response
