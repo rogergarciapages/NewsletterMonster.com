@@ -2,71 +2,36 @@ import cron from "node-cron";
 
 import { BadgeService } from "../services/badge";
 
-export class BadgeScheduler {
-  private static isRunning = false;
+let isCalculating = false;
 
-  static start() {
-    if (this.isRunning) {
-      return;
-    }
-
-    // Daily badges - Every day at 00:00 GMT
-    cron.schedule(
-      "0 0 * * *",
-      async () => {
-        try {
-          await BadgeService.calculateAndAwardBadges("DAY");
-        } catch (error) {
-          console.error("Error calculating daily badges:", error);
-        }
-      },
-      {
-        timezone: "GMT",
-      }
-    );
-
-    // Weekly badges - Every Thursday at 00:00 GMT
-    cron.schedule(
-      "0 0 * * 4",
-      async () => {
-        try {
-          await BadgeService.calculateAndAwardBadges("WEEK");
-        } catch (error) {
-          console.error("Error calculating weekly badges:", error);
-        }
-      },
-      {
-        timezone: "GMT",
-      }
-    );
-
-    // Monthly badges - At 00:00 GMT on the last day of each month
-    cron.schedule(
-      "0 0 28-31 * *",
-      async () => {
-        try {
-          // Check if it's the last day of the month
-          const now = new Date();
-          const tomorrow = new Date(now);
-          tomorrow.setDate(tomorrow.getDate() + 1);
-
-          if (tomorrow.getMonth() !== now.getMonth()) {
-            // It's the last day of the month
-            await BadgeService.calculateAndAwardBadges("MONTH");
-          }
-        } catch (error) {
-          console.error("Error calculating monthly badges:", error);
-        }
-      },
-      {
-        timezone: "GMT",
-      }
-    );
-
-    this.isRunning = true;
+async function calculateBadgesSafely(category: "DAY" | "WEEK" | "MONTH") {
+  if (isCalculating) {
+    console.log(`Skipping ${category} badge calculation - another calculation is in progress`);
+    return;
   }
 
-  static stop() {
-    this.isRunning = false;
+  try {
+    isCalculating = true;
+    await BadgeService.calculateAndAwardBadges(category);
+  } catch (error) {
+    console.error(`Error calculating ${category} badges:`, error);
+  } finally {
+    isCalculating = false;
   }
+}
+
+export function initBadgeScheduler() {
+  console.log("Initializing badge calculation schedules:");
+  console.log("- Daily badges: every day at 00:00 GMT");
+  console.log("- Weekly badges: every Thursday at 00:00 GMT");
+  console.log("- Monthly badges: last day of month at 00:00 GMT");
+
+  // Daily at 00:00 GMT
+  cron.schedule("0 0 * * *", () => calculateBadgesSafely("DAY"));
+
+  // Weekly on Thursday at 00:00 GMT
+  cron.schedule("0 0 * * 4", () => calculateBadgesSafely("WEEK"));
+
+  // Monthly on the last day at 00:00 GMT
+  cron.schedule("0 0 L * *", () => calculateBadgesSafely("MONTH"));
 }

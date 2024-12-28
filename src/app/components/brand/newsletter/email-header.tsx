@@ -38,29 +38,10 @@ export default function EmailHeader({
   badges = [],
 }: EmailHeaderProps) {
   return (
-    <div className="rounded-t-lg border-b bg-white p-4 dark:bg-zinc-900">
+    <div className="relative rounded-t-lg border-b bg-white p-4 dark:bg-zinc-900">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>
-          {badges.length > 0 && (
-            <div className="flex gap-2">
-              {badges.map(badge => (
-                <Tooltip
-                  key={badge.id}
-                  content={`${badge.rank.charAt(0) + badge.rank.slice(1).toLowerCase()} place for ${badge.type === "LIKE" ? "likes" : "you rocks"} of the ${badge.category.toLowerCase()}`}
-                >
-                  <div className="relative h-8 w-8">
-                    <Image
-                      src={`/badges/${getBadgeImage(badge.type, badge.category, badge.rank)}`}
-                      alt={`${badge.rank} ${badge.type} ${badge.category} badge`}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </Tooltip>
-              ))}
-            </div>
-          )}
         </div>
         <div className="flex gap-2">
           <Tooltip content="Star this newsletter">
@@ -117,6 +98,28 @@ export default function EmailHeader({
           </div>
         )}
       </div>
+
+      {/* Badges positioned in bottom right corner */}
+      {badges.length > 0 && (
+        <div className="absolute -bottom-10 right-8 flex gap-4">
+          {badges.map(badge => (
+            <Tooltip
+              key={badge.id}
+              content={`${badge.rank.charAt(0) + badge.rank.slice(1).toLowerCase()} place for ${badge.type === "LIKE" ? "likes" : "you rocks"} of the ${badge.category.toLowerCase()}`}
+              placement="top"
+            >
+              <div className="relative h-[144px] w-[144px] transition-transform hover:scale-110">
+                <Image
+                  src={`/badges/${getBadgeImage(badge.type, badge.category, badge.rank)}`}
+                  alt={`${badge.rank} ${badge.type} ${badge.category} badge`}
+                  fill
+                  className="object-contain drop-shadow-lg"
+                />
+              </div>
+            </Tooltip>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

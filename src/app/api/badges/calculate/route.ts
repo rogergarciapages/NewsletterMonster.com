@@ -1,35 +1,33 @@
 import { NextResponse } from "next/server";
 
-import { BadgeScheduler } from "@/lib/cron/badge-scheduler";
 import { BadgeService } from "@/lib/services/badge";
 
-// Start the scheduler when the module is loaded
-BadgeScheduler.start();
+let isCalculating = false;
 
 export async function GET() {
   // Only allow manual calculation in development mode
   if (process.env.NODE_ENV !== "development") {
     return NextResponse.json(
-      {
-        success: false,
-        error: "Badge calculation endpoint is only available in development mode",
-      },
+      { error: "Manual badge calculation is only allowed in development mode" },
       { status: 403 }
     );
   }
 
+  if (isCalculating) {
+    return NextResponse.json({ error: "Badge calculation already in progress" }, { status: 409 });
+  }
+
   try {
-    const dailyBadges = await BadgeService.calculateAndAwardBadges("DAY");
-    const weeklyBadges = await BadgeService.calculateAndAwardBadges("WEEK");
-    const monthlyBadges = await BadgeService.calculateAndAwardBadges("MONTH");
+    isCalculating = true;
+
+    // Calculate badges sequentially
+    const day = await BadgeService.calculateAndAwardBadges("DAY");
+    const week = await BadgeService.calculateAndAwardBadges("WEEK");
+    const month = await BadgeService.calculateAndAwardBadges("MONTH");
 
     return NextResponse.json({
       success: true,
-      badges: {
-        day: dailyBadges,
-        week: weeklyBadges,
-        month: monthlyBadges,
-      },
+      badges: { day, week, month },
     });
   } catch (error) {
     console.error("Error calculating badges:", error);
@@ -37,5 +35,7 @@ export async function GET() {
       { success: false, error: "Failed to calculate badges" },
       { status: 500 }
     );
+  } finally {
+    isCalculating = false;
   }
 }

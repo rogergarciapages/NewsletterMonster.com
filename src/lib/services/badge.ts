@@ -17,34 +17,42 @@ export class BadgeService {
     category: BadgeCategory,
     date: Date = new Date()
   ): Promise<TimeRange> {
-    const now = new Date();
+    const referenceDate = new Date(date);
+
     switch (category) {
-      case "DAY":
-        // Previous day (24 hours)
-        const oneDayAgo = new Date(now);
-        oneDayAgo.setUTCHours(0, 0, 0, 0); // Start of the previous day
-        return {
-          start: oneDayAgo,
-          end: now,
-        };
-      case "WEEK":
-        // Previous week (7 days)
-        const oneWeekAgo = new Date(now);
-        oneWeekAgo.setUTCDate(now.getUTCDate() - 7);
-        oneWeekAgo.setUTCHours(0, 0, 0, 0); // Start of the day 7 days ago
-        return {
-          start: oneWeekAgo,
-          end: now,
-        };
-      case "MONTH":
-        // Current month
-        const startOfMonth = new Date(now);
-        startOfMonth.setUTCDate(1); // First day of the current month
-        startOfMonth.setUTCHours(0, 0, 0, 0);
-        return {
-          start: startOfMonth,
-          end: now,
-        };
+      case "DAY": {
+        // For daily badges: previous day from 00:00 to 23:59:59
+        const start = new Date(referenceDate);
+        start.setUTCDate(start.getUTCDate() - 1);
+        start.setUTCHours(0, 0, 0, 0);
+
+        const end = new Date(start);
+        end.setUTCHours(23, 59, 59, 999);
+
+        return { start, end };
+      }
+      case "WEEK": {
+        // For weekly badges: previous week from Monday 00:00 to Sunday 23:59:59
+        const start = new Date(referenceDate);
+        start.setUTCDate(start.getUTCDate() - 7);
+        start.setUTCHours(0, 0, 0, 0);
+
+        const end = new Date(start);
+        end.setUTCDate(end.getUTCDate() + 6);
+        end.setUTCHours(23, 59, 59, 999);
+
+        return { start, end };
+      }
+      case "MONTH": {
+        // For monthly badges: current month from 1st 00:00 to last day 23:59:59
+        const start = new Date(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), 1);
+        start.setUTCHours(0, 0, 0, 0);
+
+        const end = new Date(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth() + 1, 0);
+        end.setUTCHours(23, 59, 59, 999);
+
+        return { start, end };
+      }
       default:
         throw new Error(`Invalid badge category: ${category}`);
     }
@@ -125,28 +133,79 @@ export class BadgeService {
   static async calculateAndAwardBadges(category: BadgeCategory, date: Date = new Date()) {
     const timeRange = await this.getTimeRange(category, date);
     const badgeTypes: BadgeType[] = ["LIKE", "YOU_ROCK"];
-    const now = new Date(); // Current timestamp for earned_at
+
+    console.log(`Calculating badges for ${category}:`, {
+      start: timeRange.start.toISOString(),
+      end: timeRange.end.toISOString(),
+      currentDate: date.toISOString(),
+    });
 
     const badges: Prisma.BadgeCreateManyInput[] = [];
 
     for (const type of badgeTypes) {
-      const topNewsletters = await this.getTopNewsletters(type, timeRange);
+      // First, check if badges for this time period already exist
+      const existingBadgesForPeriod = await prisma.badge.findMany({
+        where: {
+          type,
+          category,
+          earned_at: {
+            gte: timeRange.start,
+            lte: timeRange.end,
+          },
+        },
+      });
 
-      topNewsletters.forEach((result, index) => {
+      // If badges already exist for this period, skip
+      if (existingBadgesForPeriod.length > 0) {
+        console.log(`Badges already awarded for ${type} ${category} in this time period`);
+        continue;
+      }
+
+      const topNewsletters = await this.getTopNewsletters(type, timeRange);
+      console.log(`Found ${topNewsletters.length} top newsletters for ${type} ${category}`);
+
+      for (let index = 0; index < topNewsletters.length; index++) {
+        const result = topNewsletters[index];
+        const rank = this.getRankFromIndex(index);
+
         badges.push({
           type,
           category,
-          rank: this.getRankFromIndex(index),
+          rank,
           count: result.count,
           newsletter_id: result.newsletterId,
-          earned_at: now,
+          earned_at: date, // Use the provided date
         });
-      });
+        console.log(
+          `New badge to be awarded: ${type} ${category} ${rank} to newsletter ${result.newsletterId} with count ${result.count}`
+        );
+      }
     }
 
     if (badges.length > 0) {
-      await prisma.badge.createMany({
-        data: badges,
+      // Use transaction to ensure atomicity
+      await prisma.$transaction(async tx => {
+        // Final check before creating badges
+        for (const badge of badges) {
+          const existingForPeriod = await tx.badge.findFirst({
+            where: {
+              category: badge.category,
+              earned_at: {
+                gte: timeRange.start,
+                lte: timeRange.end,
+              },
+            },
+          });
+
+          if (!existingForPeriod) {
+            await tx.badge.create({
+              data: badge,
+            });
+            console.log(
+              `Badge awarded: ${badge.type} ${badge.category} ${badge.rank} to newsletter ${badge.newsletter_id}`
+            );
+          }
+        }
       });
     }
 
