@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 import { Badge as BadgeType } from "@prisma/client";
 
-import { Badge } from "@/app/components/newsletters/badge";
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -139,25 +138,40 @@ export function NewsletterCard({
               )}
             </div>
 
-            <button
-              onClick={handleBrandClick}
-              className="transform-gpu transition-all duration-300 hover:scale-105"
-            >
-              <span className="inline-block overflow-hidden truncate rounded-full bg-aquamarine-600/90 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-300 hover:bg-aquamarine-500/90 group-hover:bg-aquamarine-600/60 group-hover:hover:bg-aquamarine-500/60">
-                {newsletter.sender || "Unknown Sender"}
-              </span>
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleBrandClick}
+                className="transform-gpu transition-all duration-300 hover:scale-105"
+              >
+                <span className="inline-block overflow-hidden truncate rounded-full bg-aquamarine-600/90 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-300 hover:bg-aquamarine-500/90 group-hover:bg-aquamarine-600/60 group-hover:hover:bg-aquamarine-500/60">
+                  {newsletter.sender || "Unknown Sender"}
+                </span>
+              </button>
+
+              {showBadges && badges.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {badges.map(badge => {
+                    const rankNumber =
+                      badge.rank === "FIRST" ? "1" : badge.rank === "SECOND" ? "2" : "3";
+                    const categoryLetter =
+                      badge.category === "DAY" ? "d" : badge.category === "WEEK" ? "w" : "m";
+                    return (
+                      <Image
+                        key={badge.id}
+                        src={`/badges/${rankNumber}${categoryLetter}.png`}
+                        alt={`${badge.type} ${badge.category} ${badge.rank} Badge`}
+                        width={64}
+                        height={64}
+                        className="drop-shadow-lg transition-transform duration-300 hover:scale-110"
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-
-      {showBadges && badges.length > 0 && (
-        <div className="absolute right-3 top-3 z-20 flex flex-wrap gap-2">
-          {badges.map(badge => (
-            <Badge key={badge.id} badge={badge} size="sm" />
-          ))}
-        </div>
-      )}
     </Card>
   );
 }
