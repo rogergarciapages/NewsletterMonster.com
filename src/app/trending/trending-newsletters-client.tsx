@@ -14,6 +14,12 @@ import { Newsletter } from "@/types/newsletter";
 
 // src/app/trending/trending-newsletters-client.tsx
 
+// src/app/trending/trending-newsletters-client.tsx
+
+// src/app/trending/trending-newsletters-client.tsx
+
+// src/app/trending/trending-newsletters-client.tsx
+
 const NEWSLETTERS_PER_PAGE = 15;
 
 export default function TrendingNewslettersClient() {
@@ -107,7 +113,7 @@ export default function TrendingNewslettersClient() {
     <ThreeColumnLayout>
       <div role="main" aria-label="Trending Newsletters">
         <h1 className="sr-only">Trending Newsletters</h1>
-        <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 p-1 md:grid-cols-2 lg:grid-cols-3">
           {newsletters.map((newsletter, index) => (
             <div
               ref={index === newsletters.length - 1 ? lastNewsletterCallback : null}
@@ -129,7 +135,7 @@ export default function TrendingNewslettersClient() {
 
           {!hasMore && newsletters.length > 0 && (
             <div className="col-span-1 p-8 text-center text-gray-600 md:col-span-2 lg:col-span-3">
-              You&apos;ve reached the end of trending newsletters.
+              You&apos;re all caught up 🏁.
             </div>
           )}
         </div>

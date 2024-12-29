@@ -9,7 +9,7 @@ import { Badge as BadgeType } from "@prisma/client";
 import { Badge } from "@/app/components/newsletters/badge";
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Newsletter } from "@/types/newsletter";
 import { slugify } from "@/utils/slugify";
 
@@ -54,7 +54,7 @@ export function NewsletterCard({
   if (!mounted) {
     // Return a placeholder with the same dimensions
     return (
-      <div className="relative aspect-[3/4] w-full rounded-lg bg-gray-100 dark:bg-gray-800">
+      <div className="relative aspect-[3/4] w-full bg-gray-100 dark:bg-gray-800">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
         </div>
@@ -83,72 +83,76 @@ export function NewsletterCard({
 
   return (
     <Card
-      className="group relative w-full cursor-pointer bg-gradient-to-b from-torch-900 to-gray-900 transition-transform duration-300 hover:scale-[1.02]"
+      className="group relative w-full cursor-pointer overflow-hidden rounded-xl bg-white/5 transition-all duration-300 hover:scale-[1.02]"
       onClick={handleCardClick}
     >
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-torch-900 to-torch-800 opacity-0 transition-opacity duration-300 group-hover:opacity-[0.995]" />
+
       {/* Aspect ratio container */}
       <div className="relative w-full pt-[132.35%]">
-        {" "}
-        {/* 900/680 ≈ 1.3235 */}
-        <div className="absolute inset-0 m-2 overflow-hidden rounded-lg">
+        <div className="absolute inset-0 overflow-hidden">
           {!imageError ? (
             <Image
               src={newsletter.top_screenshot_url || defaultImage}
               alt={newsletter.subject || "Newsletter preview"}
               fill
-              className="object-cover transition-opacity duration-300 group-hover:opacity-5"
+              className="object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
               priority={priority}
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="h-full w-full bg-gradient-to-b from-gray-800 to-gray-900" />
+            <div className="h-full w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />
           )}
         </div>
+
         {/* Content overlay */}
-        <div className="absolute inset-0 z-10 flex flex-col justify-between py-2">
-          <CardContent>
-            <CardTitle className="mb-2 line-clamp-4 pt-4 text-xl leading-[1em] tracking-tight text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 z-10 flex flex-col justify-between">
+          {/* Title area */}
+          <div className="space-y-2 p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <CardTitle className="line-clamp-4 text-xl leading-tight tracking-tight text-white">
               {newsletter.subject || "No Subject"}
             </CardTitle>
 
             {newsletter.created_at && (
-              <div className="mb-2 text-xs text-gray-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="text-xs text-gray-200/90 group-hover:text-gray-200/60">
                 {formatDate(newsletter.created_at)}
               </div>
             )}
-          </CardContent>
+          </div>
 
-          <CardFooter className="flex flex-col items-start gap-2 px-4 py-1 align-bottom">
+          {/* Footer with permanent glassy effect */}
+          <div className="space-y-4 bg-white/10 p-4 backdrop-blur-sm transition-all duration-300 group-hover:bg-transparent">
             <div className="flex items-center space-x-4">
               {typeof newsletter.likes_count === "number" && (
-                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-2 py-1 text-white backdrop-blur-sm">
+                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-3 py-1.5 text-white backdrop-blur-sm transition-colors duration-300 group-hover:bg-black/20">
                   <HeartFullIcon className="h-4 w-4" />
-                  <span className="text-xs">{newsletter.likes_count}</span>
+                  <span className="text-xs font-medium">{newsletter.likes_count}</span>
                 </div>
               )}
               {typeof newsletter.you_rocks_count === "number" && (
-                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-3 py-1 text-white backdrop-blur-sm">
+                <div className="flex items-center space-x-2 rounded-full bg-black/70 px-3 py-1.5 text-white backdrop-blur-sm transition-colors duration-300 group-hover:bg-black/20">
                   <YouRockIcon className="h-4 w-4" />
-                  <span className="text-xs">{newsletter.you_rocks_count}</span>
+                  <span className="text-xs font-medium">{newsletter.you_rocks_count}</span>
                 </div>
               )}
             </div>
 
             <button
               onClick={handleBrandClick}
-              className="rounded-full transition-transform duration-300 hover:scale-105"
+              className="transform-gpu transition-all duration-300 hover:scale-105"
             >
-              <CardDescription className="inline-block truncate rounded-full bg-aquamarine-700 px-3 py-1 text-xs text-white hover:bg-aquamarine-600">
+              <span className="inline-block overflow-hidden truncate rounded-full bg-aquamarine-600/90 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-300 hover:bg-aquamarine-500/90 group-hover:bg-aquamarine-600/60 group-hover:hover:bg-aquamarine-500/60">
                 {newsletter.sender || "Unknown Sender"}
-              </CardDescription>
+              </span>
             </button>
-          </CardFooter>
+          </div>
         </div>
       </div>
 
       {showBadges && badges.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="absolute right-3 top-3 z-20 flex flex-wrap gap-2">
           {badges.map(badge => (
             <Badge key={badge.id} badge={badge} size="sm" />
           ))}
