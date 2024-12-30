@@ -16,12 +16,14 @@ interface NewsletterCardProps {
   newsletter: Newsletter;
   priority?: boolean;
   showBadges?: boolean;
+  isLarge?: boolean;
 }
 
 export function NewsletterCard({
   newsletter,
   priority = false,
   showBadges = true,
+  isLarge = false,
 }: NewsletterCardProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -97,7 +99,12 @@ export function NewsletterCard({
               alt={newsletter.subject || "Newsletter preview"}
               fill
               className="object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+              sizes={
+                isLarge
+                  ? "(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+                  : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              }
+              quality={isLarge ? 85 : 75}
               priority={priority}
               onError={() => setImageError(true)}
             />
@@ -115,7 +122,7 @@ export function NewsletterCard({
             </CardTitle>
 
             {newsletter.created_at && (
-              <div className="text-xs text-gray-200/90 group-hover:text-gray-200/60">
+              <div className="text-xs text-gray-300/90 group-hover:text-gray-200/60">
                 {formatDate(newsletter.created_at)}
               </div>
             )}
