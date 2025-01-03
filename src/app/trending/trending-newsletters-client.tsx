@@ -1,4 +1,3 @@
-// src/app/trending/trending-newsletters-client.tsx
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,65 +10,8 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { LargeNewsletterCard } from "@/app/components/newsletters/large-newsletter-card";
 import { SmallNewsletterCard } from "@/app/components/newsletters/small-newsletter-card";
 import { NewsletterPatternSkeleton } from "@/app/components/skeleton/newsletter-pattern-skeleton";
+import { Card } from "@/components/ui/card";
 import { Newsletter } from "@/types/newsletter";
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
-
-// src/app/trending/trending-newsletters-client.tsx
 
 const NEWSLETTERS_PER_PAGE = 30;
 
@@ -283,30 +225,42 @@ export default function TrendingNewslettersClient() {
   if (loading && regularNewsletters.length === 0 && badgedNewsletters.length === 0) {
     return (
       <ThreeColumnLayout>
-        <div className="space-y-6">
-          <h1 className="mb-8 text-3xl font-bold">Trending Newsletters</h1>
+        <Card className="p-8">
+          <div className="mb-8">
+            <h1 className="text-5xl font-bold">Trending Newsletters</h1>
+            <p className="text-white. mt-2">
+              Discover the most popular and highly-rated newsletters curated by our community
+            </p>
+          </div>
           <NewsletterPatternSkeleton />
-        </div>
+        </Card>
       </ThreeColumnLayout>
     );
   }
 
   return (
     <ThreeColumnLayout>
-      <div role="main" aria-label="Trending Newsletters">
-        <h1 className="mb-8 text-3xl font-bold">Trending Newsletters</h1>
-        <div className="space-y-6">
-          {renderGridItems()}
+      <Card className="p-8">
+        <div role="main" aria-label="Trending Newsletters">
+          <div className="mb-8">
+            <h1 className="text-5xl font-bold">Trending Newsletters</h1>
+            <p className="mt-4 max-w-xl text-pretty text-xl leading-snug tracking-tight text-white">
+              Discover the most popular and highly-rated newsletters curated by our community
+            </p>
+          </div>
+          <div className="space-y-6">
+            {renderGridItems()}
 
-          {loading && <NewsletterPatternSkeleton />}
+            {loading && <NewsletterPatternSkeleton />}
 
-          {!hasMore && regularNewsletters.length > 0 && (
-            <div className="col-span-3 p-8 text-center text-gray-600">
-              You&apos;re all caught up 🏁
-            </div>
-          )}
+            {!hasMore && regularNewsletters.length > 0 && (
+              <div className="col-span-3 p-8 text-center text-gray-600">
+                You&apos;re all caught up 🏁
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
     </ThreeColumnLayout>
   );
 }
