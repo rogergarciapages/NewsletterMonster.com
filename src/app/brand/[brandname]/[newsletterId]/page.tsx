@@ -5,9 +5,8 @@ import Script from "next/script";
 
 import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
+import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { LikeButton } from "@/app/components/newsletters/like-button";
-import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
 import prisma from "@/lib/prisma";
 
 import {
@@ -163,70 +162,25 @@ export default async function NewsletterPage({
   const brandDisplayName = formatBrandName(params.brandname);
   const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
 
-  // Generate structured data
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://newslettermonster.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: brandDisplayName,
-        item: `https://newslettermonster.com/${params.brandname}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: newsletter.subject || "Newsletter",
-        item: currentUrl,
-      },
-    ],
-  };
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: brandDisplayName,
-    url: `https://newslettermonster.com/${params.brandname}`,
-    sameAs: [`https://newslettermonster.com/${params.brandname}`],
-  };
-
   return (
     <>
-      {/* SEO Structured Data */}
-      <NewsletterStructuredData
-        newsletter={newsletter}
-        brandname={params.brandname}
-        brandDisplayName={brandDisplayName}
-        currentUrl={currentUrl}
-      />
-
-      {/* Additional Schema.org structured data */}
       <Script
-        id="breadcrumb-schema"
+        id="newsletter-structured-data"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <Script
-        id="organization-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            NewsletterStructuredData({
+              newsletter,
+              brandname: params.brandname,
+              brandDisplayName,
+              currentUrl,
+            })
+          ),
+        }}
       />
 
       <ThreeColumnLayout>
-        {/* Main content with email-like interface */}
-        <article
-          className="mx-auto w-full max-w-4xl overflow-hidden rounded-lg border shadow-sm"
-          itemScope
-          itemType="https://schema.org/Article"
-        >
-          {/* Email header */}
+        <article className="relative mx-auto w-full max-w-3xl">
           <EmailHeader
             subject={newsletter.subject}
             sender={newsletter.sender}
@@ -236,21 +190,14 @@ export default async function NewsletterPage({
           />
 
           {/* Email toolbar */}
-          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-800">
-            <div className="flex items-center space-x-2">
-              <LikeButton
-                newsletterId={newsletter.newsletter_id}
-                initialLikesCount={newsletter.likes_count || 0}
-                size="md"
-              />
-              <YouRockButton
-                newsletterId={newsletter.newsletter_id}
-                initialYouRocksCount={newsletter.you_rocks_count || 0}
-                size="md"
-              />
-            </div>
-            <div className="flex items-center space-x-2">{/* Add other toolbar items here */}</div>
-          </div>
+          <EmailToolbar
+            newsletterId={newsletter.newsletter_id}
+            currentUrl={currentUrl}
+            subject={newsletter.subject}
+            summary={newsletter.summary}
+            initialLikesCount={newsletter.likes_count || 0}
+            initialYouRocksCount={newsletter.you_rocks_count || 0}
+          />
 
           {/* Email content */}
           <EmailContent

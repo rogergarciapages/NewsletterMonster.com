@@ -14,12 +14,14 @@ interface YouRockButtonProps {
   newsletterId: number;
   initialYouRocksCount?: number;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 export function YouRockButton({
   newsletterId,
   initialYouRocksCount = 0,
   size = "md",
+  className = "",
 }: YouRockButtonProps) {
   const [mounted, setMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -149,7 +151,7 @@ export function YouRockButton({
         variant="light"
         onClick={handleClick}
         isLoading={isLoading}
-        className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-warning/10`}
+        className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-warning/10 ${className}`}
         startContent={
           <AnimatePresence mode="wait">
             <motion.span

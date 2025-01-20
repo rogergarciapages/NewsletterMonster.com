@@ -1,128 +1,72 @@
 "use client";
 
 import { Button, Tooltip } from "@nextui-org/react";
-import {
-  IconArchive,
-  IconBookmark,
-  IconHeart,
-  IconMail,
-  IconMailForward,
-  IconPrinter,
-  IconShare,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconBookmark } from "@tabler/icons-react";
+
+import { LikeButton } from "../../newsletters/like-button";
+import { ShareButton } from "../../newsletters/share-button";
+import { YouRockButton } from "../../newsletters/you-rock-button";
 
 type EmailToolbarProps = {
-  _onShare?: () => void;
-  _onPrint?: () => void;
-  onArchive?: () => void;
-  onDelete?: () => void;
   onBookmark?: () => void;
-  onLike?: () => void;
-  likesCount?: number;
-  isLiked?: boolean;
   currentUrl?: string;
   subject?: string | null;
   summary?: string | null;
+  newsletterId: number;
+  initialLikesCount?: number;
+  initialYouRocksCount?: number;
 };
 
 export default function EmailToolbar({
-  _onShare,
-  _onPrint,
-  onArchive,
-  onDelete,
   onBookmark,
-  onLike,
-  likesCount = 0,
-  isLiked = false,
   currentUrl,
   subject,
   summary,
+  newsletterId,
+  initialLikesCount = 0,
+  initialYouRocksCount = 0,
 }: EmailToolbarProps) {
-  const handleShare = () => {
-    if (typeof window !== "undefined" && navigator.share) {
-      navigator
-        .share({
-          title: subject || "Newsletter",
-          text: summary || "Check out this newsletter",
-          url: currentUrl,
-        })
-        .catch(console.error);
-    }
-  };
-
-  const handlePrint = () => {
-    if (typeof window !== "undefined") {
-      window.print();
-    }
-  };
+  const buttonClassName = "min-w-[110px] h-10 hover:bg-default-100";
+  const iconButtonClassName = "h-10 w-10 hover:bg-default-100";
 
   return (
-    <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white/80 px-4 py-2 backdrop-blur-sm dark:bg-zinc-900/80">
-      <div className="flex items-center gap-2">
-        <Tooltip content="Reply">
-          <Button isIconOnly variant="light" size="sm" aria-label="Reply">
-            <IconMail className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Forward">
-          <Button isIconOnly variant="light" size="sm" aria-label="Forward">
-            <IconMailForward className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <div className="mx-2 h-4 w-px bg-gray-300 dark:bg-gray-700" />
-
-        <Tooltip content="Archive">
-          <Button isIconOnly variant="light" size="sm" aria-label="Archive" onClick={onArchive}>
-            <IconArchive className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Delete">
-          <Button isIconOnly variant="light" size="sm" aria-label="Delete" onClick={onDelete}>
-            <IconTrash className="h-4 w-4" />
-          </Button>
-        </Tooltip>
+    <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:bg-zinc-900/80">
+      <div className="flex items-center gap-3">
+        <LikeButton
+          newsletterId={newsletterId}
+          initialLikesCount={initialLikesCount}
+          size="md"
+          className={buttonClassName}
+        />
+        <YouRockButton
+          newsletterId={newsletterId}
+          initialYouRocksCount={initialYouRocksCount}
+          size="md"
+          className={buttonClassName}
+        />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Tooltip content={isLiked ? "Unlike" : "Like"}>
+      <div className="flex items-center gap-3">
+        <Tooltip content="Bookmark">
           <Button
             isIconOnly
             variant="light"
-            size="sm"
-            aria-label={isLiked ? "Unlike" : "Like"}
-            onClick={onLike}
-            className={isLiked ? "text-torch-600" : ""}
+            size="md"
+            aria-label="Bookmark"
+            onClick={onBookmark}
+            className={iconButtonClassName}
           >
-            <div className="flex items-center">
-              <IconHeart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
-              {likesCount > 0 && <span className="ml-1 text-xs">{likesCount}</span>}
-            </div>
+            <IconBookmark className="h-5 w-5 text-default-500" />
           </Button>
         </Tooltip>
 
-        <Tooltip content="Bookmark">
-          <Button isIconOnly variant="light" size="sm" aria-label="Bookmark" onClick={onBookmark}>
-            <IconBookmark className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <div className="mx-2 h-4 w-px bg-gray-300 dark:bg-gray-700" />
-
-        <Tooltip content="Share">
-          <Button isIconOnly variant="light" size="sm" aria-label="Share" onClick={handleShare}>
-            <IconShare className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Print">
-          <Button isIconOnly variant="light" size="sm" aria-label="Print" onClick={handlePrint}>
-            <IconPrinter className="h-4 w-4" />
-          </Button>
-        </Tooltip>
+        <ShareButton
+          newsletterId={newsletterId}
+          size="md"
+          url={currentUrl}
+          title={subject || "Check out this newsletter on NewsletterMonster"}
+          className={iconButtonClassName}
+        />
       </div>
     </div>
   );

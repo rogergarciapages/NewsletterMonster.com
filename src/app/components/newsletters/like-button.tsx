@@ -14,6 +14,7 @@ interface LikeButtonProps {
   initialLikesCount?: number;
   initialIsLiked?: boolean;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 export function LikeButton({
@@ -21,6 +22,7 @@ export function LikeButton({
   initialLikesCount = 0,
   initialIsLiked = false,
   size = "md",
+  className = "",
 }: LikeButtonProps) {
   const [mounted, setMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -67,7 +69,7 @@ export function LikeButton({
       color={isLiked ? "danger" : "default"}
       onClick={handleClick}
       isLoading={isLoading}
-      className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-danger/10`}
+      className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-danger/10 ${className}`}
       startContent={
         <AnimatePresence mode="wait">
           <motion.span
