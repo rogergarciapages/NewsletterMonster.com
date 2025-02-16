@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en" suppressHydrationWarning className="light">
+    <html lang="en" suppressHydrationWarning className={`light ${inter.className}`}>
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
         <Providers _session={session}>
           <AppNavbar />

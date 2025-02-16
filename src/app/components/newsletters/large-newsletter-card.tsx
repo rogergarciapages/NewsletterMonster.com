@@ -4,8 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Badge as BadgeType } from "@prisma/client";
-
 import HeartFullIcon from "@/assets/svg/Heartfull.svg";
 import YouRockIcon from "@/assets/svg/Yourockicon.svg";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -15,40 +13,16 @@ import { slugify } from "@/utils/slugify";
 interface LargeNewsletterCardProps {
   newsletter: Newsletter;
   priority?: boolean;
-  showBadges?: boolean;
 }
 
-export function LargeNewsletterCard({
-  newsletter,
-  priority = false,
-  showBadges = true,
-}: LargeNewsletterCardProps) {
+export function LargeNewsletterCard({ newsletter, priority = false }: LargeNewsletterCardProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [badges, setBadges] = useState<BadgeType[]>([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (showBadges) {
-      const fetchBadges = async () => {
-        try {
-          const response = await fetch(`/api/badges/newsletter/${newsletter.newsletter_id}`);
-          if (response.ok) {
-            const data = await response.json();
-            setBadges(data);
-          }
-        } catch (error) {
-          console.error("Error fetching badges:", error);
-        }
-      };
-
-      fetchBadges();
-    }
-  }, [newsletter.newsletter_id, showBadges]);
 
   if (!mounted) {
     return (
@@ -140,27 +114,6 @@ export function LargeNewsletterCard({
                   {newsletter.sender || "Unknown Sender"}
                 </span>
               </button>
-
-              {showBadges && badges.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {badges.map(badge => {
-                    const rankNumber =
-                      badge.rank === "FIRST" ? "1" : badge.rank === "SECOND" ? "2" : "3";
-                    const categoryLetter =
-                      badge.category === "DAY" ? "d" : badge.category === "WEEK" ? "w" : "m";
-                    return (
-                      <Image
-                        key={badge.id}
-                        src={`/badges/${rankNumber}${categoryLetter}.png`}
-                        alt={`${badge.type} ${badge.category} ${badge.rank} Badge`}
-                        width={72}
-                        height={72}
-                        className="drop-shadow-lg transition-transform duration-300 hover:scale-110"
-                      />
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
         </div>

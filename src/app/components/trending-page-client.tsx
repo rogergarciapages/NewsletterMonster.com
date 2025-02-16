@@ -86,13 +86,13 @@ const TrendingPageClient: React.FC<TrendingPageClientProps> = ({
                   <div className="mt-2 flex w-full items-center justify-between">
                     <div className="flex items-center space-x-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       {newsletter.likes_count !== null && (
-                        <div className="flex items-center space-x-2 rounded-full bg-black px-3 py-1 text-white">
+                        <div className="flex items-center space-x-2 rounded-full bg-gray-900 px-3 py-1 text-white">
                           <HeartFullIcon className="h-5 w-5" />
                           <span className="text-base">{newsletter.likes_count}</span>
                         </div>
                       )}
                       {newsletter.you_rocks_count !== null && (
-                        <div className="flex items-center space-x-2 rounded-full bg-black px-3 py-1 text-white">
+                        <div className="flex items-center space-x-2 rounded-full bg-gray-900 px-3 py-1 text-white">
                           <YouRockIcon className="h-5 w-5" />
                           <span className="text-base">{newsletter.you_rocks_count}</span>
                         </div>
