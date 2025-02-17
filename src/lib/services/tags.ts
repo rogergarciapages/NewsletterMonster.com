@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import type { Newsletter, Tag, TagWithNewsletters } from "@/types/newsletter";
+import type { Newsletter, Tag } from "@/types/newsletter";
 
 export async function getTagBySlug(slug: string): Promise<Tag | null> {
   const tag = await prisma.tag.findUnique({
@@ -68,30 +68,18 @@ export async function getNewslettersByTag(
   return result;
 }
 
-export async function getTopTagsWithNewsletters(limit = 6): Promise<TagWithNewsletters[]> {
+export async function getTopTagsWithNewsletters(skip = 0, take = 10) {
   const tags = await prisma.tag.findMany({
-    where: {
-      count: { gt: 0 },
+    skip,
+    take,
+    orderBy: {
+      count: "desc",
     },
-    orderBy: { count: "desc" },
-    take: limit,
     include: {
       NewsletterTag: {
         take: 6,
         include: {
-          Newsletter: {
-            select: {
-              newsletter_id: true,
-              user_id: true,
-              sender: true,
-              subject: true,
-              top_screenshot_url: true,
-              likes_count: true,
-              you_rocks_count: true,
-              created_at: true,
-              summary: true,
-            },
-          },
+          Newsletter: true,
         },
         orderBy: {
           Newsletter: {
@@ -102,16 +90,8 @@ export async function getTopTagsWithNewsletters(limit = 6): Promise<TagWithNewsl
     },
   });
 
-  // Transform the data to match TagWithNewsletters type
   return tags.map(tag => ({
-    id: tag.id,
-    name: tag.name,
-    slug: tag.slug,
-    count: tag.count,
-    createdAt: tag.createdAt,
-    updatedAt: tag.updatedAt,
-    Newsletters: tag.NewsletterTag.map(nt => ({
-      Newsletter: nt.Newsletter,
-    })),
+    ...tag,
+    Newsletters: tag.NewsletterTag.map(nt => ({ Newsletter: nt.Newsletter })),
   }));
 }
