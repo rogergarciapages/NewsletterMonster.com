@@ -38,7 +38,7 @@ export default function EmailHeader({
   badges = [],
 }: EmailHeaderProps) {
   return (
-    <div className="relative rounded-t-lg border-b bg-white p-4 dark:bg-zinc-900">
+    <div className="relative rounded-t-lg bg-white p-4 dark:bg-zinc-900">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>

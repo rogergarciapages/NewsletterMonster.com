@@ -45,21 +45,21 @@ export function LikeButton({
   };
 
   const sizeClasses = {
-    sm: "h-8 min-w-[90px] text-sm",
-    md: "h-10 min-w-[110px] text-base",
-    lg: "h-12 min-w-[130px] text-lg",
+    sm: "h-6 min-w-[70px] text-xs",
+    md: "h-8 min-w-[80px] text-sm",
+    lg: "h-10 min-w-[100px] text-base",
   };
 
   const iconSizes = {
-    sm: "text-xl",
-    md: "text-2xl",
-    lg: "text-3xl",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
   };
 
   const countSizes = {
-    sm: "text-base",
-    md: "text-lg",
-    lg: "text-xl",
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
   };
 
   const button = (
@@ -101,7 +101,13 @@ export function LikeButton({
             isLiked ? "text-[#ff0000]" : "text-default-600"
           }`}
         >
-          {likesCount > 0 ? likesCount.toLocaleString() : "Like"}
+          {likesCount > 0 ? (
+            <>
+              {likesCount.toLocaleString()} <span className="ml-1">Likes</span>
+            </>
+          ) : (
+            "Be the first to like"
+          )}
         </motion.span>
       </AnimatePresence>
     </Button>

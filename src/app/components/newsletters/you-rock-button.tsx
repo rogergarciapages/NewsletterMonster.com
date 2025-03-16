@@ -126,21 +126,21 @@ export function YouRockButton({
   }
 
   const sizeClasses = {
-    sm: "h-8 min-w-[90px] text-sm",
-    md: "h-10 min-w-[110px] text-base",
-    lg: "h-12 min-w-[130px] text-lg",
+    sm: "h-6 min-w-[70px] text-xs",
+    md: "h-8 min-w-[80px] text-sm",
+    lg: "h-10 min-w-[100px] text-base",
   };
 
   const iconSizes = {
-    sm: "h-6 w-6",
-    md: "h-7 w-7",
-    lg: "h-8 w-8",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
   };
 
   const countSizes = {
-    sm: "text-base",
-    md: "text-lg",
-    lg: "text-xl",
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
   };
 
   const button = (
@@ -182,7 +182,15 @@ export function YouRockButton({
           </AnimatePresence>
         }
       >
-        <span className={`font-semibold ${countSizes[size]}`}>{youRocksCount}</span>
+        <span className={`font-semibold ${countSizes[size]}`}>
+          {youRocksCount > 0 ? (
+            <>
+              {youRocksCount.toLocaleString()} <span className="ml-1">Rock it</span>
+            </>
+          ) : (
+            "Rock it"
+          )}
+        </span>
       </Button>
       <AnimatePresence>
         {showTooltip && youRocksCount > 0 && (
