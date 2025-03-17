@@ -14,8 +14,8 @@ export default withAuth(
       }
     }
 
-    // Handle tag routes - Add this section
-    if (path.startsWith("/tag/")) {
+    // Handle tag routes - public access
+    if (path === "/tag" || path.startsWith("/tag/")) {
       // Allow both /tag and /tag/[slug]
       return NextResponse.next();
     }
@@ -55,6 +55,5 @@ export const config = {
     "/following/:path*",
     "/followers/:path*",
     "/drafts/:path*",
-    "/tag/:path*", // Add this line
   ],
 };
