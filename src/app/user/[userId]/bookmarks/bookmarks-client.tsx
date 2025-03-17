@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Card } from "@nextui-org/react";
 import axios from "axios";
 
 import { NewsletterGrid } from "@/app/components/newsletters/newsletter-grid";
 import { NewsletterPatternSkeleton } from "@/app/components/skeleton/newsletter-pattern-skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Newsletter } from "@/types/newsletter";
 
 const NEWSLETTERS_PER_PAGE = 20;
@@ -81,11 +81,15 @@ export function BookmarksClient({ initialBookmarks, userId }: BookmarksClientPro
 
   if (newsletters.length === 0 && !loading) {
     return (
-      <Card className="p-8 text-center">
-        <h2 className="mb-4 text-2xl font-bold">No bookmarks yet</h2>
-        <p className="text-gray-600">
-          Start bookmarking newsletters you want to read later or keep for reference.
-        </p>
+      <Card className="rounded-xl border bg-card text-card-foreground shadow">
+        <CardHeader className="flex flex-col space-y-1.5 p-6">
+          <h2 className="text-2xl font-bold">No bookmarks yet</h2>
+        </CardHeader>
+        <CardContent className="p-6 pt-0">
+          <p className="text-muted-foreground">
+            Start bookmarking newsletters you want to read later or keep for reference.
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -97,7 +101,7 @@ export function BookmarksClient({ initialBookmarks, userId }: BookmarksClientPro
       {loading && <NewsletterPatternSkeleton />}
 
       {!hasMore && newsletters.length > 0 && (
-        <div className="col-span-3 p-8 text-center text-gray-600">
+        <div className="col-span-3 p-8 text-center text-muted-foreground">
           You&apos;ve seen all your bookmarks 🎉
         </div>
       )}
