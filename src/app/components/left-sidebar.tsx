@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Accordion, AccordionItem, Button } from "@nextui-org/react";
+import { Accordion, AccordionItem, Button, Chip } from "@nextui-org/react";
 import {
   IconBell,
   IconBookmark,
@@ -18,6 +18,8 @@ import {
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 
+import { useBookmarkCount } from "@/hooks/use-bookmark-count";
+
 import LoginModal from "./login-modal";
 
 // src/app/components/left-sidebar.tsx
@@ -27,12 +29,14 @@ interface MenuItem {
   label: string;
   path: string;
   requiresAuth?: boolean;
+  badge?: number;
 }
 
 const LeftSidebar: React.FC = () => {
   useTheme();
   const router = useRouter();
   const { data: session } = useSession();
+  const { count: bookmarkCount } = useBookmarkCount();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [lastAttemptedPath, setLastAttemptedPath] = useState<string | null>(null);
 
@@ -48,7 +52,13 @@ const LeftSidebar: React.FC = () => {
     { icon: IconList, label: "Lists", path: "#" },
     { icon: IconTrendingUp, label: "Trending", path: "/trending" },
     { icon: IconBell, label: "Notifications", path: "#" },
-    { icon: IconBookmark, label: "Bookmarks", path: "#" },
+    {
+      icon: IconBookmark,
+      label: "Bookmarks",
+      path: session?.user?.user_id ? `/user/${session.user.user_id}/bookmarks` : "#",
+      requiresAuth: true,
+      badge: bookmarkCount,
+    },
     { icon: IconMovie, label: "Cinema Mode!", path: "#" },
   ];
 
@@ -81,6 +91,13 @@ const LeftSidebar: React.FC = () => {
       className="w-full justify-start"
       onClick={() => handleNavigation(item)}
       startContent={<item.icon className="h-6 w-6" />}
+      endContent={
+        item.badge ? (
+          <Chip size="sm" color="success" variant="flat" className="ml-auto">
+            {item.badge}
+          </Chip>
+        ) : null
+      }
     >
       {item.label}
     </Button>

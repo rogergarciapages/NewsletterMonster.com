@@ -7,6 +7,9 @@ import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
 import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
+import { LikeButton } from "@/app/components/newsletters/like-button";
+import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
 import prisma from "@/lib/prisma";
 
 import {
@@ -162,6 +165,8 @@ export default async function NewsletterPage({
   const brandDisplayName = formatBrandName(params.brandname);
   const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
 
+  const isLiked = false; // This should be determined from the server or passed as a prop
+
   return (
     <>
       <Script
@@ -214,6 +219,19 @@ export default async function NewsletterPage({
           <meta itemProp="publisher" content="NewsletterMonster" />
           <meta itemProp="author" content={brandDisplayName} />
           {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
+
+          <div className="flex flex-wrap gap-2">
+            <LikeButton
+              newsletterId={newsletter.newsletter_id}
+              initialLikesCount={newsletter.likes_count || 0}
+              initialIsLiked={isLiked}
+            />
+            <YouRockButton
+              newsletterId={newsletter.newsletter_id}
+              initialYouRocksCount={newsletter.you_rocks_count || 0}
+            />
+            <BookmarkButton newsletterId={newsletter.newsletter_id} initialIsBookmarked={false} />
+          </div>
         </article>
       </ThreeColumnLayout>
     </>

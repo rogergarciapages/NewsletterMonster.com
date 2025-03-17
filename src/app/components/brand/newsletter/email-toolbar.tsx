@@ -1,14 +1,11 @@
 "use client";
 
-import { Button, Tooltip } from "@nextui-org/react";
-import { IconBookmark } from "@tabler/icons-react";
-
+import { BookmarkButton } from "../../newsletters/bookmark-button";
 import { LikeButton } from "../../newsletters/like-button";
 import { ShareButton } from "../../newsletters/share-button";
 import { YouRockButton } from "../../newsletters/you-rock-button";
 
 type EmailToolbarProps = {
-  onBookmark?: () => void;
   currentUrl?: string;
   subject?: string | null;
   summary?: string | null;
@@ -18,7 +15,6 @@ type EmailToolbarProps = {
 };
 
 export default function EmailToolbar({
-  onBookmark,
   currentUrl,
   subject,
   summary,
@@ -44,22 +40,10 @@ export default function EmailToolbar({
           size="md"
           className={buttonClassName}
         />
+        <BookmarkButton newsletterId={newsletterId} size="md" className={buttonClassName} />
       </div>
 
       <div className="flex items-center gap-3">
-        <Tooltip content="Bookmark">
-          <Button
-            isIconOnly
-            variant="light"
-            size="md"
-            aria-label="Bookmark"
-            onClick={onBookmark}
-            className={iconButtonClassName}
-          >
-            <IconBookmark className="h-5 w-5 text-default-500" />
-          </Button>
-        </Tooltip>
-
         <ShareButton
           newsletterId={newsletterId}
           size="md"

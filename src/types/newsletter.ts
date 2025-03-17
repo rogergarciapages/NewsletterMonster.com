@@ -8,6 +8,12 @@ export interface Newsletter {
   you_rocks_count: number | null;
   created_at: Date | null;
   summary: string | null;
+  brand_id?: string | null;
+  Brand?: {
+    name: string;
+    slug: string;
+    logo?: string | null;
+  };
 }
 
 export interface NewsletterTag {

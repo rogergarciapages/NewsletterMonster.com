@@ -24,6 +24,30 @@ function getFirstName(fullName: string): string {
   return fullName.split(" ")[0].trim();
 }
 
+export async function getUserById(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { user_id: userId },
+      select: {
+        user_id: true,
+        name: true,
+        surname: true,
+        username: true,
+        email: true,
+        profile_photo: true,
+        bio: true,
+        website: true,
+        role: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error in getUserById:", error);
+    return null;
+  }
+}
+
 export async function getUserProfile(userId: string): Promise<UserProfileData | null> {
   try {
     const user = await prisma.user.findUnique({
