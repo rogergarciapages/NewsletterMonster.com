@@ -1,6 +1,9 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
+
+import { getServerSession } from "next-auth";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { authOptions } from "@/lib/auth";
 import { getBookmarkedNewsletters } from "@/lib/services/bookmark";
 import { getUserById } from "@/lib/services/user";
 
@@ -12,10 +15,18 @@ export const metadata = {
 };
 
 export default async function BookmarksPage({ params }: { params: { userId: string } }) {
+  // Get current user session
+  const session = await getServerSession(authOptions);
+
+  // If no session or user IDs don't match, redirect to home
+  if (!session?.user || session.user.user_id !== params.userId) {
+    redirect("/");
+  }
+
   // Verify user exists
   const user = await getUserById(params.userId);
   if (!user) {
-    return notFound();
+    redirect("/");
   }
 
   // Get initial bookmarks
