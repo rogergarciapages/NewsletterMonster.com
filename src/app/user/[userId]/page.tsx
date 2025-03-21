@@ -51,16 +51,30 @@ interface UserProfileData {
 export const revalidate = 60; // Revalidate every 60 seconds
 
 // Cache the user data fetch function
-async function getUserData(userId: string): Promise<UserProfileData | null> {
+async function getUserData(userIdentifier: string): Promise<UserProfileData | null> {
   try {
-    // Use Promise.all to parallelize database queries
-    const [user, newsletters, followersCount] = await Promise.all([
-      prisma!.user.findUnique({
-        where: { user_id: userId },
+    // First try to find by username
+    let user = await prisma!.user.findUnique({
+      where: { username: userIdentifier },
+      include: { SocialLinks: true },
+    });
+
+    // If not found by username, try by user_id (UUID)
+    if (!user) {
+      user = await prisma!.user.findUnique({
+        where: { user_id: userIdentifier },
         include: { SocialLinks: true },
-      }),
+      });
+    }
+
+    if (!user) {
+      return null;
+    }
+
+    // Use Promise.all to parallelize database queries for newsletters and followers
+    const [newsletters, followersCount] = await Promise.all([
       prisma!.newsletter.findMany({
-        where: { user_id: userId },
+        where: { user_id: user.user_id },
         orderBy: { created_at: "desc" },
         select: {
           newsletter_id: true,
@@ -75,13 +89,9 @@ async function getUserData(userId: string): Promise<UserProfileData | null> {
         },
       }),
       prisma!.follow.count({
-        where: { brand_id: userId },
+        where: { brand_id: user.user_id },
       }),
     ]);
-
-    if (!user) {
-      return null;
-    }
 
     return {
       newsletters,
@@ -129,6 +139,9 @@ export async function generateMetadata({
   const { user, newsletters, followersCount } = userData;
   const displayName = user.username || user.name || "User";
 
+  // Generate canonical URL based on username if available
+  const canonicalUrl = user.username ? `/user/${user.username}` : `/user/${params.userId}`;
+
   return {
     title: `${displayName}'s Profile | Newsletter Monster`,
     description: `View ${displayName}'s profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
@@ -150,7 +163,7 @@ export async function generateMetadata({
       images: user.profile_photo ? [user.profile_photo] : undefined,
     },
     alternates: {
-      canonical: `/user/${params.userId}`,
+      canonical: canonicalUrl,
     },
     robots: {
       index: true,
@@ -176,7 +189,10 @@ export default async function UserProfilePage({ params }: { params: { userId: st
   }
 
   const { newsletters, user, followersCount } = data;
-  const isOwnProfile = session?.user?.user_id === params.userId;
+  // Check if profile belongs to current user by comparing both user_id and username
+  const isOwnProfile: boolean =
+    (!!session?.user?.user_id && session.user.user_id === user.user_id) ||
+    !!(session?.user?.username && session.user.username === params.userId);
 
   const brandProfile: BrandProfile = {
     user_id: user.user_id,
@@ -234,8 +250,8 @@ export default async function UserProfilePage({ params }: { params: { userId: st
           newsletterCount={newsletters.length}
           followersCount={followersCount}
           isFollowing={false}
-          hideFollowButton={isOwnProfile}
-          isOwnProfile={isOwnProfile}
+          hideFollowButton={!!isOwnProfile}
+          isOwnProfile={!!isOwnProfile}
         />
 
         {isOwnProfile && (

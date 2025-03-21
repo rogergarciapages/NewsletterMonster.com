@@ -18,6 +18,26 @@ import { signOut, useSession } from "next-auth/react";
 
 // src/app/components/app-navbar/auth-button.tsx
 
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
@@ -64,14 +84,18 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
     (key: string | number) => {
       switch (key) {
         case "profile":
-          router.push(`/user/${session.user.user_id}`);
+          if (session.user.username) {
+            router.push(`/user/${session.user.username}`);
+          } else {
+            router.push(`/user/${session.user.user_id}/edit`);
+          }
           break;
         case "sign-out":
           handleSignOut();
           break;
       }
     },
-    [router, session.user.user_id, handleSignOut]
+    [router, session.user, handleSignOut]
   );
 
   return (
@@ -118,17 +142,19 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
 });
 UserDropdown.displayName = "UserDropdown";
 
-const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => (
-  <Button
-    onClick={onOpenLoginModal}
-    color="warning"
-    variant="shadow"
-    startContent={<IconUser className="h-4 w-4" />}
-    className="min-w-[100px]"
-  >
-    Sign In
-  </Button>
-));
+const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => {
+  const router = useRouter();
+  return (
+    <Button
+      color="warning"
+      onClick={() => router.push("/api/auth/signin")}
+      variant="flat"
+      className="text-inherit"
+    >
+      Sign In
+    </Button>
+  );
+});
 SignInButton.displayName = "SignInButton";
 
 function AuthButton({ onOpenLoginModal }: AuthButtonProps) {

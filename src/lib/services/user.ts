@@ -112,3 +112,94 @@ export async function getUserProfile(userId: string): Promise<UserProfileData | 
     throw error;
   }
 }
+
+// Social Links Types
+export interface SocialLinksData {
+  instagram?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  facebook?: string | null;
+  youtube?: string | null;
+  github?: string | null;
+}
+
+/**
+ * Get social links for a user
+ * @param userId The ID of the user
+ * @returns The social links or null if not found
+ */
+export async function getUserSocialLinks(userId: string) {
+  const socialLinks = await prisma.socialLinks.findUnique({
+    where: {
+      user_id: userId,
+    },
+  });
+
+  return socialLinks;
+}
+
+/**
+ * Create or update social links for a user
+ * @param userId The ID of the user
+ * @param data The social links data
+ * @returns The updated or created social links
+ */
+export async function updateUserSocialLinks(userId: string, data: SocialLinksData) {
+  // Check if social links already exist for this user
+  const existingSocialLinks = await prisma.socialLinks.findUnique({
+    where: {
+      user_id: userId,
+    },
+  });
+
+  if (existingSocialLinks) {
+    // Update existing social links
+    return prisma.socialLinks.update({
+      where: {
+        id: existingSocialLinks.id,
+      },
+      data,
+    });
+  } else {
+    // Create new social links
+    return prisma.socialLinks.create({
+      data: {
+        ...data,
+        user_id: userId,
+      },
+    });
+  }
+}
+
+/**
+ * Delete social links for a user
+ * @param userId The ID of the user
+ * @returns True if successful, false otherwise
+ */
+export async function deleteUserSocialLinks(userId: string): Promise<boolean> {
+  const existingSocialLinks = await prisma.socialLinks.findUnique({
+    where: {
+      user_id: userId,
+    },
+  });
+
+  if (!existingSocialLinks) {
+    return false;
+  }
+
+  await prisma.socialLinks.delete({
+    where: {
+      id: existingSocialLinks.id,
+    },
+  });
+
+  return true;
+}
+
+// Add this function to check if user needs onboarding
+export async function shouldRedirectToOnboarding(user: {
+  username?: string | null;
+}): Promise<boolean> {
+  // If the user doesn't have a username, they need to go through onboarding
+  return !user.username;
+}

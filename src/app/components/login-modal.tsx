@@ -113,6 +113,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
         toast.success("Login successful!");
         onSuccess?.();
         onOpenChange();
+
+        // No longer redirecting to onboarding - just refresh the page if needed
+        window.location.reload();
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -183,6 +186,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
       toast.success("Account created and logged in successfully!");
       onSuccess?.();
       onOpenChange();
+
+      // No longer redirecting to onboarding - just refresh the page
+      window.location.reload();
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to create account");

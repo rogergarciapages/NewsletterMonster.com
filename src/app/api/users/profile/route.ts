@@ -66,8 +66,21 @@ export async function PUT(request: Request) {
       await deleteOldImage(currentUser.profile_photo, session.user.user_id!);
     }
 
+    // Extract only fields that exist in the User model
+    const allowedFields = ["name", "surname", "username", "bio", "website", "location"];
+
+    const sanitizedData = Object.keys(validatedData).reduce(
+      (acc, key) => {
+        if (allowedFields.includes(key)) {
+          acc[key] = validatedData[key as keyof typeof validatedData];
+        }
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
     console.log("Updating user with data:", {
-      ...validatedData,
+      ...sanitizedData,
       profile_photo: body.profile_photo ? "New photo URL exists" : "No new photo",
     });
 
@@ -76,7 +89,7 @@ export async function PUT(request: Request) {
         email: session.user.email,
       },
       data: {
-        ...validatedData,
+        ...sanitizedData,
         ...(body.profile_photo ? { profile_photo: body.profile_photo } : {}),
         updated_at: new Date(),
       },

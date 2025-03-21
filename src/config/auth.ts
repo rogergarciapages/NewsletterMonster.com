@@ -194,6 +194,13 @@ export const authOptions: NextAuthOptions = {
         },
       };
     },
+    async redirect({ url, baseUrl }) {
+      // No longer redirecting to onboarding
+      // Just use default NextAuth behavior
+      if (url.startsWith(baseUrl)) return url;
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return baseUrl;
+    },
   },
   events: {
     async createUser({ user }) {

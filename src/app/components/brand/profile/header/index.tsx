@@ -3,24 +3,15 @@
 
 import Image from "next/image";
 
-import { Button, Card, CardBody, Chip, Link } from "@nextui-org/react";
+import { Card, CardBody, Chip, Link } from "@nextui-org/react";
 import { Brand, SocialLinks } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { BsPatchCheckFill } from "react-icons/bs";
 import { FaGithub, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
-import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 
 import { useFollowCount } from "@/hooks/use-follow-count";
 
 import FollowButton from "./follow-button";
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
-
-// src/app/components/brand/profile/header/index.tsx
 
 // src/app/components/brand/profile/header/index.tsx
 
@@ -54,11 +45,6 @@ export default function BrandProfileHeader({
     updateFollowCount(newIsFollowing);
   };
 
-  const handleClaimBrand = () => {
-    // TODO: Implement brand claiming functionality
-    return;
-  };
-
   return (
     <Card className="mt-4 border-none bg-background/60 dark:bg-default-100/50">
       <CardBody className="px-4 py-8 sm:px-6 lg:px-8">
@@ -89,7 +75,7 @@ export default function BrandProfileHeader({
               <h1 className="truncate text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
                 {brandName}
               </h1>
-              {brand.is_claimed && (
+              {brand.is_verified && (
                 <Chip
                   className="border-none bg-primary/10 dark:bg-primary/20"
                   startContent={<BsPatchCheckFill className="text-primary" />}
@@ -108,12 +94,7 @@ export default function BrandProfileHeader({
                 <p className="text-default-500">{brand.description}</p>
               ) : (
                 <div className="text-white">
-                  <p className="text-default-600">
-                    This brand has not been claimed yet. Are you the owner?{" "}
-                    <Link href="/brand/claim" className="text-primary">
-                      Claim it now!
-                    </Link>
-                  </p>
+                  <p className="text-default-600">No description available yet.</p>
                 </div>
               )}
             </div>
@@ -150,17 +131,6 @@ export default function BrandProfileHeader({
                     isFollowing={initialIsFollowing}
                     onFollowChange={handleFollowChange}
                   />
-                )}
-                {!brand.is_claimed && !isOwnProfile && (
-                  <Button
-                    onClick={handleClaimBrand}
-                    className="h-[44px] font-medium text-white"
-                    style={{ backgroundColor: "#fa0036e6" }}
-                    startContent={<HiOutlineBuildingOffice2 className="text-xl text-white" />}
-                    size="lg"
-                  >
-                    Claim this Brand
-                  </Button>
                 )}
               </div>
             </div>

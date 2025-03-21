@@ -3,7 +3,8 @@ import { Inter } from "next/font/google";
 
 import { getServerSession } from "next-auth";
 
-import AppNavbar from "@/app/components/app-navbar";
+import AppNavbar from "@/app/components/app-navbar/index";
+import AuthRedirect from "@/app/components/auth-redirect";
 import Providers from "@/app/components/providers";
 import { authOptions } from "@/lib/auth";
 
@@ -23,6 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" suppressHydrationWarning className={`light ${inter.className}`}>
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
         <Providers _session={session}>
+          <AuthRedirect />
           <AppNavbar />
           <main>
             <div className="flex min-h-[calc(100vh-64px)] flex-grow flex-col">{children}</div>

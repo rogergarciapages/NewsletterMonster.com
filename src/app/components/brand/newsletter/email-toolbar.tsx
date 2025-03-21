@@ -12,6 +12,8 @@ type EmailToolbarProps = {
   newsletterId: number;
   initialLikesCount?: number;
   initialYouRocksCount?: number;
+  initialIsLiked?: boolean;
+  initialIsBookmarked?: boolean;
 };
 
 export default function EmailToolbar({
@@ -21,6 +23,8 @@ export default function EmailToolbar({
   newsletterId,
   initialLikesCount = 0,
   initialYouRocksCount = 0,
+  initialIsLiked = false,
+  initialIsBookmarked = false,
 }: EmailToolbarProps) {
   const buttonClassName = "min-w-[110px] h-10 hover:bg-default-100";
   const iconButtonClassName = "h-10 w-10 hover:bg-default-100";
@@ -31,6 +35,7 @@ export default function EmailToolbar({
         <LikeButton
           newsletterId={newsletterId}
           initialLikesCount={initialLikesCount}
+          initialIsLiked={initialIsLiked}
           size="md"
           className={buttonClassName}
         />
@@ -40,7 +45,12 @@ export default function EmailToolbar({
           size="md"
           className={buttonClassName}
         />
-        <BookmarkButton newsletterId={newsletterId} size="md" className={buttonClassName} />
+        <BookmarkButton
+          newsletterId={newsletterId}
+          initialIsBookmarked={initialIsBookmarked}
+          size="md"
+          className={buttonClassName}
+        />
       </div>
 
       <div className="flex items-center gap-3">

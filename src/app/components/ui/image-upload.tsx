@@ -1,11 +1,17 @@
 // C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
 "use client";
 
-import { UserProfileFormData } from "@/lib/schemas/user-profile";
-import { Input, Spinner } from "@nextui-org/react";
-import NextImage from "next/image"; // Renamed to avoid confusion
+import NextImage from "next/image";
+// Renamed to avoid confusion
 import { useCallback, useState } from "react";
+
+import { Input, Spinner } from "@nextui-org/react";
+import { IconPhotoPlus } from "@tabler/icons-react";
 import { UseFormRegister, UseFormSetError } from "react-hook-form";
+
+import { UserProfileFormData } from "@/lib/schemas/user-profile";
+
+// C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -18,67 +24,70 @@ interface ImageUploadProps {
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_IMAGE_DIMENSIONS = {
   width: 2048,
-  height: 2048
+  height: 2048,
 };
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-export default function ImageUpload({ 
-  currentImage, 
-  register, 
-  name, 
+export default function ImageUpload({
+  currentImage,
+  register,
+  name,
   errorMessage,
-  setError 
+  setError,
 }: ImageUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage);
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateImage = useCallback((file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      // Check file size
-      if (file.size > MAX_FILE_SIZE) {
-        setError(name, {
-          type: "manual",
-          message: "Image must be less than 2MB"
-        });
-        return resolve(false);
-      }
-
-      // Check file type
-      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        setError(name, {
-          type: "manual",
-          message: "Only JPG, PNG and WebP images are allowed"
-        });
-        return resolve(false);
-      }
-
-      // Check dimensions using native HTML Image
-      const img = new globalThis.Image();
-      img.src = URL.createObjectURL(file);
-      
-      img.onload = () => {
-        URL.revokeObjectURL(img.src);
-        if (img.width > MAX_IMAGE_DIMENSIONS.width || img.height > MAX_IMAGE_DIMENSIONS.height) {
+  const validateImage = useCallback(
+    (file: File): Promise<boolean> => {
+      return new Promise(resolve => {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
           setError(name, {
             type: "manual",
-            message: `Image dimensions must be less than ${MAX_IMAGE_DIMENSIONS.width}x${MAX_IMAGE_DIMENSIONS.height}`
+            message: `Image must be less than 2MB (current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`,
+          });
+          return resolve(false);
+        }
+
+        // Check file type
+        if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+          setError(name, {
+            type: "manual",
+            message: `Only JPG, PNG and WebP images are allowed (received: ${file.type})`,
+          });
+          return resolve(false);
+        }
+
+        // Check dimensions using native HTML Image
+        const img = new globalThis.Image();
+        img.src = URL.createObjectURL(file);
+
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          if (img.width > MAX_IMAGE_DIMENSIONS.width || img.height > MAX_IMAGE_DIMENSIONS.height) {
+            setError(name, {
+              type: "manual",
+              message: `Image dimensions must be less than ${MAX_IMAGE_DIMENSIONS.width}x${MAX_IMAGE_DIMENSIONS.height} (received: ${img.width}x${img.height})`,
+            });
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(img.src);
+          setError(name, {
+            type: "manual",
+            message: "Failed to load image. The file may be corrupted or in an unsupported format.",
           });
           resolve(false);
-        } else {
-          resolve(true);
-        }
-      };
-
-      img.onerror = () => {
-        URL.revokeObjectURL(img.src);
-        setError(name, {
-          type: "manual",
-          message: "Failed to load image"
-        });
-        resolve(false);
-      };
-    });
-  }, [setError, name]);
+        };
+      });
+    },
+    [setError, name]
+  );
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,10 +104,9 @@ export default function ImageUpload({
         setPreviewUrl(currentImage); // Restore previous preview
       }
     } catch (error) {
-      console.error("Error validating image:", error);
       setError(name, {
         type: "manual",
-        message: "Failed to process image"
+        message: "Failed to process image. Please try another file.",
       });
     } finally {
       setIsLoading(false);
@@ -107,41 +115,42 @@ export default function ImageUpload({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="relative mx-auto h-24 w-24 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 sm:mx-0 sm:h-32 sm:w-32">
           {previewUrl ? (
-            <NextImage
-              src={previewUrl}
-              alt="Profile preview"
-              fill
-              className="object-cover"
-            />
+            <NextImage src={previewUrl} alt="Profile preview" fill className="object-cover" />
           ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-400 text-2xl">+</span>
+            <div className="flex h-full w-full items-center justify-center bg-gray-100">
+              <IconPhotoPlus className="h-8 w-8 text-gray-400" />
             </div>
           )}
           {isLoading && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
               <Spinner size="sm" color="white" />
             </div>
           )}
         </div>
-        <Input
-          type="file"
-          label="Profile Photo"
-          accept={ACCEPTED_IMAGE_TYPES.join(",")}
-          {...register(name, {
-            onChange: handleImageChange
-          })}
-          errorMessage={errorMessage}
-          className="flex-grow"
-          isDisabled={isLoading}
-        />
+
+        <div className="flex-grow">
+          <div className="mb-2 text-sm font-medium">Profile Photo</div>
+          <div className="mb-2 text-xs text-gray-500">
+            Select a square image in JPG, PNG, or WebP format (max 2MB)
+          </div>
+          <Input
+            type="file"
+            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+            {...register(name, {
+              onChange: handleImageChange,
+            })}
+            isDisabled={isLoading}
+            className="max-w-full"
+            classNames={{
+              input: "cursor-pointer",
+            }}
+          />
+          {errorMessage && <p className="text-danger mt-2 text-sm">{errorMessage}</p>}
+        </div>
       </div>
-      {errorMessage && (
-        <p className="text-sm text-danger mt-1">{errorMessage}</p>
-      )}
     </div>
   );
 }

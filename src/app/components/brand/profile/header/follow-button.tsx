@@ -1,13 +1,17 @@
 // src/app/components/brand/profile/header/follow-button.tsx
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa";
 
 import LoginModal from "@/app/components/login-modal";
+
+// src/app/components/brand/profile/header/follow-button.tsx
+
+// src/app/components/brand/profile/header/follow-button.tsx
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
@@ -28,11 +32,34 @@ export default function FollowButton({
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { status } = useSession();
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClickTimeRef = useRef<number>(0);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleClick = async () => {
     if (status !== "authenticated") {
       setIsLoginModalOpen(true);
       return;
+    }
+
+    // Prevent rapid clicks (300ms debounce)
+    const now = Date.now();
+    if (now - lastClickTimeRef.current < 300) {
+      return;
+    }
+    lastClickTimeRef.current = now;
+
+    // Clear any pending debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
     const newIsFollowing = !isFollowing;
@@ -41,33 +68,36 @@ export default function FollowButton({
     setIsFollowing(newIsFollowing);
     onFollowChange?.(newIsFollowing);
 
-    // Update the database
-    startTransition(async () => {
-      try {
-        const response = await fetch("/api/follow", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            brandId,
-            action: newIsFollowing ? "follow" : "unfollow",
-          }),
-        });
+    // Debounce the actual API call
+    debounceTimerRef.current = setTimeout(() => {
+      // Update the database
+      startTransition(async () => {
+        try {
+          const response = await fetch("/api/follow", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              brandId,
+              action: newIsFollowing ? "follow" : "unfollow",
+            }),
+          });
 
-        if (!response.ok) {
-          // If the server request fails, revert the optimistic update
+          if (!response.ok) {
+            // If the server request fails, revert the optimistic update
+            setIsFollowing(!newIsFollowing);
+            onFollowChange?.(!newIsFollowing);
+            console.error("Failed to update follow status");
+          }
+        } catch (error) {
+          // If there's an error, revert the optimistic update
           setIsFollowing(!newIsFollowing);
           onFollowChange?.(!newIsFollowing);
-          console.error("Failed to update follow status");
+          console.error("Error updating follow status:", error);
         }
-      } catch (error) {
-        // If there's an error, revert the optimistic update
-        setIsFollowing(!newIsFollowing);
-        onFollowChange?.(!newIsFollowing);
-        console.error("Error updating follow status:", error);
-      }
-    });
+      });
+    }, 300); // 300ms debounce time
   };
 
   return (

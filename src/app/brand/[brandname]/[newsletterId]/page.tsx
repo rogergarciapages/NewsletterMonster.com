@@ -3,6 +3,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
+import { getServerSession } from "next-auth";
+
 import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
 import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
@@ -10,7 +12,9 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
 import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { isNewsletterBookmarked } from "@/lib/services/bookmark";
 
 import {
   NewsletterStructuredData,
@@ -72,6 +76,18 @@ function formatBrandName(brandname: string): string {
     .split("-")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+// Check if a newsletter is liked by a user
+async function checkIsNewsletterLiked(userId: string, newsletterId: number): Promise<boolean> {
+  const like = await prisma.like.findFirst({
+    where: {
+      user_id: userId,
+      newsletter_id: newsletterId,
+    },
+  });
+
+  return !!like;
 }
 
 // Data fetching function
@@ -165,7 +181,19 @@ export default async function NewsletterPage({
   const brandDisplayName = formatBrandName(params.brandname);
   const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
 
-  const isLiked = false; // This should be determined from the server or passed as a prop
+  // Get the user session
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.user_id;
+
+  // Check if the newsletter is liked and bookmarked by the current user
+  let isLiked = false;
+  let isBookmarked = false;
+
+  if (userId) {
+    // Only check these if the user is logged in
+    isLiked = await checkIsNewsletterLiked(userId, newsletter.newsletter_id);
+    isBookmarked = await isNewsletterBookmarked(userId, newsletter.newsletter_id);
+  }
 
   return (
     <>
@@ -202,6 +230,8 @@ export default async function NewsletterPage({
             summary={newsletter.summary}
             initialLikesCount={newsletter.likes_count || 0}
             initialYouRocksCount={newsletter.you_rocks_count || 0}
+            initialIsLiked={isLiked}
+            initialIsBookmarked={isBookmarked}
           />
 
           {/* Email content */}
@@ -230,7 +260,10 @@ export default async function NewsletterPage({
               newsletterId={newsletter.newsletter_id}
               initialYouRocksCount={newsletter.you_rocks_count || 0}
             />
-            <BookmarkButton newsletterId={newsletter.newsletter_id} initialIsBookmarked={false} />
+            <BookmarkButton
+              newsletterId={newsletter.newsletter_id}
+              initialIsBookmarked={isBookmarked}
+            />
           </div>
         </article>
       </ThreeColumnLayout>
