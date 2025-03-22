@@ -9,10 +9,8 @@ interface ProfileImageProps {
 }
 
 // Utility function to ensure profile image URL has the correct structure
-function ensureCorrectImageUrl(url: string | null): string | null {
+const ensureCorrectImageUrl = (url: string | null): string | null => {
   if (!url) return null;
-
-  console.log("Ensuring correct image URL for:", url);
 
   // If URL already starts with the expected pattern, return it as is
   if (url.includes("/userpics/public/")) {
@@ -40,7 +38,7 @@ function ensureCorrectImageUrl(url: string | null): string | null {
 
   console.log("URL correction failed, returning original URL");
   return url;
-}
+};
 
 export default function ProfileImage({ user }: ProfileImageProps) {
   // Use null check with fallback and ensure correct URL structure

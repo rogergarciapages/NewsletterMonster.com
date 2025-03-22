@@ -14,6 +14,21 @@ import { authOptions } from "@/config/auth";
 import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
 
+// Utility function to ensure profile image URL has the correct structure
+const ensureCorrectImageUrl = (url: string | null): string | null => {
+  if (!url) return null;
+  if (url.includes("/userpics/public/")) return url;
+
+  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
+  if (match) {
+    const userId = match[1];
+    const extension = match[4].toLowerCase();
+    const minioEndpoint = url.split("/userpics")[0];
+    return `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+  }
+  return url;
+};
+
 interface UserProfileData {
   newsletters: Array<{
     newsletter_id: number;
@@ -180,40 +195,6 @@ export async function generateMetadata({
       },
     },
   };
-}
-
-// Utility function to ensure profile image URL has the correct structure
-function ensureCorrectImageUrl(url: string | null): string | null {
-  if (!url) return null;
-
-  console.log("Ensuring correct image URL for:", url);
-
-  // If URL already starts with the expected pattern, return it as is
-  if (url.includes("/userpics/public/")) {
-    console.log("URL appears to be in correct format already");
-    return url;
-  }
-
-  // Extract the file extension from the original URL
-  const extensionMatch = url.match(/\.([a-z]+)$/i);
-  const fileExtension = extensionMatch ? extensionMatch[1].toLowerCase() : "jpg";
-
-  // Try to extract the user ID from the URL
-  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
-  if (match) {
-    const userId = match[1];
-    // Use the extension from the original URL if available, otherwise use the extracted one
-    const extension = match[4] ? match[4].toLowerCase() : fileExtension;
-
-    // Construct the URL with the correct path structure (without timestamp)
-    const minioEndpoint = url.split("/userpics")[0];
-    const correctedUrl = `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
-    console.log("Corrected URL:", correctedUrl);
-    return correctedUrl;
-  }
-
-  console.log("URL correction failed, returning original URL");
-  return url;
 }
 
 export default async function UserProfilePage({ params }: { params: { userId: string } }) {

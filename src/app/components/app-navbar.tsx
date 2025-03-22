@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
@@ -22,6 +21,21 @@ export default function AppNavbar() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
+  // Utility function to ensure profile image URL has the correct structure
+  const ensureCorrectImageUrl = (url: string | null): string | null => {
+    if (!url) return null;
+    if (url.includes("/userpics/public/")) return url;
+
+    const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
+    if (match) {
+      const userId = match[1];
+      const extension = match[4].toLowerCase();
+      const minioEndpoint = url.split("/userpics")[0];
+      return `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+    }
+    return url;
+  };
+
   const handleSignOut = async () => {
     // Import dynamically to avoid server component issues
     const { signOut } = await import("next-auth/react");
@@ -31,9 +45,9 @@ export default function AppNavbar() {
   return (
     <Navbar>
       <NavbarBrand>
-        <Link href="/" className="font-bold text-inherit">
+        <a href="/" className="font-bold text-inherit">
           Newsletter Monster
-        </Link>
+        </a>
       </NavbarBrand>
 
       <NavbarContent className="hidden gap-4 sm:flex" justify="center">
@@ -60,8 +74,8 @@ export default function AppNavbar() {
                 isBordered
                 as="button"
                 className="transition-transform hover:scale-105"
-                src={session.user.profile_photo || ""}
-                name={session.user.name?.charAt(0).toUpperCase()}
+                src={ensureCorrectImageUrl(session.user.profile_photo || null) || ""}
+                name={session.user.name?.charAt(0).toUpperCase() || "R"}
                 showFallback
               />
             </DropdownTrigger>

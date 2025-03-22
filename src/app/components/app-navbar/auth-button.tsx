@@ -38,9 +38,32 @@ import { signOut, useSession } from "next-auth/react";
 
 // src/app/components/app-navbar/auth-button.tsx
 
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
+// src/app/components/app-navbar/auth-button.tsx
+
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
+
+// Utility function to ensure profile image URL has the correct structure
+const ensureCorrectImageUrl = (url: string | null): string | null => {
+  if (!url) return null;
+  if (url.includes("/userpics/public/")) return url;
+
+  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
+  if (match) {
+    const userId = match[1];
+    const extension = match[4].toLowerCase();
+    const minioEndpoint = url.split("/userpics")[0];
+    return `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+  }
+  return url;
+};
 
 const LoadingState = memo(() => (
   <div className="flex h-10 w-10 items-center justify-center">
@@ -105,9 +128,9 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
           isBordered
           as="button"
           className="transition-transform hover:scale-105"
-          showFallback={!session.user.profile_photo}
-          src={session.user.profile_photo || ""}
-          name={session.user.email?.charAt(0).toUpperCase()}
+          showFallback
+          src={ensureCorrectImageUrl(session.user.profile_photo || null) || ""}
+          name={session.user.name?.charAt(0).toUpperCase() || "R"}
           aria-label="User menu"
         />
       </DropdownTrigger>
