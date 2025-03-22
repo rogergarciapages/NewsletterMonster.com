@@ -18,17 +18,52 @@ const minioClient = new Client({
 
 async function deleteOldImage(imageUrl: string, userId: string) {
   try {
-    // Extract the filename from the full URL path
+    if (!imageUrl || !imageUrl.includes("/userpics/")) {
+      console.log("Invalid image URL format, cannot delete:", imageUrl);
+      return;
+    }
+
+    console.log(`Attempting to delete old image URL: ${imageUrl}`);
+
+    // Extract the filename from the URL
     const urlParts = imageUrl.split("/");
-    const fileName = urlParts[urlParts.length - 1];
-    const objectPath = `public/${userId}/${fileName}`;
+    const filename = urlParts[urlParts.length - 1];
 
-    console.log("Attempting to delete old image:", objectPath);
+    // Construct a simple path based on userId and filename
+    const objectPath = `public/${userId}/${filename}`;
+    console.log(`Deleting image at path: ${objectPath}`);
 
-    await minioClient.removeObject(process.env.MINIO_BUCKET!, objectPath);
-    console.log("Successfully deleted old image:", objectPath);
+    try {
+      await minioClient.removeObject(process.env.MINIO_BUCKET!, objectPath);
+      console.log("Successfully deleted old image:", objectPath);
+    } catch (removeError) {
+      console.error("Failed to delete old image:", removeError);
+
+      // As a fallback, try to list and delete all files for this user except the current file
+      console.log("Attempting fallback cleanup for user:", userId);
+      try {
+        const objectsList = await minioClient.listObjects(
+          process.env.MINIO_BUCKET!,
+          `public/${userId}/`,
+          true
+        );
+
+        for await (const obj of objectsList) {
+          console.log(`Found object: ${obj.name}`);
+          try {
+            await minioClient.removeObject(process.env.MINIO_BUCKET!, obj.name);
+            console.log(`Deleted object: ${obj.name}`);
+          } catch (e) {
+            console.error(`Failed to delete object ${obj.name}:`, e);
+          }
+        }
+      } catch (listError) {
+        console.error("Failed to list objects:", listError);
+      }
+    }
   } catch (error) {
-    console.error("Error deleting old image:", error);
+    console.error("Error in deleteOldImage:", error);
+    // Don't throw error to allow profile update to continue
   }
 }
 
@@ -63,7 +98,18 @@ export async function PUT(request: Request) {
     // Delete old image if new one is being uploaded
     if (body.profile_photo && currentUser?.profile_photo) {
       console.log("Detected new image upload, deleting old image");
-      await deleteOldImage(currentUser.profile_photo, session.user.user_id!);
+
+      // Only delete if URLs are different - avoid unnecessary operations
+      if (body.profile_photo !== currentUser.profile_photo) {
+        try {
+          await deleteOldImage(currentUser.profile_photo, session.user.user_id!);
+        } catch (deleteError) {
+          console.error("Error deleting old image:", deleteError);
+          // Continue with update even if delete fails
+        }
+      } else {
+        console.log("New image URL is identical to existing one, skipping delete operation");
+      }
     }
 
     // Extract only fields that exist in the User model

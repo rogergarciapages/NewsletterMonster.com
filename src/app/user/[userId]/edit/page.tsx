@@ -41,6 +41,40 @@ interface UserData {
   };
 }
 
+// Utility function to ensure profile image URL has the correct structure
+function ensureCorrectImageUrl(url: string | null): string | null {
+  if (!url) return null;
+
+  console.log("Ensuring correct image URL for:", url);
+
+  // If URL already starts with the expected pattern, return it as is
+  if (url.includes("/userpics/public/")) {
+    console.log("URL appears to be in correct format already");
+    return url;
+  }
+
+  // Extract the file extension from the original URL
+  const extensionMatch = url.match(/\.([a-z]+)$/i);
+  const fileExtension = extensionMatch ? extensionMatch[1].toLowerCase() : "jpg";
+
+  // Try to extract the user ID from the URL
+  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
+  if (match) {
+    const userId = match[1];
+    // Use the extension from the original URL if available, otherwise use the extracted one
+    const extension = match[4] ? match[4].toLowerCase() : fileExtension;
+
+    // Construct the URL with the correct path structure (without timestamp)
+    const minioEndpoint = url.split("/userpics")[0];
+    const correctedUrl = `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+    console.log("Corrected URL:", correctedUrl);
+    return correctedUrl;
+  }
+
+  console.log("URL correction failed, returning original URL");
+  return url;
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const { data: session, status, update: updateSession } = useSession();
@@ -149,18 +183,25 @@ export default function EditProfilePage() {
       if (!session?.user?.user_id) return;
 
       try {
-        const response = await fetch(`/api/users/${session.user.user_id}`);
-        if (!response.ok) throw new Error("Failed to fetch user data");
-
-        const userData = (await response.json()) as UserData;
-        setOriginalData(userData);
-        setCurrentImage(userData.profile_photo);
-
-        Object.entries(userData).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && key in userProfileSchema.shape) {
-            setValue(key as keyof UserProfileFormData, value);
-          }
+        const response = await fetch(`/api/users/${session.user.user_id}`, {
+          cache: "no-store",
         });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.statusText}`);
+        }
+
+        const userData = await response.json();
+
+        // Fix profile photo URL if present
+        if (userData.profile_photo) {
+          userData.profile_photo = ensureCorrectImageUrl(userData.profile_photo);
+        }
+
+        setOriginalData(userData);
+        reset(userData);
+        setCurrentImage(userData.profile_photo || undefined);
+        setIsLoading(false);
 
         // Fetch social links separately
         try {
@@ -185,8 +226,6 @@ export default function EditProfilePage() {
           console.error("Failed to fetch social links", error);
           // Continue without social links if they fail to load
         }
-
-        setIsLoading(false);
       } catch (error) {
         toast.error("Failed to load profile data");
         setIsLoading(false);
@@ -194,7 +233,7 @@ export default function EditProfilePage() {
     }
 
     fetchUserData();
-  }, [session, setValue, setValueSocial]);
+  }, [session, setValue, setValueSocial, reset]);
 
   // Reset entire form
   const resetForm = () => {

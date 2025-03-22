@@ -14,6 +14,8 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
     throw new Error("User not authenticated");
   }
 
+  console.log("Starting profile image upload for user:", session.user.user_id);
+
   // Validate file before uploading
   if (!file || !(file instanceof File)) {
     throw new Error("Invalid file provided");
@@ -31,44 +33,97 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
     );
   }
 
+  console.log(`Uploading image: type=${file.type}, size=${(file.size / 1024).toFixed(2)}KB`);
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("userId", session.user.user_id);
   formData.append("transaction_id", generateTransactionId()); // For potential rollback
 
-  try {
-    const response = await fetch("/api/upload/profile-image", {
-      method: "POST",
-      body: formData,
-      credentials: "same-origin",
-    });
+  // Retry mechanism
+  const MAX_RETRIES = 2;
+  let retries = 0;
+  let lastError = null;
 
-    if (!response.ok) {
-      let errorMessage = "Upload failed";
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // If parsing JSON fails, try to get the text
+  while (retries <= MAX_RETRIES) {
+    try {
+      console.log(`Upload attempt ${retries + 1}/${MAX_RETRIES + 1}`);
+
+      // Add a delay for retries
+      if (retries > 0) {
+        console.log(`Waiting ${retries * 1000}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, retries * 1000));
+      }
+
+      const response = await fetch("/api/upload/profile-image", {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Upload failed";
         try {
-          errorMessage = await response.text();
-        } catch (_) {
-          // If that fails too, use status code
-          errorMessage = `Upload failed with status: ${response.status}`;
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If parsing JSON fails, try to get the text
+          try {
+            errorMessage = await response.text();
+          } catch (_) {
+            // If that fails too, use status code
+            errorMessage = `Upload failed with status: ${response.status}`;
+          }
+        }
+        console.error(`Profile image upload failed (attempt ${retries + 1}):`, errorMessage);
+
+        // Store error for potential throw
+        lastError = new Error(errorMessage);
+
+        // Only retry on certain status codes
+        if (response.status === 500 || response.status === 503) {
+          retries++;
+          continue;
+        } else {
+          // Don't retry client errors (400s)
+          throw lastError;
         }
       }
-      throw new Error(errorMessage);
-    }
 
-    const data = await response.json();
-    return data.url;
-  } catch (error) {
-    // Rethrow the error with a user-friendly message
-    if (error instanceof Error) {
-      throw error; // Already formatted error
+      const data = await response.json();
+      console.log("Upload successful, image URL:", data.url);
+
+      // Verify the URL is correct format
+      if (!data.url || typeof data.url !== "string" || !data.url.includes("/userpics/")) {
+        console.error("Received invalid image URL:", data.url);
+        throw new Error("Server returned invalid image URL");
+      }
+
+      return data.url;
+    } catch (error) {
+      console.error(`Profile image upload error (attempt ${retries + 1}):`, error);
+      lastError = error;
+
+      // For network errors, try again
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        retries++;
+        continue;
+      }
+
+      // For other errors, only retry if we haven't hit the limit
+      if (retries < MAX_RETRIES) {
+        retries++;
+        continue;
+      }
+      break;
     }
-    throw new Error("Failed to upload image. Please try again.");
   }
+
+  // If we're here, all retries failed
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+  throw new Error("Failed to upload image after multiple attempts. Please try again.");
 }
 
 /**
@@ -77,4 +132,27 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
  */
 function generateTransactionId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * A utility to debounce function calls - use this for React effects
+ * that are causing performance warnings
+ */
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return function (...args: Parameters<T>) {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
 }

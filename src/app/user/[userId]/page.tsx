@@ -142,6 +142,11 @@ export async function generateMetadata({
   // Generate canonical URL based on username if available
   const canonicalUrl = user.username ? `/user/${user.username}` : `/user/${params.userId}`;
 
+  // Update user data with corrected profile image URL
+  if (userData?.user && userData.user.profile_photo) {
+    userData.user.profile_photo = ensureCorrectImageUrl(userData.user.profile_photo);
+  }
+
   return {
     title: `${displayName}'s Profile | Newsletter Monster`,
     description: `View ${displayName}'s profile and newsletters on Newsletter Monster. Following: ${followersCount} | Newsletters: ${newsletters.length}`,
@@ -175,6 +180,40 @@ export async function generateMetadata({
       },
     },
   };
+}
+
+// Utility function to ensure profile image URL has the correct structure
+function ensureCorrectImageUrl(url: string | null): string | null {
+  if (!url) return null;
+
+  console.log("Ensuring correct image URL for:", url);
+
+  // If URL already starts with the expected pattern, return it as is
+  if (url.includes("/userpics/public/")) {
+    console.log("URL appears to be in correct format already");
+    return url;
+  }
+
+  // Extract the file extension from the original URL
+  const extensionMatch = url.match(/\.([a-z]+)$/i);
+  const fileExtension = extensionMatch ? extensionMatch[1].toLowerCase() : "jpg";
+
+  // Try to extract the user ID from the URL
+  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
+  if (match) {
+    const userId = match[1];
+    // Use the extension from the original URL if available, otherwise use the extracted one
+    const extension = match[4] ? match[4].toLowerCase() : fileExtension;
+
+    // Construct the URL with the correct path structure (without timestamp)
+    const minioEndpoint = url.split("/userpics")[0];
+    const correctedUrl = `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+    console.log("Corrected URL:", correctedUrl);
+    return correctedUrl;
+  }
+
+  console.log("URL correction failed, returning original URL");
+  return url;
 }
 
 export default async function UserProfilePage({ params }: { params: { userId: string } }) {
@@ -281,14 +320,36 @@ export default async function UserProfilePage({ params }: { params: { userId: st
 
         <main className="mx-auto max-w-6xl px-4 py-8">
           <h1 className="sr-only">{user.name}&apos;s Newsletters</h1>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {newsletters.map(newsletter => (
-              <NewsletterCard
-                key={newsletter.newsletter_id}
-                newsletter={newsletter}
-                priority={false}
-              />
-            ))}
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {newsletters.length > 0 ? (
+              newsletters.map((newsletter, index) => (
+                <div key={newsletter.newsletter_id} className="w-full">
+                  <NewsletterCard
+                    newsletter={newsletter}
+                    priority={index < 3} // Only prioritize the first 3 newsletters
+                    showBadges={false}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 flex h-[200px] w-full flex-col items-center justify-center gap-4 rounded-md bg-zinc-50 p-8 text-center dark:bg-zinc-900">
+                <IconBuildingStore className="h-12 w-12 text-gray-400" />
+                <div>
+                  <h3 className="mb-1 text-lg font-medium">
+                    {user.name} hasn&apos;t published any newsletters yet
+                  </h3>
+                  <p className="mb-4 text-sm text-gray-500">
+                    Their newsletters will appear here once they start publishing.
+                  </p>
+
+                  {isOwnProfile && (
+                    <Button as="a" color="primary" href="/newsletters/explore" className="mx-auto">
+                      Browse Newsletters
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <EmailCopyProfile user={brandProfile} isOwnProfile={isOwnProfile} />
         </main>

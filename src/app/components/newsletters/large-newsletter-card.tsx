@@ -70,6 +70,7 @@ export function LargeNewsletterCard({ newsletter, priority = false }: LargeNewsl
               quality={85}
               priority={priority}
               onError={() => setImageError(true)}
+              loading={priority ? "eager" : "lazy"}
             />
           ) : (
             <div className="h-full w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />

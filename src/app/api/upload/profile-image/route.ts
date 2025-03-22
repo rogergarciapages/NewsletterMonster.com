@@ -103,8 +103,15 @@ export async function POST(request: Request) {
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileExt = file.type.split("/")[1].replace("jpeg", "jpg");
-    const fileName = `${userId}-${Date.now()}.${fileExt}`; // Use timestamp for unique filename
+    const fileName = `${userId}.${fileExt}`;
     const objectPath = `public/${userId}/${fileName}`;
+
+    console.log("Image upload details:", {
+      fileType: file.type,
+      extractedExtension: fileExt,
+      fileName,
+      objectPath,
+    });
 
     // Store transaction data for potential rollback
     pendingUploads.set(transactionId, {
@@ -113,18 +120,63 @@ export async function POST(request: Request) {
       oldImageUrl: user.profile_photo,
     });
 
-    // First phase: Upload file without deleting old image yet
+    // First, delete any existing files with same name to avoid conflicts
+    try {
+      console.log("Checking for existing file at path:", objectPath);
+      await minioClient.statObject(process.env.MINIO_BUCKET!, objectPath);
+      console.log("Existing file found, removing first");
+      await minioClient.removeObject(process.env.MINIO_BUCKET!, objectPath);
+    } catch (statErr) {
+      // File doesn't exist, which is fine
+      console.log("No existing file at path, proceeding with upload");
+    }
+
+    // Now upload the new file
+    console.log("Uploading new image to:", objectPath);
     await minioClient.putObject(process.env.MINIO_BUCKET!, objectPath, buffer, file.size, {
       "Content-Type": file.type,
       "Cache-Control": "no-cache",
       "x-amz-meta-transaction-id": transactionId,
     });
 
-    const fileUrl = `${process.env.MINIO_ENDPOINT}/${process.env.MINIO_BUCKET}/${objectPath}`;
+    // Verify the upload was successful
+    try {
+      await minioClient.statObject(process.env.MINIO_BUCKET!, objectPath);
+      console.log("Verified image uploaded successfully");
+    } catch (err) {
+      console.error("Failed to verify upload:", err);
+      throw new Error("Failed to verify image upload");
+    }
 
-    // Second phase: Now that upload succeeded, delete old images
+    // Construct the URL to match the expected pattern
+    const fileUrl = `${process.env.MINIO_ENDPOINT}/${process.env.MINIO_BUCKET}/${objectPath}`;
+    console.log("Constructed image URL:", fileUrl);
+
+    // Create artificial delay to allow for storage consistency
+    console.log("Adding short delay to ensure storage consistency...");
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Clean up other old images (if any)
     if (user.profile_photo) {
-      await deleteExistingProfileImages(process.env.MINIO_BUCKET!, userId);
+      try {
+        console.log("Cleaning up other old images");
+        const objectsList = await minioClient.listObjects(
+          process.env.MINIO_BUCKET!,
+          `public/${userId}/`,
+          true
+        );
+
+        for await (const obj of objectsList) {
+          // Don't delete the file we just uploaded
+          if (obj.name !== objectPath) {
+            console.log(`Deleting old image: ${obj.name}`);
+            await minioClient.removeObject(process.env.MINIO_BUCKET!, obj.name);
+          }
+        }
+      } catch (deleteErr) {
+        console.error("Error during cleanup of old images:", deleteErr);
+        // Don't fail the whole operation if cleanup fails
+      }
     }
 
     // Upload completed successfully, remove from pending

@@ -13,6 +13,8 @@ import { UserProfileFormData } from "@/lib/schemas/user-profile";
 
 // C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
 
+// C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
+
 interface ImageUploadProps {
   currentImage?: string;
   register: UseFormRegister<UserProfileFormData>;
@@ -118,7 +120,13 @@ export default function ImageUpload({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative mx-auto h-24 w-24 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 sm:mx-0 sm:h-32 sm:w-32">
           {previewUrl ? (
-            <NextImage src={previewUrl} alt="Profile preview" fill className="object-cover" />
+            <NextImage
+              src={previewUrl}
+              alt="Profile preview"
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 96px, 128px"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-100">
               <IconPhotoPlus className="h-8 w-8 text-gray-400" />
