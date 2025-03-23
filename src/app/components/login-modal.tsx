@@ -1,5 +1,5 @@
 // src/app/components/login-modal.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Button,
@@ -36,6 +36,7 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess }) => {
   const [showSignup, setShowSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableProviders, setAvailableProviders] = useState<Record<string, any>>({});
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -55,6 +56,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
   });
 
   const [rememberMe, setRememberMe] = useState(false);
+
+  // Fetch available providers when the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchProviders = async () => {
+        try {
+          const response = await fetch("/api/auth/providers");
+          const data = await response.json();
+          console.log("Available authentication providers:", data);
+          setAvailableProviders(data);
+        } catch (error) {
+          console.error("Failed to fetch providers:", error);
+        }
+      };
+      fetchProviders();
+    }
+  }, [isOpen]);
 
   const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -199,11 +217,30 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
   const handleOAuthSignIn = async (provider: string) => {
     try {
+      console.log(`Starting ${provider} sign in process`);
       setIsLoading(true);
-      await signIn(provider, { callbackUrl: "/" });
+
+      // Check if we're in a development environment
+      const isDev =
+        process.env.NODE_ENV === "development" || window.location.hostname === "localhost";
+
+      console.log(`Environment: ${isDev ? "development" : "production"}`);
+
+      // Get the base URL for the callback
+      const callbackUrl = window.location.origin;
+      console.log(`Using callback URL: ${callbackUrl}`);
+
+      // Directly sign in with the provider
+      await signIn(provider, {
+        callbackUrl,
+        redirect: true,
+      });
+
+      // Note: This code below won't execute since redirect: true will navigate away
+      console.log(`${provider} sign-in initiated`);
     } catch (error) {
       console.error(`${provider} sign in error:`, error);
-      toast.error(`Failed to sign in with ${provider}`);
+      toast.error(`Failed to sign in with ${provider}. Please try again later.`);
       setIsLoading(false);
     }
   };
@@ -290,39 +327,60 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                   >
                     Sign in
                   </Button>
-                  <Divider className="my-4" />
-                  <Button
-                    onClick={() => handleOAuthSignIn("google")}
-                    startContent={<IconBrandGoogle />}
-                    className="w-full bg-torch-800 text-white"
-                    isLoading={isLoading}
-                  >
-                    Continue with Google
-                  </Button>
-                  <Button
-                    onClick={() => handleOAuthSignIn("github")}
-                    startContent={<IconBrandGithub />}
-                    className="mt-2 w-full bg-[#4078c0] text-white"
-                    isLoading={isLoading}
-                  >
-                    Continue with GitHub
-                  </Button>
-                  <Button
-                    onClick={() => handleOAuthSignIn("discord")}
-                    startContent={<IconBrandDiscord />}
-                    className="mt-2 w-full bg-[#5865F2] text-white"
-                    isLoading={isLoading}
-                  >
-                    Continue with Discord
-                  </Button>
-                  <Button
-                    onClick={() => handleOAuthSignIn("linkedin")}
-                    startContent={<IconBrandLinkedin />}
-                    className="mt-2 w-full bg-[#0A66C2] text-white"
-                    isLoading={isLoading}
-                  >
-                    Continue with LinkedIn
-                  </Button>
+
+                  {/* Only show OAuth providers section if any are available */}
+                  {Object.keys(availableProviders).length > 0 && (
+                    <>
+                      <Divider className="my-4" />
+                      <div className="mb-2 text-center text-small text-default-500">
+                        Or continue with
+                      </div>
+
+                      {availableProviders.github && (
+                        <Button
+                          onClick={() => handleOAuthSignIn("github")}
+                          startContent={<IconBrandGithub />}
+                          className="mt-2 w-full bg-[#4078c0] text-white"
+                          isLoading={isLoading}
+                        >
+                          Continue with GitHub
+                        </Button>
+                      )}
+
+                      {availableProviders.google && (
+                        <Button
+                          onClick={() => handleOAuthSignIn("google")}
+                          startContent={<IconBrandGoogle />}
+                          className="mt-2 w-full bg-[#dd4b39] text-white"
+                          isLoading={isLoading}
+                        >
+                          Continue with Google
+                        </Button>
+                      )}
+
+                      {availableProviders.linkedin && (
+                        <Button
+                          onClick={() => handleOAuthSignIn("linkedin")}
+                          startContent={<IconBrandLinkedin />}
+                          className="mt-2 w-full bg-[#0A66C2] text-white"
+                          isLoading={isLoading}
+                        >
+                          Continue with LinkedIn
+                        </Button>
+                      )}
+
+                      {availableProviders.discord && (
+                        <Button
+                          onClick={() => handleOAuthSignIn("discord")}
+                          startContent={<IconBrandDiscord />}
+                          className="mt-2 w-full bg-[#5865F2] text-white"
+                          isLoading={isLoading}
+                        >
+                          Continue with Discord
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </ModalFooter>
               </>
             ) : (

@@ -46,6 +46,8 @@ import { signOut, useSession } from "next-auth/react";
 
 // src/app/components/app-navbar/auth-button.tsx
 
+// src/app/components/app-navbar/auth-button.tsx
+
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
@@ -166,11 +168,13 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
 UserDropdown.displayName = "UserDropdown";
 
 const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => {
-  const router = useRouter();
   return (
     <Button
       color="warning"
-      onClick={() => router.push("/api/auth/signin")}
+      onClick={() => {
+        console.log("Sign In button clicked, opening modal");
+        onOpenLoginModal();
+      }}
       variant="flat"
       className="text-inherit"
     >
