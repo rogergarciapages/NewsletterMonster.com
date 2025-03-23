@@ -53,5 +53,40 @@ export function fixPrismaAdapter(prisma: PrismaClient): Adapter {
       console.log("Returning adapter user:", { id: adapterUser.id, user_id: adapterUser.user_id });
       return adapterUser;
     },
+    createUser: async (user: Omit<AdapterUser, "id">) => {
+      console.log("Creating new user with data:", {
+        email: user.email,
+        name: user.name,
+        provider: "Based on OAuth data",
+      });
+
+      // Ensure we have a properly formatted name
+      const name = user.name || user.email?.split("@")[0] || "User";
+
+      const newUser = await prisma.user.create({
+        data: {
+          email: user.email,
+          name: name,
+          profile_photo: user.image || null,
+          emailVerified: user.emailVerified,
+          status: "active",
+          role: "FREE",
+        },
+      });
+
+      console.log("Created new user:", { userId: newUser.user_id, email: newUser.email });
+
+      return {
+        id: newUser.user_id,
+        user_id: newUser.user_id,
+        name: newUser.name,
+        email: newUser.email,
+        profile_photo: newUser.profile_photo,
+        emailVerified: newUser.emailVerified,
+        image: newUser.profile_photo || null, // Ensure image is set for NextAuth
+        role: newUser.role || "FREE",
+        status: newUser.status || "active",
+      } as AdapterUser;
+    },
   };
 }

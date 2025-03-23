@@ -67,6 +67,17 @@ export default function AppNavbar() {
       return `${imgUrl}${hasQuery ? "&" : "?"}t=${sessionTimestamp}`;
     };
 
+    // Handle LinkedIn, GitHub, and other external provider images directly
+    if (
+      url.includes("linkedin.com") ||
+      url.includes("googleusercontent.com") ||
+      url.includes("githubusercontent.com") ||
+      !url.includes("/userpics/")
+    ) {
+      console.log("Using external provider image:", url);
+      return addCacheBuster(url);
+    }
+
     if (url.includes("/userpics/public/")) {
       console.log("URL already in correct format:", url);
       return addCacheBuster(url);

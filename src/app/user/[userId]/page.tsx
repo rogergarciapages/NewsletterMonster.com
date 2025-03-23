@@ -15,19 +15,42 @@ import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
 
 // Utility function to ensure profile image URL has the correct structure
-const ensureCorrectImageUrl = (url: string | null): string | null => {
-  if (!url) return null;
-  if (url.includes("/userpics/public/")) return url;
+function ensureCorrectImageUrl(url: string | null): string | null {
+  if (!url) {
+    return null;
+  }
+
+  console.log("Processing profile image URL:", url);
+
+  // Handle LinkedIn and other external provider images
+  if (
+    url.includes("linkedin.com") ||
+    url.includes("googleusercontent.com") ||
+    !url.includes("/userpics/")
+  ) {
+    console.log("Using external provider image directly:", url);
+    return url;
+  }
+
+  // Handle MinIO-stored images
+  if (url.includes("/userpics/public/")) {
+    console.log("URL already in correct format:", url);
+    return url;
+  }
 
   const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
   if (match) {
     const userId = match[1];
     const extension = match[4].toLowerCase();
     const minioEndpoint = url.split("/userpics")[0];
-    return `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+    const correctedUrl = `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
+    console.log("Original URL:", url);
+    console.log("Corrected URL:", correctedUrl);
+    return correctedUrl;
   }
+  console.log("Failed to correct URL:", url);
   return url;
-};
+}
 
 interface UserProfileData {
   newsletters: Array<{

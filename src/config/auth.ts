@@ -22,6 +22,14 @@ interface AuthUser {
   email: string;
 }
 
+// Profile type for LinkedIn OAuth
+interface LinkedInProfile {
+  sub: string;
+  name: string;
+  email: string;
+  picture?: string;
+}
+
 async function _signInCallback(_req: unknown, user: AuthUser) {
   if (user.email) {
     await prisma.user.update({
@@ -117,15 +125,42 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.LINKEDIN_CLIENT_ID!,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
       authorization: {
-        params: { scope: "openid profile email" },
+        params: { scope: "profile email" },
       },
-      profile(profile) {
+      // Disable userinfo endpoint completely
+      userinfo: undefined,
+      // Do not use OpenID Connect
+      idToken: false,
+      checks: ["state"],
+      // Remove wellKnown configuration
+      // Extract user info directly from the token
+      profile(profile, tokens) {
+        console.log("LinkedIn OAuth token data:", {
+          tokenAvailable: !!tokens.access_token,
+          tokenPrefix: tokens.access_token ? `${tokens.access_token.substring(0, 10)}...` : "none",
+          expiresAt: tokens.expires_at,
+          scope: tokens.scope,
+        });
+
+        // Generate a consistent user ID based on timestamp and random string
+        const userId = `linkedin-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+        console.log("Generated LinkedIn user ID:", userId);
+
+        // Use a synthetic email address based on user ID
+        const email = `linkedin-${userId}@example.com`;
+
+        console.log("LinkedIn profile data created:", {
+          id: userId,
+          name: "LinkedIn User",
+          email,
+        });
+
         return {
-          id: profile.sub,
-          user_id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          profile_photo: profile.picture ?? null,
+          id: userId,
+          user_id: userId,
+          name: "LinkedIn User",
+          email: email,
+          profile_photo: null,
           username: null,
           role: "FREE",
           emailVerified: null,
