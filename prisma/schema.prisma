@@ -1,11 +1,11 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DATABASE_URL_POOLED")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_POOLED")
 }
 
 model Account {
@@ -297,14 +297,14 @@ model YouRock {
 }
 
 model Badge {
-  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type          BadgeType  // Using enum
-  category      BadgeCategory // Using enum
-  rank          BadgeRank  // Using enum
-  count         Int       // Track the count that earned this badge
-  earned_at     DateTime   @default(now()) @db.Timestamp(6)
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          BadgeType
+  category      BadgeCategory
+  rank          BadgeRank
+  count         Int
+  earned_at     DateTime      @default(now()) @db.Timestamp(6)
   newsletter_id Int
-  newsletter    Newsletter @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade)
+  newsletter    Newsletter    @relation(fields: [newsletter_id], references: [newsletter_id], onDelete: Cascade)
 
   @@unique([type, category, rank, earned_at])
   @@index([newsletter_id])

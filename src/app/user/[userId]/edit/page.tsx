@@ -1,6 +1,6 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,7 +58,40 @@ interface UserData {
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { data: session, status, update: updateSession } = useSession();
+  const {
+    data: session,
+    status,
+    update: updateSession,
+  } = useSession({
+    required: true,
+  });
+  const { userId } = useParams() as { userId: string };
+
+  // Debug user ID information
+  useEffect(() => {
+    console.log("Session in edit profile page:", {
+      status,
+      user_id: session?.user?.user_id,
+      params_userId: userId,
+      isAuthenticated: !!session,
+    });
+
+    // Check if we have a session but userId is undefined in the URL
+    if (userId === "undefined") {
+      if (session?.user?.user_id) {
+        console.log("Redirecting from undefined userId to actual user ID:", session.user.user_id);
+        router.replace(`/user/${session.user.user_id}/edit`);
+      } else {
+        console.warn("Both URL userId and session user_id are undefined!");
+        // If both are undefined, redirect to homepage
+        if (status === "authenticated") {
+          console.log("User is authenticated but has no ID - redirecting to homepage");
+          router.replace("/");
+        }
+      }
+    }
+  }, [session, userId, router, status]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState<string | undefined>(undefined);
@@ -67,13 +100,6 @@ export default function EditProfilePage() {
   const [fieldValidating, setFieldValidating] = useState<Record<string, boolean>>({});
   const formRef = useRef<HTMLFormElement>(null);
   const successToastRef = useRef<string | null>(null);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      redirect("/");
-    }
-  }, [status]);
 
   // Setup form with userProfileSchema for User data
   const {
@@ -398,7 +424,13 @@ export default function EditProfilePage() {
     }
   };
 
-  if (isLoading) return <Loading />;
+  if (status === "loading") {
+    return <Loading />;
+  }
+
+  if (!session?.user || userId === "undefined") {
+    return <Loading />;
+  }
 
   return (
     <ThreeColumnLayout>

@@ -1,5 +1,4 @@
 // src/config/auth.ts
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { User } from "next-auth";
@@ -8,9 +7,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
+import { fixPrismaAdapter } from "@/lib/auth/fix-prisma-adapter";
 import prisma from "@/lib/prisma";
 
-// Initialize PrismaAdapter with raw PrismaClient
+// Initialize PrismaClient for adapter
 const prismaWithoutExtensions = new PrismaClient({
   datasourceUrl: process.env.DATABASE_URL,
   log: ["error", "warn"],
@@ -44,7 +44,8 @@ interface GitHubProfile {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prismaWithoutExtensions),
+  // Use our fixed adapter that corrects the field name issue
+  adapter: fixPrismaAdapter(prismaWithoutExtensions),
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -88,9 +89,20 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       profile(profile: GitHubProfile): User {
-        return {
+        console.log("GitHub profile data:", {
           id: profile.id.toString(),
-          user_id: profile.id.toString(),
+          email: profile.email,
+          name: profile.name,
+          login: profile.login,
+        });
+
+        // Make sure we have a valid ID string
+        const userId = profile.id.toString();
+        console.log("Setting GitHub user ID to:", userId);
+
+        return {
+          id: userId,
+          user_id: userId, // Explicitly set user_id to match id
           email: profile.email!,
           name: profile.name ?? profile.login ?? profile.email?.split("@")[0] ?? "User",
           profile_photo: profile.avatar_url ?? null,
@@ -124,16 +136,23 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
+      console.log("SignIn callback executing for:", account?.provider);
+      console.log("User data received:", { id: user.id, email: user.email, name: user.name });
+
+      // For OAuth providers, ensure the user is properly created
       if (account?.provider === "github" || account?.provider === "linkedin") {
         try {
+          // Check if user already exists by email
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
-            include: {
-              Account: true,
-            },
           });
 
           if (existingUser) {
+            console.log("Found existing user:", existingUser.user_id);
+
+            // Ensure the user_id is set properly for the session
+            user.user_id = existingUser.user_id;
+
             // Check if this provider account already exists
             const existingAccount = await prisma.account.findFirst({
               where: {
@@ -156,8 +175,11 @@ export const authOptions: NextAuthOptions = {
                 },
               });
             }
-            return true;
+          } else {
+            // This is a new user, the adapter will create it automatically
+            console.log("No existing user found - a new one will be created");
           }
+          return true;
         } catch (error) {
           console.error("SignIn callback error:", error);
           return false;
@@ -167,20 +189,36 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account }) {
       if (account && user) {
-        return {
-          ...token,
+        console.log("JWT callback - user data:", {
+          id: user.id,
           user_id: user.user_id,
           email: user.email,
+        });
+
+        // Ensure user_id is set correctly
+        const userId = user.user_id || user.id;
+        console.log("Setting user_id in token to:", userId);
+
+        return {
+          ...token,
+          user_id: userId,
+          email: user.email,
           name: user.name,
-          profile_photo: user.profile_photo,
+          profile_photo: user.profile_photo || user.image,
           username: user.username,
-          role: user.role,
+          role: user.role || "FREE",
           accessToken: account.access_token,
         };
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback - token data:", { user_id: token.user_id, email: token.email });
+
+      if (!token.user_id) {
+        console.warn("WARNING: token.user_id is undefined in session callback");
+      }
+
       return {
         ...session,
         user: {
