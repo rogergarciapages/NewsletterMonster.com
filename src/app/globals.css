@@ -71,15 +71,24 @@ body {
   }
 }
 
-/* Selection styling in light mode */
-::selection {
-  color: hsl(240, 5.9%, 10%); /* Adjust this to match your light mode theme */
-  background-color: hsl(240, 4.8%, 95.9%); /* Or use any color that fits */
+/* Text selection styling for paragraphs */
+p::selection {
+  color: #fa0036;
+  background-color: rgba(250, 0, 54, 0.2); /* Semi-transparent pink */
 }
 
-/* Selection styling in dark mode */
-.dark ::selection {
-  --tw-text-opacity: 1;
-  color: rgb(250, 0, 54 / var(--tw-text-opacity)); /* Torch color */
-  background-color: transparent; /* Optional: Remove background highlight if desired */
+p::-moz-selection {
+  color: #fa0036;
+  background-color: rgba(250, 0, 54, 0.2);
+}
+
+/* Default selection styling for other elements */
+::selection {
+  background-color: #fa0036;
+  color: #000000;
+}
+
+::-moz-selection {
+  background-color: #fa0036;
+  color: #000000;
 }
