@@ -219,54 +219,57 @@ export const authOptions: NextAuthOptions = {
         profile: profile,
       });
 
-      // For OAuth providers, ensure the user is properly created
+      // For OAuth providers, ensure the user is properly created/updated
       if (
         account?.provider === "github" ||
         account?.provider === "linkedin" ||
         account?.provider === "google"
       ) {
         try {
-          // Get the profile photo based on provider
-          let profilePhoto = user.profile_photo;
-
-          if (account.provider === "github" && profile) {
-            // For GitHub, get the avatar_url directly from the profile
-            const githubProfile = profile as GitHubProfile;
-            profilePhoto = githubProfile.avatar_url
-              ? githubProfile.avatar_url.replace(/\?.*$/, "") // Remove any query parameters
-              : null;
-            console.log("Using GitHub avatar URL:", profilePhoto);
-          } else if (account.provider === "google" && profile) {
-            // For Google, use high-res version
-            const googleProfile = profile as any;
-            profilePhoto = googleProfile.picture
-              ? googleProfile.picture.replace("=s96-c", "=s400-c")
-              : null;
-          }
-
           // Check if user already exists by email
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
           });
 
+          // Get the profile photo based on provider
+          let profilePhoto = user.profile_photo;
+
           if (existingUser) {
             console.log("Found existing user:", existingUser.user_id);
 
-            // Update the user's profile data
+            // If user exists and has a custom photo, use that instead of provider's photo
+            if (existingUser.profile_photo) {
+              profilePhoto = existingUser.profile_photo;
+              console.log("Using existing custom profile photo:", profilePhoto);
+            } else if (account.provider === "github" && profile) {
+              // Only use GitHub photo if user has no custom photo
+              const githubProfile = profile as GitHubProfile;
+              profilePhoto = githubProfile.avatar_url
+                ? githubProfile.avatar_url.replace(/\?.*$/, "") // Remove any query parameters
+                : null;
+              console.log("Using GitHub avatar URL:", profilePhoto);
+            } else if (account.provider === "google" && profile) {
+              // Only use Google photo if user has no custom photo
+              const googleProfile = profile as any;
+              profilePhoto = googleProfile.picture
+                ? googleProfile.picture.replace("=s96-c", "=s400-c")
+                : null;
+              console.log("Using Google profile photo:", profilePhoto);
+            }
+
+            // Update the user's data but keep their existing photo if they have one
             await prisma.user.update({
               where: { user_id: existingUser.user_id },
               data: {
                 name: user.name,
-                profile_photo: profilePhoto,
+                profile_photo: profilePhoto, // This will now prioritize existing custom photo
                 updated_at: new Date(),
                 last_login: new Date(),
               },
             });
 
-            // Update the user object with the profile photo
+            // Update the user object with the correct photo
             user.profile_photo = profilePhoto;
-
-            // Ensure the user_id is set properly for the session
             user.user_id = existingUser.user_id;
 
             // Check if this provider account already exists
@@ -292,7 +295,19 @@ export const authOptions: NextAuthOptions = {
               });
             }
           } else {
-            // This is a new user, create it with profile data
+            // This is a new user, create it with provider's profile photo
+            if (account.provider === "github" && profile) {
+              const githubProfile = profile as GitHubProfile;
+              profilePhoto = githubProfile.avatar_url
+                ? githubProfile.avatar_url.replace(/\?.*$/, "")
+                : null;
+            } else if (account.provider === "google" && profile) {
+              const googleProfile = profile as any;
+              profilePhoto = googleProfile.picture
+                ? googleProfile.picture.replace("=s96-c", "=s400-c")
+                : null;
+            }
+
             const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
@@ -304,7 +319,6 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            // Update the user object with the new data
             user.user_id = newUser.user_id;
             user.profile_photo = profilePhoto;
           }

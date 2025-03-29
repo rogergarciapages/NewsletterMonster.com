@@ -200,14 +200,24 @@ export default function EditProfilePage() {
 
         const userData = await response.json();
 
-        // Fix profile photo URL if present
+        // Fix profile photo URL if present and set it
         if (userData.profile_photo) {
-          userData.profile_photo = ensureCorrectImageUrl(userData.profile_photo);
+          const correctedUrl = ensureCorrectImageUrl(userData.profile_photo);
+          userData.profile_photo = correctedUrl;
+          setCurrentImage(correctedUrl);
+        } else if (session.user.profile_photo) {
+          // Fallback to session profile photo if available
+          const correctedUrl = ensureCorrectImageUrl(session.user.profile_photo);
+          userData.profile_photo = correctedUrl;
+          setCurrentImage(correctedUrl);
+        } else {
+          setCurrentImage(undefined);
         }
+
+        console.log("Setting user data with profile photo:", userData.profile_photo);
 
         setOriginalData(userData);
         reset(userData);
-        setCurrentImage(userData.profile_photo || undefined);
         setIsLoading(false);
 
         // Fetch social links separately

@@ -3,13 +3,17 @@
 
 import NextImage from "next/image";
 // Renamed to avoid confusion
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Input, Spinner } from "@nextui-org/react";
 import { IconPhotoPlus } from "@tabler/icons-react";
 import { UseFormRegister, UseFormSetError } from "react-hook-form";
 
 import { UserProfileFormData } from "@/lib/schemas/user-profile";
+
+// C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
+
+// C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
 
 // C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\ui\image-upload.tsx
 
@@ -39,6 +43,12 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update preview when currentImage changes
+  useEffect(() => {
+    console.log("Current image updated:", currentImage);
+    setPreviewUrl(currentImage);
+  }, [currentImage]);
 
   const validateImage = useCallback(
     (file: File): Promise<boolean> => {
@@ -93,7 +103,11 @@ export default function ImageUpload({
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      // If no file is selected, revert to current image
+      setPreviewUrl(currentImage);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -110,6 +124,7 @@ export default function ImageUpload({
         type: "manual",
         message: "Failed to process image. Please try another file.",
       });
+      setPreviewUrl(currentImage); // Restore previous preview on error
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +141,10 @@ export default function ImageUpload({
               fill
               className="object-cover"
               sizes="(max-width: 640px) 96px, 128px"
+              onError={() => {
+                console.error("Failed to load preview image:", previewUrl);
+                setPreviewUrl(undefined);
+              }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-100">
