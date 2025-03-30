@@ -204,12 +204,12 @@ export default function EditProfilePage() {
         if (userData.profile_photo) {
           const correctedUrl = ensureCorrectImageUrl(userData.profile_photo);
           userData.profile_photo = correctedUrl;
-          setCurrentImage(correctedUrl);
+          setCurrentImage(correctedUrl || undefined);
         } else if (session.user.profile_photo) {
           // Fallback to session profile photo if available
           const correctedUrl = ensureCorrectImageUrl(session.user.profile_photo);
           userData.profile_photo = correctedUrl;
-          setCurrentImage(correctedUrl);
+          setCurrentImage(correctedUrl || undefined);
         } else {
           setCurrentImage(undefined);
         }

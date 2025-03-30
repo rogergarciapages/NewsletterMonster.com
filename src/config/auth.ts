@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import type { User } from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import DiscordProvider from "next-auth/providers/discord";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import LinkedInProvider from "next-auth/providers/linkedin";
@@ -52,6 +53,20 @@ interface GitHubProfile {
   avatar_url: string | null;
 }
 
+// Add Discord profile type
+interface DiscordProfile {
+  id: string;
+  email: string;
+  username: string;
+  discriminator: string;
+  avatar: string | null;
+  verified: boolean;
+  banner?: string | null;
+  accent_color?: number | null;
+  premium_type?: number;
+  public_flags?: number;
+}
+
 export const authOptions: NextAuthOptions = {
   // Use our fixed adapter that corrects the field name issue
   adapter: fixPrismaAdapter(prismaWithoutExtensions),
@@ -91,6 +106,37 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           emailVerified: user.emailVerified,
           status: user.status,
+        } as User;
+      },
+    }),
+    DiscordProvider({
+      clientId: process.env.DISCORD_CLIENT_ID!,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      profile(profile): User {
+        console.log("Discord profile data:", {
+          id: profile.id,
+          email: profile.email,
+          username: profile.username,
+          avatar: profile.avatar,
+        });
+
+        // Get high-res Discord avatar
+        const profilePhoto = profile.avatar
+          ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png?size=1024`
+          : null;
+
+        console.log("Using Discord profile photo:", profilePhoto);
+
+        return {
+          id: profile.id,
+          user_id: profile.id,
+          email: profile.email,
+          name: profile.username ?? profile.email?.split("@")[0] ?? "User",
+          profile_photo: profilePhoto,
+          username: profile.username,
+          role: "FREE",
+          emailVerified: profile.verified ? new Date() : null,
+          status: "active",
         } as User;
       },
     }),
@@ -223,7 +269,8 @@ export const authOptions: NextAuthOptions = {
       if (
         account?.provider === "github" ||
         account?.provider === "linkedin" ||
-        account?.provider === "google"
+        account?.provider === "google" ||
+        account?.provider === "discord"
       ) {
         try {
           // Check if user already exists by email
@@ -255,6 +302,13 @@ export const authOptions: NextAuthOptions = {
                 ? googleProfile.picture.replace("=s96-c", "=s400-c")
                 : null;
               console.log("Using Google profile photo:", profilePhoto);
+            } else if (account.provider === "discord" && profile) {
+              // Only use Discord photo if user has no custom photo
+              const discordProfile = profile as DiscordProfile;
+              profilePhoto = discordProfile.avatar
+                ? `https://cdn.discordapp.com/avatars/${discordProfile.id}/${discordProfile.avatar}.png?size=1024`
+                : null;
+              console.log("Using Discord avatar URL:", profilePhoto);
             }
 
             // Update the user's data but keep their existing photo if they have one
@@ -306,19 +360,43 @@ export const authOptions: NextAuthOptions = {
               profilePhoto = googleProfile.picture
                 ? googleProfile.picture.replace("=s96-c", "=s400-c")
                 : null;
+            } else if (account.provider === "discord" && profile) {
+              const discordProfile = profile as DiscordProfile;
+              profilePhoto = discordProfile.avatar
+                ? `https://cdn.discordapp.com/avatars/${discordProfile.id}/${discordProfile.avatar}.png?size=1024`
+                : null;
             }
 
+            // Create the new user
             const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
-                name: user.name!,
+                name: user.name,
                 profile_photo: profilePhoto,
-                role: "FREE",
-                status: "active",
+                created_at: new Date(),
+                updated_at: new Date(),
                 last_login: new Date(),
               },
             });
 
+            // Create the account
+            await prisma.account.create({
+              data: {
+                userId: newUser.user_id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                token_type: account.token_type,
+                scope: account.scope,
+                ...(account.provider === "discord" && {
+                  refresh_token: account.refresh_token,
+                  expires_at: account.expires_at,
+                }),
+              },
+            });
+
+            // Update the user object with the new user_id and profile photo
             user.user_id = newUser.user_id;
             user.profile_photo = profilePhoto;
           }
@@ -331,10 +409,11 @@ export const authOptions: NextAuthOptions = {
 
           return true;
         } catch (error) {
-          console.error("SignIn callback error:", error);
+          console.error("Error in signIn callback:", error);
           return false;
         }
       }
+
       return true;
     },
     async jwt({ token, user, account, profile, trigger }) {

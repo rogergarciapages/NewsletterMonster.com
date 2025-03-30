@@ -18,36 +18,6 @@ import { signOut, useSession } from "next-auth/react";
 
 // src/app/components/app-navbar/auth-button.tsx
 
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
-// src/app/components/app-navbar/auth-button.tsx
-
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
