@@ -113,14 +113,6 @@ export default function EditProfilePage() {
     formState: { errors, isDirty, dirtyFields, isValidating },
   } = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
-    defaultValues: {
-      name: "",
-      surname: "",
-      username: "",
-      bio: "",
-      website: "",
-      location: "",
-    },
     mode: "onChange", // Enable real-time validation
   });
 
@@ -134,22 +126,14 @@ export default function EditProfilePage() {
     reset: resetSocial,
   } = useForm<SocialLinksFormData>({
     resolver: zodResolver(socialLinksSchema),
-    defaultValues: {
-      twitter: "",
-      instagram: "",
-      linkedin: "",
-      youtube: "",
-      facebook: "",
-      github: "",
-    },
     mode: "onChange",
   });
 
   // Watch form values for changes
   const watchedValues = watch();
   useEffect(() => {
-    setHasUnsavedChanges(isDirty);
-  }, [isDirty, watchedValues]);
+    setHasUnsavedChanges(isDirty || isDirtySocial);
+  }, [isDirty, isDirtySocial, watchedValues]);
 
   // Define the beforeunload handler
   const handleBeforeUnload = useCallback(
@@ -216,9 +200,17 @@ export default function EditProfilePage() {
 
         console.log("Setting user data with profile photo:", userData.profile_photo);
 
+        // Reset the main form with user data
+        reset({
+          name: userData.name || "",
+          surname: userData.surname || "",
+          username: userData.username || "",
+          bio: userData.bio || "",
+          website: userData.website || "",
+          location: userData.location || "",
+        });
+
         setOriginalData(userData);
-        reset(userData);
-        setIsLoading(false);
 
         // Fetch social links separately
         try {
@@ -231,26 +223,31 @@ export default function EditProfilePage() {
               userData.socialLinks = socialLinks;
               setOriginalData(userData);
 
-              // Set values in the social links form
-              Object.entries(socialLinks).forEach(([key, value]) => {
-                if (value !== null && value !== undefined) {
-                  setValueSocial(key as keyof SocialLinksFormData, value as string);
-                }
+              // Reset social links form
+              resetSocial({
+                twitter: socialLinks.twitter || "",
+                instagram: socialLinks.instagram || "",
+                linkedin: socialLinks.linkedin || "",
+                youtube: socialLinks.youtube || "",
+                facebook: socialLinks.facebook || "",
+                github: socialLinks.github || "",
               });
             }
           }
         } catch (error) {
           console.error("Failed to fetch social links", error);
-          // Continue without social links if they fail to load
         }
+
+        setIsLoading(false);
       } catch (error) {
+        console.error("Failed to load profile data:", error);
         toast.error("Failed to load profile data");
         setIsLoading(false);
       }
     }
 
     fetchUserData();
-  }, [session, setValue, setValueSocial, reset]);
+  }, [session, reset, resetSocial]);
 
   // Reset entire form
   const resetForm = () => {
@@ -434,7 +431,7 @@ export default function EditProfilePage() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "loading" || isLoading) {
     return <Loading />;
   }
 
@@ -482,6 +479,7 @@ export default function EditProfilePage() {
                     aria-required="true"
                     aria-invalid={!!errors.name}
                     isInvalid={!!errors.name}
+                    defaultValue={originalData?.name || ""}
                     endContent={
                       dirtyFields.name && (
                         <Tooltip content="Reset to original value">
@@ -503,12 +501,13 @@ export default function EditProfilePage() {
 
                 <div className="relative">
                   <Input
-                    label="Surname"
+                    label="Surname (optional)"
                     {...register("surname")}
                     id="surname"
                     errorMessage={errors.surname?.message}
                     aria-invalid={!!errors.surname}
                     isInvalid={!!errors.surname}
+                    defaultValue={originalData?.surname || ""}
                     endContent={
                       dirtyFields.surname && (
                         <Tooltip content="Reset to original value">
@@ -530,7 +529,7 @@ export default function EditProfilePage() {
 
                 <div className="relative">
                   <Input
-                    label="Username"
+                    label="Username (optional)"
                     {...register("username")}
                     id="username"
                     errorMessage={errors.username?.message}
@@ -538,6 +537,7 @@ export default function EditProfilePage() {
                     placeholder="john_doe"
                     aria-invalid={!!errors.username}
                     isInvalid={!!errors.username}
+                    defaultValue={originalData?.username || ""}
                     endContent={
                       dirtyFields.username && (
                         <Tooltip content="Reset to original value">
@@ -559,7 +559,7 @@ export default function EditProfilePage() {
 
                 <div className="relative md:col-span-2">
                   <Textarea
-                    label="Bio"
+                    label="Bio (optional)"
                     {...register("bio")}
                     id="bio"
                     errorMessage={errors.bio?.message}
@@ -567,6 +567,7 @@ export default function EditProfilePage() {
                     placeholder="Share a little about yourself, your interests, or your work"
                     aria-invalid={!!errors.bio}
                     isInvalid={!!errors.bio}
+                    defaultValue={originalData?.bio || ""}
                     endContent={
                       dirtyFields.bio && (
                         <Tooltip content="Reset to original value">
@@ -589,7 +590,7 @@ export default function EditProfilePage() {
 
                 <div className="relative">
                   <Input
-                    label="Website"
+                    label="Website (optional)"
                     {...register("website")}
                     id="website"
                     placeholder="https://your-website.com"
@@ -597,6 +598,7 @@ export default function EditProfilePage() {
                     description="Your personal or business website"
                     aria-invalid={!!errors.website}
                     isInvalid={!!errors.website}
+                    defaultValue={originalData?.website || ""}
                     endContent={
                       dirtyFields.website && (
                         <Tooltip content="Reset to original value">
@@ -618,13 +620,14 @@ export default function EditProfilePage() {
 
                 <div className="relative">
                   <Input
-                    label="Location"
+                    label="Location (optional)"
                     {...register("location")}
                     id="location"
                     errorMessage={errors.location?.message}
                     placeholder="City, Country"
                     aria-invalid={!!errors.location}
                     isInvalid={!!errors.location}
+                    defaultValue={originalData?.location || ""}
                     endContent={
                       dirtyFields.location && (
                         <Tooltip content="Reset to original value">
@@ -685,7 +688,7 @@ export default function EditProfilePage() {
                   color="primary"
                   type="submit"
                   isLoading={isSubmitting}
-                  isDisabled={!hasUnsavedChanges && !dirtyFields.profile_photo}
+                  isDisabled={(!hasUnsavedChanges && !dirtyFields.profile_photo) || isSubmitting}
                   aria-label="Save profile changes"
                 >
                   Save Changes

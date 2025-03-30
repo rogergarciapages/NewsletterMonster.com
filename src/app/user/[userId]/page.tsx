@@ -6,10 +6,9 @@ import { Button } from "@nextui-org/react";
 import { IconBuildingStore, IconEdit } from "@tabler/icons-react";
 import { getServerSession } from "next-auth/next";
 
-import BrandProfileHeaderWrapper from "@/app/components/brand/profile/header/client-wrapper";
-import EmailCopyProfile from "@/app/components/email-copy-profile";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";
+import UserProfileHeader from "@/app/components/user/profile/header";
 import { authOptions } from "@/config/auth";
 import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
@@ -263,38 +262,27 @@ export default async function UserProfilePage({ params }: { params: { userId: st
   return (
     <ThreeColumnLayout>
       <div className="w-full">
-        <BrandProfileHeaderWrapper
-          brandId={user.user_id}
-          brandName={user.name}
-          brand={{
-            brand_id: user.user_id,
+        <UserProfileHeader
+          user={{
+            user_id: user.user_id,
             name: user.name,
-            slug: user.username || user.user_id,
-            description: user.bio,
-            website: user.website,
-            domain: user.website_domain,
-            logo: user.profile_photo,
-            is_claimed: user.domain_verified,
-            is_verified: user.domain_verified,
-            created_at: null,
-            updated_at: null,
-            SocialLinks: {
-              user_id: user.user_id,
-              brand_id: user.user_id,
-              id: user.user_id,
-              twitter: user.twitter_username,
-              instagram: user.instagram_username,
-              linkedin: user.linkedin_profile,
-              youtube: user.youtube_channel,
-              github: null,
-              facebook: null,
-            },
+            surname: user.surname || "",
+            username: user.username || "",
+            email: user.email,
+            profile_photo: user.profile_photo,
+            bio: user.bio || "",
+            role: user.role,
+            website: user.website || null,
+            company_name: user.name,
+            website_domain: user.website_domain || null,
+            domain_verified: user.domain_verified || false,
+            twitter_username: user.twitter_username || null,
+            instagram_username: user.instagram_username || null,
+            youtube_channel: user.youtube_channel || null,
+            linkedin_profile: user.linkedin_profile || null,
           }}
           newsletterCount={newsletters.length}
           followersCount={followersCount}
-          isFollowing={false}
-          hideFollowButton={!!isOwnProfile}
-          isOwnProfile={!!isOwnProfile}
         />
 
         {isOwnProfile && (
@@ -355,7 +343,6 @@ export default async function UserProfilePage({ params }: { params: { userId: st
               </div>
             )}
           </div>
-          <EmailCopyProfile user={brandProfile} isOwnProfile={isOwnProfile} />
         </main>
       </div>
     </ThreeColumnLayout>
