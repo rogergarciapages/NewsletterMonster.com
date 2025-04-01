@@ -1,7 +1,7 @@
 // C:\Users\Usuario\Documents\GitHub\nm4\src\app\components\footer.tsx
 const Footer = () => {
   return (
-    <footer className="mt-auto bg-white dark:bg-[#1c1c1c]">
+    <footer className="mt-auto bg-white dark:bg-zinc-900">
       <div className="relative mx-auto max-w-7xl px-4 text-gray-700 dark:text-gray-300 sm:px-6">
         <div className="grid grid-cols-12 gap-4 gap-y-8 py-8 sm:gap-8 md:py-12">
           <div className="col-span-12 lg:col-span-4">

@@ -167,8 +167,10 @@ export default function TrendingNewslettersClient() {
       <ThreeColumnLayout>
         <Card className="p-8">
           <div className="mb-8">
-            <h1 className="text-5xl font-bold">Trending Newsletters</h1>
-            <p className="text-white. mt-2">
+            <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
+              Trending Newsletters
+            </h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-300">
               Discover the most popular and highly-rated newsletters curated by our community
             </p>
           </div>
@@ -180,11 +182,13 @@ export default function TrendingNewslettersClient() {
 
   return (
     <ThreeColumnLayout>
-      <Card className="p-8">
+      <Card className="mb-32 p-8">
         <div role="main" aria-label="Trending Newsletters">
           <div className="mb-8">
-            <h1 className="text-5xl font-bold">Trending Newsletters</h1>
-            <p className="mt-4 max-w-xl text-pretty text-xl leading-snug tracking-tight text-white">
+            <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
+              Trending Newsletters
+            </h1>
+            <p className="mt-4 max-w-xl text-pretty text-xl leading-snug tracking-tight text-gray-600 dark:text-gray-300">
               Discover the most popular and highly-rated newsletters curated by our community
             </p>
           </div>
@@ -194,7 +198,7 @@ export default function TrendingNewslettersClient() {
             {loading && <NewsletterPatternSkeleton />}
 
             {!hasMore && newsletters.length > 0 && (
-              <div className="col-span-3 p-8 text-center text-gray-600">
+              <div className="col-span-3 p-8 text-center text-gray-600 dark:text-gray-400">
                 You&apos;re all caught up 🏁
               </div>
             )}

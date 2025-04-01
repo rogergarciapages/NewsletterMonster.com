@@ -14,14 +14,6 @@ import { SWRConfig } from "swr";
 
 /* eslint-disable quotes */
 
-/* eslint-disable quotes */
-
-/* eslint-disable quotes */
-
-/* eslint-disable quotes */
-
-/* eslint-disable quotes */
-
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
