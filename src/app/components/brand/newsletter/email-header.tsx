@@ -3,8 +3,7 @@
 import Link from "next/dist/client/link";
 import Image from "next/image";
 
-import { Button, Chip, Tooltip } from "@nextui-org/react";
-import { IconMail, IconMailForward, IconStar } from "@tabler/icons-react";
+import { Chip, Tooltip } from "@nextui-org/react";
 
 type Badge = {
   id: string;
@@ -42,23 +41,6 @@ export default function EmailHeader({
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>
-        </div>
-        <div className="flex gap-2">
-          <Tooltip content="Star this newsletter">
-            <Button isIconOnly variant="light" aria-label="Star">
-              <IconStar className="h-5 w-5" />
-            </Button>
-          </Tooltip>
-          <Tooltip content="Reply">
-            <Button isIconOnly variant="light" aria-label="Reply">
-              <IconMail className="h-5 w-5" />
-            </Button>
-          </Tooltip>
-          <Tooltip content="Forward">
-            <Button isIconOnly variant="light" aria-label="Forward">
-              <IconMailForward className="h-5 w-5" />
-            </Button>
-          </Tooltip>
         </div>
       </div>
 

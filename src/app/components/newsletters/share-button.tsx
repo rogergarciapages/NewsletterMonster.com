@@ -67,12 +67,6 @@ export function ShareButton({
     }
   };
 
-  const buttonSizes = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
-  };
-
   const iconSizes = {
     sm: "h-4 w-4",
     md: "h-5 w-5",
@@ -81,13 +75,13 @@ export function ShareButton({
 
   const button = (
     <Button
-      isIconOnly
       variant="light"
       aria-label="Share newsletter"
-      className={`${buttonSizes[size]} flex items-center justify-center hover:bg-default-100 ${className}`}
+      className={`flex items-center justify-center hover:bg-default-100 ${className}`}
       onClick={onOpen}
+      startContent={<IconShare className={`${iconSizes[size]} text-default-500`} />}
     >
-      <IconShare className={`${iconSizes[size]} text-default-500`} />
+      Share
     </Button>
   );
 

@@ -213,7 +213,7 @@ export default async function NewsletterPage({
       />
 
       <ThreeColumnLayout>
-        <article className="relative mx-auto w-full max-w-3xl">
+        <article className="relative mx-auto w-full max-w-5xl">
           <EmailHeader
             subject={newsletter.subject}
             sender={newsletter.sender}

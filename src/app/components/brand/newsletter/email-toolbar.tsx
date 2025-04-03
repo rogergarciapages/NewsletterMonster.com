@@ -27,10 +27,9 @@ export default function EmailToolbar({
   initialIsBookmarked = false,
 }: EmailToolbarProps) {
   const buttonClassName = "min-w-[110px] h-10 hover:bg-default-100";
-  const iconButtonClassName = "h-10 w-10 hover:bg-default-100";
 
   return (
-    <div className="sticky top-0 z-10 flex items-center justify-between bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:bg-zinc-900/80">
+    <div className="sticky top-0 z-10 flex items-center justify-start bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:bg-zinc-900/80">
       <div className="flex items-center gap-3">
         <LikeButton
           newsletterId={newsletterId}
@@ -51,15 +50,12 @@ export default function EmailToolbar({
           size="md"
           className={buttonClassName}
         />
-      </div>
-
-      <div className="flex items-center gap-3">
         <ShareButton
           newsletterId={newsletterId}
           size="md"
           url={currentUrl}
           title={subject || "Check out this newsletter on NewsletterMonster"}
-          className={iconButtonClassName}
+          className={buttonClassName}
         />
       </div>
     </div>
