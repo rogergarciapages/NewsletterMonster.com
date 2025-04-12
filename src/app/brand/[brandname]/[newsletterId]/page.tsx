@@ -475,27 +475,46 @@ export default async function NewsletterPage({
               </div>
             </div>
 
-            {/* Related Newsletters Section */}
-            {brandNewsletters.length > 0 && (
-              <div className="mt-12 border-t border-zinc-800 pt-8">
-                <h2 className="mb-6 text-2xl font-bold text-gray-100">
-                  {brandNewslettersRaw.some(
-                    nl =>
-                      nl.sender?.includes(brandDisplayName) ||
-                      nl.sender?.includes(params.brandname.replace("-", " "))
-                  )
-                    ? `Related newsletters from ${brandDisplayName}`
-                    : "You might also like these newsletters"}
-                </h2>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {brandNewsletters.slice(0, 6).map(newsletter => (
-                    <div key={newsletter.newsletter_id} className="overflow-hidden">
-                      <NewsletterCard newsletter={newsletter} brandname={params.brandname} />
-                    </div>
-                  ))}
+            {/* Related Newsletters Sections */}
+            <div className="mt-12 border-t border-zinc-800 pt-8">
+              {/* Brand-specific newsletters */}
+              {brandNewsletters.length > 0 && (
+                <div className="mb-12">
+                  <h2 className="mb-6 text-2xl font-bold text-gray-100">
+                    {brandNewslettersRaw.some(
+                      nl =>
+                        nl.sender?.includes(brandDisplayName) ||
+                        nl.sender?.includes(params.brandname.replace("-", " "))
+                    )
+                      ? `Related newsletters from ${brandDisplayName}`
+                      : "You might also like these newsletters"}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {brandNewsletters.slice(0, 6).map(newsletter => (
+                      <div key={newsletter.newsletter_id} className="overflow-hidden">
+                        <NewsletterCard newsletter={newsletter} brandname={params.brandname} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Topic-related newsletters (by tags) */}
+              {categoryNewsletters.length > 0 && (
+                <div>
+                  <h2 className="mb-6 text-2xl font-bold text-gray-100">
+                    Similar newsletters you might enjoy
+                  </h2>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {categoryNewsletters.slice(0, 6).map(newsletter => (
+                      <div key={newsletter.newsletter_id} className="overflow-hidden">
+                        <NewsletterCard newsletter={newsletter} brandname={params.brandname} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </article>
         </Card>
       </ThreeColumnLayout>
