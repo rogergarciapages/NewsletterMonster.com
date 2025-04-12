@@ -47,7 +47,7 @@ export default function EmailContent({
       <div className="space-y-6">
         {/* Newsletter screenshot */}
         {fullScreenshotUrl && (
-          <div className="overflow-hidden rounded-lg border shadow-sm">
+          <div className="overflow-hidden rounded-lg border-0 shadow-none">
             <Image
               src={fullScreenshotUrl}
               alt={subject || "Newsletter content"}
@@ -61,7 +61,7 @@ export default function EmailContent({
 
         {/* Newsletter HTML content */}
         {htmlFileUrl && (
-          <div className="overflow-hidden rounded-lg border shadow-sm">
+          <div className="overflow-hidden rounded-lg border-0 shadow-none">
             <iframe
               src={htmlFileUrl}
               className="h-[800px] w-full"

@@ -8,14 +8,14 @@ import { Skeleton } from "@nextui-org/react";
 const NewsletterCardSkeleton = memo(() => {
   return (
     <article className="flex flex-col overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl dark:bg-zinc-800">
-      {/* Image Skeleton */}
+      {/* Image */}
       <div className="relative aspect-[1200/630] w-full">
         <Skeleton className="absolute inset-0 h-full w-full" />
       </div>
 
       {/* Content */}
       <div className="flex flex-col gap-4 p-4">
-        {/* Subject */}
+        {/* Title */}
         <div className="space-y-2">
           <Skeleton className="h-6 w-3/4 rounded-lg" />
           <Skeleton className="h-6 w-1/2 rounded-lg" />

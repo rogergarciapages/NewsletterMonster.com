@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
+import { Card } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 
 import EmailContent from "@/app/components/brand/newsletter/email-content";
@@ -213,59 +214,61 @@ export default async function NewsletterPage({
       />
 
       <ThreeColumnLayout>
-        <article className="relative mx-auto w-full max-w-5xl">
-          <EmailHeader
-            subject={newsletter.subject}
-            sender={newsletter.sender}
-            brandname={params.brandname}
-            date={newsletter.created_at}
-            badges={newsletter.badges}
-          />
+        <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
+          <article className="mx-auto max-w-5xl">
+            <EmailHeader
+              subject={newsletter.subject}
+              sender={newsletter.sender}
+              brandname={params.brandname}
+              date={newsletter.created_at}
+              badges={newsletter.badges}
+            />
 
-          {/* Email toolbar */}
-          <EmailToolbar
-            newsletterId={newsletter.newsletter_id}
-            currentUrl={currentUrl}
-            subject={newsletter.subject}
-            summary={newsletter.summary}
-            initialLikesCount={newsletter.likes_count || 0}
-            initialYouRocksCount={newsletter.you_rocks_count || 0}
-            initialIsLiked={isLiked}
-            initialIsBookmarked={isBookmarked}
-          />
-
-          {/* Email content */}
-          <EmailContent
-            summary={newsletter.summary}
-            fullScreenshotUrl={newsletter.full_screenshot_url}
-            htmlFileUrl={newsletter.html_file_url}
-            subject={newsletter.subject}
-            tags={newsletter.NewsletterTag}
-            productsLink={newsletter.products_link}
-          />
-
-          {/* SEO metadata */}
-          <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
-          <meta itemProp="publisher" content="NewsletterMonster" />
-          <meta itemProp="author" content={brandDisplayName} />
-          {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
-
-          <div className="flex flex-wrap gap-2">
-            <LikeButton
+            {/* Email toolbar */}
+            <EmailToolbar
               newsletterId={newsletter.newsletter_id}
+              currentUrl={currentUrl}
+              subject={newsletter.subject}
+              summary={newsletter.summary}
               initialLikesCount={newsletter.likes_count || 0}
-              initialIsLiked={isLiked}
-            />
-            <YouRockButton
-              newsletterId={newsletter.newsletter_id}
               initialYouRocksCount={newsletter.you_rocks_count || 0}
-            />
-            <BookmarkButton
-              newsletterId={newsletter.newsletter_id}
+              initialIsLiked={isLiked}
               initialIsBookmarked={isBookmarked}
             />
-          </div>
-        </article>
+
+            {/* Email content */}
+            <EmailContent
+              summary={newsletter.summary}
+              fullScreenshotUrl={newsletter.full_screenshot_url}
+              htmlFileUrl={newsletter.html_file_url}
+              subject={newsletter.subject}
+              tags={newsletter.NewsletterTag}
+              productsLink={newsletter.products_link}
+            />
+
+            {/* SEO metadata */}
+            <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
+            <meta itemProp="publisher" content="NewsletterMonster" />
+            <meta itemProp="author" content={brandDisplayName} />
+            {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
+
+            <div className="flex flex-wrap gap-2">
+              <LikeButton
+                newsletterId={newsletter.newsletter_id}
+                initialLikesCount={newsletter.likes_count || 0}
+                initialIsLiked={isLiked}
+              />
+              <YouRockButton
+                newsletterId={newsletter.newsletter_id}
+                initialYouRocksCount={newsletter.you_rocks_count || 0}
+              />
+              <BookmarkButton
+                newsletterId={newsletter.newsletter_id}
+                initialIsBookmarked={isBookmarked}
+              />
+            </div>
+          </article>
+        </Card>
       </ThreeColumnLayout>
     </>
   );

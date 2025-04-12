@@ -165,7 +165,7 @@ export default function TrendingNewslettersClient() {
   if (loading && newsletters.length === 0) {
     return (
       <ThreeColumnLayout>
-        <Card className="p-8">
+        <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] p-8">
           <div className="mb-8">
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
               Trending Newsletters
@@ -182,7 +182,7 @@ export default function TrendingNewslettersClient() {
 
   return (
     <ThreeColumnLayout>
-      <Card className="mb-32 p-8">
+      <Card className="mb-32 border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] p-8">
         <div role="main" aria-label="Trending Newsletters">
           <div className="mb-8">
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
