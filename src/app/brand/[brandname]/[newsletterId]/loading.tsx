@@ -1,16 +1,31 @@
 // src/app/[brandname]/[newsletterId]/loading.tsx
 import { Card, Skeleton } from "@nextui-org/react";
 
+import NewsletterCardSkeleton from "@/app/components/brand/newsletter/card/skeleton";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 
 export default function NewsletterPageSkeleton() {
   return (
     <ThreeColumnLayout>
       <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
-        <article className="mx-auto max-w-3xl px-4 py-8">
+        <article className="mx-auto max-w-5xl px-4 py-8">
           {/* Back Button Skeleton */}
           <div className="mb-8">
             <Skeleton className="h-10 w-32 rounded-lg border-none shadow-none" />
+          </div>
+
+          {/* Email Toolbar Skeleton */}
+          <div className="sticky top-0 z-10 mb-6 flex items-center justify-start bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:bg-zinc-900/80">
+            <div className="flex items-center gap-3">
+              {/* Like Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* You Rock Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* Bookmark Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* Share Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+            </div>
           </div>
 
           {/* Header Section */}
@@ -76,6 +91,18 @@ export default function NewsletterPageSkeleton() {
               </div>
             </div>
 
+            {/* Bottom Action Buttons Skeleton */}
+            <div className="mt-8 flex items-center gap-3">
+              {/* Like Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* You Rock Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* Bookmark Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+              {/* Share Button Skeleton */}
+              <Skeleton className="h-10 min-w-[110px] rounded-lg border-none shadow-none" />
+            </div>
+
             {/* Engagement Metrics */}
             <div className="flex space-x-6">
               <Skeleton className="h-6 w-24 rounded-lg border-none shadow-none" />
@@ -88,6 +115,29 @@ export default function NewsletterPageSkeleton() {
               <Skeleton className="mb-4 h-4 w-full rounded-lg border-none shadow-none" />
               <div className="flex items-center">
                 <Skeleton className="h-10 w-48 rounded-lg border-none shadow-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Related Newsletters Skeletons */}
+          <div className="mt-12 border-t border-zinc-800 pt-8">
+            {/* Brand newsletters section */}
+            <div className="mb-10">
+              <Skeleton className="mb-6 h-10 w-64 rounded-lg border-none shadow-none" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => (
+                  <NewsletterCardSkeleton key={`brand-${i}`} />
+                ))}
+              </div>
+            </div>
+
+            {/* Category newsletters section */}
+            <div className="mt-10">
+              <Skeleton className="mb-6 h-10 w-64 rounded-lg border-none shadow-none" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => (
+                  <NewsletterCardSkeleton key={`category-${i}`} />
+                ))}
               </div>
             </div>
           </div>

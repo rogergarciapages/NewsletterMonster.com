@@ -6,12 +6,14 @@ import Script from "next/script";
 import { Card } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 
+import NewsletterCard from "@/app/components/brand/newsletter/card";
 import EmailContent from "@/app/components/brand/newsletter/email-content";
 import EmailHeader from "@/app/components/brand/newsletter/email-header";
 import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
+import { ShareButton } from "@/app/components/newsletters/share-button";
 import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -150,6 +152,121 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
   }
 }
 
+// Data fetching function for related newsletters from the same brand
+async function getBrandNewsletters(
+  brandname: string,
+  currentNewsletterId: number,
+  limit = 6
+): Promise<any[]> {
+  try {
+    // Create variations of the brand name for searching
+    const brandKeyword = brandname.split("-").join(" ");
+    const brandCapitalized = brandKeyword
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    console.log("Searching for brand newsletters with variations:", {
+      brandname,
+      brandKeyword,
+      brandCapitalized,
+    });
+
+    const newsletters = await prisma.newsletter.findMany({
+      where: {
+        OR: [
+          { sender: { contains: brandKeyword } },
+          { sender: { contains: brandKeyword.toLowerCase() } },
+          { sender: { contains: brandCapitalized } },
+          { sender_slug: brandname },
+          // Try to match based on partial sender name
+          ...brandKeyword
+            .split(" ")
+            .map(word => ({
+              sender: { contains: word.length > 3 ? word : undefined },
+            }))
+            .filter(item => item.sender.contains),
+        ],
+        newsletter_id: {
+          not: currentNewsletterId, // Exclude the current newsletter
+        },
+      },
+      select: {
+        newsletter_id: true,
+        sender: true,
+        subject: true,
+        top_screenshot_url: true,
+        likes_count: true,
+        you_rocks_count: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      take: limit,
+    });
+
+    console.log(`Found ${newsletters.length} related newsletters for brand: ${brandname}`);
+    return newsletters;
+  } catch (error) {
+    console.error("Error fetching brand newsletters:", error);
+    return [];
+  }
+}
+
+// Data fetching function for related newsletters from the same category/tags
+async function getCategoryNewsletters(
+  tags: number[],
+  brandname: string,
+  currentNewsletterId: number,
+  limit = 6
+): Promise<any[]> {
+  if (!tags.length) return [];
+
+  try {
+    // Alternative approach: search on sender field for different possible forms of the brand name
+    const brandKeyword = brandname.split("-").join(" ");
+
+    const newsletters = await prisma.newsletter.findMany({
+      where: {
+        NewsletterTag: {
+          some: {
+            tag_id: {
+              in: tags,
+            },
+          },
+        },
+        newsletter_id: {
+          not: currentNewsletterId, // Exclude the current newsletter
+        },
+        NOT: [
+          { sender: { contains: brandKeyword } },
+          { sender: { contains: brandKeyword.toLowerCase() } },
+          { sender_slug: brandname },
+        ],
+      },
+      select: {
+        newsletter_id: true,
+        sender: true,
+        subject: true,
+        top_screenshot_url: true,
+        likes_count: true,
+        you_rocks_count: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      take: limit,
+    });
+
+    return newsletters;
+  } catch (error) {
+    console.error("Error fetching category newsletters:", error);
+    return [];
+  }
+}
+
 // Metadata generation
 export async function generateMetadata({
   params,
@@ -196,6 +313,80 @@ export default async function NewsletterPage({
     isBookmarked = await isNewsletterBookmarked(userId, newsletter.newsletter_id);
   }
 
+  // Extract tag IDs for related newsletters
+  const tagIds = newsletter.NewsletterTag.map(tag => tag.Tag.id);
+
+  // Fetch related newsletters
+  let brandNewslettersRaw = await getBrandNewsletters(params.brandname, newsletter.newsletter_id);
+  const categoryNewslettersRaw = await getCategoryNewsletters(
+    tagIds,
+    params.brandname,
+    newsletter.newsletter_id
+  );
+
+  // If no brand newsletters found, fetch some recent newsletters as fallback
+  if (brandNewslettersRaw.length === 0) {
+    console.log("No brand newsletters found, fetching recent newsletters as fallback");
+    try {
+      brandNewslettersRaw = await prisma.newsletter.findMany({
+        where: {
+          newsletter_id: {
+            not: newsletter.newsletter_id,
+          },
+        },
+        select: {
+          newsletter_id: true,
+          sender: true,
+          subject: true,
+          top_screenshot_url: true,
+          likes_count: true,
+          you_rocks_count: true,
+          created_at: true,
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+        take: 3,
+      });
+      console.log(`Fetched ${brandNewslettersRaw.length} recent newsletters as fallback`);
+    } catch (error) {
+      console.error("Error fetching fallback newsletters:", error);
+    }
+  }
+
+  // Map the newsletters to match our expected format with proper type handling
+  const brandNewsletters = brandNewslettersRaw.map(nl => ({
+    newsletter_id: nl.newsletter_id,
+    sender: nl.sender,
+    subject: nl.subject,
+    top_screenshot_url: nl.top_screenshot_url,
+    likes_count: nl.likes_count || 0,
+    you_rocks_count: nl.you_rocks_count || 0,
+    created_at: nl.created_at instanceof Date ? nl.created_at : new Date(nl.created_at),
+    summary: null,
+    user_id: null,
+  }));
+
+  const categoryNewsletters = categoryNewslettersRaw.map(nl => ({
+    newsletter_id: nl.newsletter_id,
+    sender: nl.sender,
+    subject: nl.subject,
+    top_screenshot_url: nl.top_screenshot_url,
+    likes_count: nl.likes_count || 0,
+    you_rocks_count: nl.you_rocks_count || 0,
+    created_at: nl.created_at instanceof Date ? nl.created_at : new Date(nl.created_at),
+    summary: null,
+    user_id: null,
+  }));
+
+  // Debug logs for related newsletters
+  console.log("DEBUG Related Newsletters:");
+  console.log("Brand name:", params.brandname);
+  console.log("Current newsletter ID:", newsletter.newsletter_id);
+  console.log("Brand newsletters raw count:", brandNewslettersRaw.length);
+  console.log("Brand newsletters mapped count:", brandNewsletters.length);
+  console.log("First few brand newsletters:", brandNewsletters.slice(0, 2));
+
   return (
     <>
       <Script
@@ -215,7 +406,7 @@ export default async function NewsletterPage({
 
       <ThreeColumnLayout>
         <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
-          <article className="mx-auto max-w-5xl">
+          <article className="mx-auto max-w-5xl px-4 py-8">
             <EmailHeader
               subject={newsletter.subject}
               sender={newsletter.sender}
@@ -253,21 +444,58 @@ export default async function NewsletterPage({
             <meta itemProp="author" content={brandDisplayName} />
             {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
 
-            <div className="flex flex-wrap gap-2">
-              <LikeButton
-                newsletterId={newsletter.newsletter_id}
-                initialLikesCount={newsletter.likes_count || 0}
-                initialIsLiked={isLiked}
-              />
-              <YouRockButton
-                newsletterId={newsletter.newsletter_id}
-                initialYouRocksCount={newsletter.you_rocks_count || 0}
-              />
-              <BookmarkButton
-                newsletterId={newsletter.newsletter_id}
-                initialIsBookmarked={isBookmarked}
-              />
+            <div className="mb-6 mt-8 rounded-lg p-6">
+              <h3 className="mb-2 text-xl font-bold text-gray-100">
+                Like, share and rock this newsletter
+              </h3>
+              <p className="mb-4 text-gray-400">
+                Show your appreciation for this content by liking, sharing with friends, or giving
+                it a rock. Your engagement helps promote great newsletters!
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                <LikeButton
+                  newsletterId={newsletter.newsletter_id}
+                  initialLikesCount={newsletter.likes_count || 0}
+                  initialIsLiked={isLiked}
+                />
+                <YouRockButton
+                  newsletterId={newsletter.newsletter_id}
+                  initialYouRocksCount={newsletter.you_rocks_count || 0}
+                />
+                <BookmarkButton
+                  newsletterId={newsletter.newsletter_id}
+                  initialIsBookmarked={isBookmarked}
+                />
+                <ShareButton
+                  newsletterId={newsletter.newsletter_id}
+                  url={currentUrl}
+                  title={newsletter.subject || "Check out this newsletter"}
+                />
+              </div>
             </div>
+
+            {/* Related Newsletters Section */}
+            {brandNewsletters.length > 0 && (
+              <div className="mt-12 border-t border-zinc-800 pt-8">
+                <h2 className="mb-6 text-2xl font-bold text-gray-100">
+                  {brandNewslettersRaw.some(
+                    nl =>
+                      nl.sender?.includes(brandDisplayName) ||
+                      nl.sender?.includes(params.brandname.replace("-", " "))
+                  )
+                    ? `Related newsletters from ${brandDisplayName}`
+                    : "You might also like these newsletters"}
+                </h2>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {brandNewsletters.slice(0, 6).map(newsletter => (
+                    <div key={newsletter.newsletter_id} className="overflow-hidden">
+                      <NewsletterCard newsletter={newsletter} brandname={params.brandname} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </article>
         </Card>
       </ThreeColumnLayout>

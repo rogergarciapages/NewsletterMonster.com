@@ -13,6 +13,16 @@ import { IconMailOpened } from "@tabler/icons-react";
 
 // src/app/components/brand/newsletter/card/image.tsx
 
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
 interface NewsletterImageProps {
   imageUrl: string | null;
   subject: string | null;
@@ -38,36 +48,32 @@ const NewsletterImage = memo(
 
     const imageContent = (
       <div className="group relative">
-        <div className="aspect-[680/900] w-full">
-          <div className="absolute inset-0 p-4">
-            <div className="relative h-full w-full overflow-hidden rounded-md">
-              <Image
-                src={imageUrl}
-                alt={imageAlt}
-                title={imageTitle}
-                fill
-                className={`object-cover object-top ${
-                  showHoverEffect ? "transition-transform duration-300 group-hover:scale-105" : ""
-                }`}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={priority}
-                quality={85}
-              />
-              {showHoverEffect && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-torch-600/0 opacity-0 transition-all duration-300 group-hover:bg-torch-600/90 group-hover:opacity-100">
-                  <div className="flex translate-y-4 transform flex-col items-center gap-3 transition-transform duration-300 group-hover:translate-y-0">
-                    <IconMailOpened
-                      className="h-16 w-16 text-white"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                      title="Open newsletter"
-                    />
-                    <span className="text-xl font-bold tracking-tighter text-white">Open It!</span>
-                  </div>
-                </div>
-              )}
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={imageAlt}
+            title={imageTitle}
+            fill
+            className={`object-cover object-top ${
+              showHoverEffect ? "transition-transform duration-300 group-hover:scale-105" : ""
+            }`}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
+            quality={85}
+          />
+          {showHoverEffect && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-torch-600/0 opacity-0 transition-all duration-300 group-hover:bg-torch-600/90 group-hover:opacity-100">
+              <div className="flex translate-y-4 transform flex-col items-center gap-3 transition-transform duration-300 group-hover:translate-y-0">
+                <IconMailOpened
+                  className="h-16 w-16 text-white"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                  title="Open newsletter"
+                />
+                <span className="text-xl font-bold tracking-tighter text-white">Open It!</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );

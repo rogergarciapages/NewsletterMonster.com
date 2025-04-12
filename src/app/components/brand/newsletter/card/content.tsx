@@ -30,11 +30,11 @@ const NewsletterContent = memo(
 
     // Create the URL object to satisfy type requirements
     const href = {
-      pathname: `/${brandname}/${newsletter.newsletter_id}`,
+      pathname: `/brand/${brandname}/${newsletter.newsletter_id}`,
     };
 
     return (
-      <div className={`flex flex-col px-4 py-2 ${showFullContent ? "" : "h-[180px]"}`}>
+      <div className="flex flex-col px-4 py-3">
         {showFullContent ? (
           titleContent
         ) : (
@@ -43,13 +43,9 @@ const NewsletterContent = memo(
           </SeoLink>
         )}
 
-        <div className="mt-auto flex flex-col">
+        <div className="mt-auto flex flex-col justify-end">
           {newsletter.summary && (
-            <p
-              className={`mb-3 text-sm text-gray-800 dark:text-gray-300 ${
-                showFullContent ? "" : "line-clamp-2"
-              }`}
-            >
+            <p className="mb-3 line-clamp-2 text-sm text-gray-800 dark:text-gray-300">
               {newsletter.summary}
             </p>
           )}

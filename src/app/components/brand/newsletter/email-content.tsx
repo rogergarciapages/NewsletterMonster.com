@@ -1,8 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
+import { useDisclosure } from "@nextui-org/react";
 import { IconDownload, IconExternalLink } from "@tabler/icons-react";
+import { useSession } from "next-auth/react";
+
+import LoginModal from "@/app/components/login-modal";
 
 import NewsletterTags from "../../tags/newsletter-tags";
 
@@ -30,16 +36,37 @@ export default function EmailContent({
   productsLink,
   brandname,
 }: EmailContentProps) {
-  const handleDownloadHTML = () => {
-    if (htmlFileUrl) {
+  const { data: session, status } = useSession();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [downloadType, setDownloadType] = useState<"html" | "image" | null>(null);
+  const router = useRouter();
+
+  const isLoggedIn = status === "authenticated" && !!session;
+
+  const handleDownload = (type: "html" | "image") => {
+    if (!isLoggedIn) {
+      setDownloadType(type);
+      onOpen();
+      return;
+    }
+
+    // User is logged in, proceed with download
+    if (type === "html" && htmlFileUrl) {
       window.open(htmlFileUrl, "_blank");
+    } else if (type === "image" && fullScreenshotUrl) {
+      window.open(fullScreenshotUrl, "_blank");
     }
   };
 
-  const handleDownloadImage = () => {
-    if (fullScreenshotUrl) {
+  const handleLoginSuccess = () => {
+    onOpenChange();
+    // After successful login, attempt the download again
+    if (downloadType === "html" && htmlFileUrl) {
+      window.open(htmlFileUrl, "_blank");
+    } else if (downloadType === "image" && fullScreenshotUrl) {
       window.open(fullScreenshotUrl, "_blank");
     }
+    setDownloadType(null);
   };
 
   // Format brand name for display (capitalize words, replace hyphens with spaces)
@@ -52,6 +79,9 @@ export default function EmailContent({
 
   return (
     <div className="flex flex-col gap-6 bg-white p-6 dark:bg-zinc-900">
+      {/* Login Modal */}
+      <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} onSuccess={handleLoginSuccess} />
+
       {/* Summary section */}
       {summary && (
         <div className="rounded-lg bg-gray-50 p-4 dark:bg-zinc-800">
@@ -106,7 +136,7 @@ export default function EmailContent({
               </p>
               <div className="flex flex-wrap gap-4">
                 <button
-                  onClick={handleDownloadHTML}
+                  onClick={() => handleDownload("html")}
                   className="inline-flex items-center gap-2 rounded-lg bg-warning px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-warning-600"
                 >
                   <IconDownload className="h-4 w-4" />
@@ -114,7 +144,7 @@ export default function EmailContent({
                 </button>
                 {fullScreenshotUrl && (
                   <button
-                    onClick={handleDownloadImage}
+                    onClick={() => handleDownload("image")}
                     className="inline-flex items-center gap-2 rounded-lg bg-torch-700 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-torch-800"
                   >
                     <IconDownload className="h-4 w-4" />
