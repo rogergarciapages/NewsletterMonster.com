@@ -60,19 +60,36 @@ export default function NewsletterPageSkeleton() {
               <Skeleton className="aspect-[3/4] w-full rounded-lg border-none shadow-none" />
             </div>
 
+            {/* Newsletter Content Iframe Placeholder */}
+            <div>
+              <Skeleton className="mb-4 h-8 w-64 rounded-lg border-none shadow-none" />
+              <div className="overflow-hidden rounded-lg shadow-none">
+                <Skeleton className="h-[800px] w-full rounded-lg border-none shadow-none" />
+              </div>
+              <div className="mt-4">
+                <Skeleton className="mb-3 h-8 w-64 rounded-lg border-none shadow-none" />
+                <Skeleton className="mb-4 h-4 w-full rounded-lg border-none shadow-none" />
+                <div className="flex flex-wrap gap-4">
+                  <Skeleton className="h-10 w-36 rounded-lg border-none shadow-none" />
+                  <Skeleton className="h-10 w-36 rounded-lg border-none shadow-none" />
+                </div>
+              </div>
+            </div>
+
             {/* Engagement Metrics */}
             <div className="flex space-x-6">
               <Skeleton className="h-6 w-24 rounded-lg border-none shadow-none" />
               <Skeleton className="h-6 w-24 rounded-lg border-none shadow-none" />
             </div>
 
-            {/* Newsletter Content Iframe Placeholder */}
-            <div className="overflow-hidden rounded-lg shadow-none">
-              <Skeleton className="h-[800px] w-full rounded-lg border-none shadow-none" />
-            </div>
-
             {/* Products Link */}
-            <Skeleton className="h-6 w-32 rounded-lg border-none shadow-none" />
+            <div className="mt-6">
+              <Skeleton className="mb-3 h-8 w-64 rounded-lg border-none shadow-none" />
+              <Skeleton className="mb-4 h-4 w-full rounded-lg border-none shadow-none" />
+              <div className="flex items-center">
+                <Skeleton className="h-10 w-48 rounded-lg border-none shadow-none" />
+              </div>
+            </div>
           </div>
         </article>
       </Card>

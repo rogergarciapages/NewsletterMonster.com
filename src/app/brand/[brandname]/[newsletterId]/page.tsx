@@ -244,6 +244,7 @@ export default async function NewsletterPage({
               subject={newsletter.subject}
               tags={newsletter.NewsletterTag}
               productsLink={newsletter.products_link}
+              brandname={params.brandname}
             />
 
             {/* SEO metadata */}
