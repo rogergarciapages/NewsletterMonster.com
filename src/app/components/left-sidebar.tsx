@@ -8,8 +8,8 @@ import {
   IconAlertCircle,
   IconBell,
   IconBookmark,
+  IconCompass,
   IconHome,
-  IconList,
   IconMessageCircle2,
   IconMovie,
   IconTag,
@@ -173,7 +173,7 @@ const LeftSidebar: React.FC = () => {
     },
     { icon: IconMessageCircle2, label: "Messages", path: "#" },
     { icon: IconTag, label: "Tags", path: "/tag" },
-    { icon: IconList, label: "Lists", path: "#" },
+    { icon: IconCompass, label: "Explore", path: "/newsletters/explore" },
     { icon: IconTrendingUp, label: "Trending", path: "/trending" },
     { icon: IconBell, label: "Notifications", path: "#" },
     {

@@ -2,10 +2,17 @@
 "use client";
 
 import Link from "next/dist/client/link";
-import Image from "next/image";
 import { memo } from "react";
 
 import { IconMailOpened } from "@tabler/icons-react";
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
 
 // src/app/components/brand/newsletter/card/image.tsx
 
@@ -48,18 +55,14 @@ const NewsletterImage = memo(
 
     const imageContent = (
       <div className="group relative">
-        <div className="relative aspect-[4/3] w-full overflow-hidden">
-          <Image
+        <div className="relative w-full overflow-hidden">
+          <img
             src={imageUrl}
             alt={imageAlt}
             title={imageTitle}
-            fill
-            className={`object-cover object-top ${
+            className={`h-auto w-full ${
               showHoverEffect ? "transition-transform duration-300 group-hover:scale-105" : ""
             }`}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={priority}
-            quality={85}
           />
           {showHoverEffect && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-torch-600/0 opacity-0 transition-all duration-300 group-hover:bg-torch-600/90 group-hover:opacity-100">
