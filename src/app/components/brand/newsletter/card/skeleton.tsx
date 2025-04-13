@@ -9,8 +9,8 @@ const NewsletterCardSkeleton = memo(() => {
   return (
     <article className="flex flex-col overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl dark:bg-zinc-800">
       {/* Image */}
-      <div className="relative aspect-[1200/630] w-full">
-        <Skeleton className="absolute inset-0 h-full w-full" />
+      <div className="relative w-full">
+        <Skeleton className="h-64 w-full" />
       </div>
 
       {/* Content */}

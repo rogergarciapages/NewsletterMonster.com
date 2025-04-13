@@ -17,7 +17,7 @@ export default function ExploreNewslettersLoading() {
               key={index}
               className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-zinc-800"
             >
-              <Skeleton className="aspect-[4/3] w-full rounded-none" />
+              <Skeleton className="h-64 w-full rounded-none" />
               <div className="p-4">
                 <Skeleton className="mb-2 h-6 w-3/4 rounded-lg" />
                 <Skeleton className="mb-4 h-4 w-full rounded-lg" />

@@ -1,18 +1,19 @@
 // src/components/skeleton/newsletter-card-skeleton.tsx
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@nextui-org/react";
+
+import { Card } from "@/components/ui/card";
 
 export const NewsletterCardSkeleton = () => {
   return (
     <Card className="relative w-full bg-content2">
-      {/* Maintain same aspect ratio as the actual card */}
-      <div className="relative w-full pt-[132.35%]">
-        <div className="absolute inset-0 m-3 rounded-xl overflow-hidden">
+      {/* Use a fixed height instead of aspect ratio */}
+      <div className="relative h-80 w-full">
+        <div className="absolute inset-0 m-3 overflow-hidden rounded-xl">
           {/* Image skeleton */}
           <Skeleton className="absolute inset-0 rounded-xl">
             <div className="h-full w-full bg-default-300" />
           </Skeleton>
-          
+
           {/* Content overlay */}
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-6">
             {/* Title and date skeleton */}
@@ -26,7 +27,7 @@ export const NewsletterCardSkeleton = () => {
                   <div className="h-6 w-1/2" />
                 </Skeleton>
               </div>
-              
+
               {/* Date skeleton */}
               <div className="mt-4">
                 <Skeleton className="rounded-lg">
@@ -46,7 +47,7 @@ export const NewsletterCardSkeleton = () => {
                   <div className="h-8 w-20" />
                 </Skeleton>
               </div>
-              
+
               {/* Sender name skeleton */}
               <Skeleton className="rounded-full">
                 <div className="h-6 w-32" />
