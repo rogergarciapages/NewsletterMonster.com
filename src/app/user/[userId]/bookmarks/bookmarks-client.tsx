@@ -1,8 +1,10 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import axios from "axios";
+import { toast } from "sonner";
 
 import { NewsletterGrid } from "@/app/components/newsletters/newsletter-grid";
 import { NewsletterPatternSkeleton } from "@/app/components/skeleton/newsletter-pattern-skeleton";
@@ -17,6 +19,8 @@ interface BookmarksClientProps {
 }
 
 export function BookmarksClient({ initialBookmarks, userId }: BookmarksClientProps) {
+  const searchParams = useSearchParams();
+  const wasUnauthorized = searchParams.get("unauthorized") === "true";
   const [newsletters, setNewsletters] = useState<Newsletter[]>(initialBookmarks);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -25,6 +29,18 @@ export function BookmarksClient({ initialBookmarks, userId }: BookmarksClientPro
   const processedNewsletterIds = useRef(
     new Set(initialBookmarks.map(newsletter => newsletter.newsletter_id))
   );
+
+  // Show unauthorized toast if needed
+  useEffect(() => {
+    if (wasUnauthorized) {
+      toast.warning(
+        "You can only view your own bookmarks. You have been redirected to your bookmarks page.",
+        {
+          duration: 5000,
+        }
+      );
+    }
+  }, [wasUnauthorized]);
 
   const fetchMoreBookmarks = async (pageNumber: number) => {
     try {

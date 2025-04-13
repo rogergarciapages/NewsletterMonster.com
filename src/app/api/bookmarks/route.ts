@@ -16,8 +16,10 @@ export async function GET(request: NextRequest) {
   const skip = parseInt(searchParams.get("skip") || "0");
   const take = parseInt(searchParams.get("take") || "20");
 
+  const userId = session.user.user_id;
+
   try {
-    const bookmarks = await getBookmarkedNewsletters(session.user.user_id, skip, take);
+    const bookmarks = await getBookmarkedNewsletters(userId, skip, take);
     return NextResponse.json(bookmarks);
   } catch (error) {
     console.error("Error fetching bookmarks:", error);

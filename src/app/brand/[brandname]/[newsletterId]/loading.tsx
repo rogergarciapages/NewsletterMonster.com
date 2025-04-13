@@ -7,7 +7,10 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 export default function NewsletterPageSkeleton() {
   return (
     <ThreeColumnLayout>
-      <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
+      <Card
+        className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none"
+        data-testid="newsletter-page-skeleton"
+      >
         <article className="mx-auto max-w-5xl px-4 py-8">
           {/* Back Button Skeleton */}
           <div className="mb-8">
@@ -72,14 +75,14 @@ export default function NewsletterPageSkeleton() {
 
             {/* Newsletter Screenshot */}
             <div className="overflow-hidden rounded-lg shadow-none">
-              <Skeleton className="aspect-[3/4] w-full rounded-lg border-none shadow-none" />
+              <Skeleton className="aspect-auto h-96 w-full rounded-lg border-none shadow-none" />
             </div>
 
             {/* Newsletter Content Iframe Placeholder */}
             <div>
               <Skeleton className="mb-4 h-8 w-64 rounded-lg border-none shadow-none" />
               <div className="overflow-hidden rounded-lg shadow-none">
-                <Skeleton className="h-[800px] w-full rounded-lg border-none shadow-none" />
+                <Skeleton className="h-[500px] w-full rounded-lg border-none shadow-none" />
               </div>
               <div className="mt-4">
                 <Skeleton className="mb-3 h-8 w-64 rounded-lg border-none shadow-none" />
@@ -119,23 +122,23 @@ export default function NewsletterPageSkeleton() {
             </div>
           </div>
 
-          {/* Related Newsletters Skeletons */}
+          {/* Related Newsletters Skeletons - Show fewer skeletons to reduce page weight */}
           <div className="mt-12 border-t border-zinc-800 pt-8">
             {/* Brand newsletters section */}
             <div className="mb-10">
               <Skeleton className="mb-6 h-10 w-64 rounded-lg border-none shadow-none" />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(1)].map((_, i) => (
                   <NewsletterCardSkeleton key={`brand-${i}`} />
                 ))}
               </div>
             </div>
 
-            {/* Category newsletters section */}
+            {/* Category newsletters section - Hidden until content is loaded */}
             <div className="mt-10">
               <Skeleton className="mb-6 h-10 w-64 rounded-lg border-none shadow-none" />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(1)].map((_, i) => (
                   <NewsletterCardSkeleton key={`category-${i}`} />
                 ))}
               </div>

@@ -6,7 +6,7 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 export default function EditProfileLoading() {
   return (
     <ThreeColumnLayout>
-      <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      <div className="mx-auto w-full max-w-5xl px-4 py-8">
         <Card>
           <CardBody className="gap-4">
             {/* Header */}

@@ -24,7 +24,7 @@ export function NewsletterGrid({ newsletters, observerRef }: NewsletterGridProps
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {newsletters.map((_, index) => (
-          <div key={index} className="relative aspect-[3/4] w-full bg-gray-100 dark:bg-gray-800">
+          <div key={index} className="relative h-80 w-full bg-gray-100 dark:bg-gray-800">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
             </div>
@@ -61,25 +61,21 @@ export function NewsletterGrid({ newsletters, observerRef }: NewsletterGridProps
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-torch-900 to-torch-800 opacity-0 transition-opacity duration-300 group-hover:opacity-[0.995]" />
 
-              {/* Aspect ratio container */}
-              <div className="relative w-full pt-[132.35%]">
-                <div className="absolute inset-0 overflow-hidden">
-                  {newsletter.top_screenshot_url ? (
-                    <div className="relative h-full w-full">
-                      <img
-                        src={newsletter.top_screenshot_url}
-                        alt={newsletter.subject || "Newsletter preview"}
-                        className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
-                        onError={e => {
-                          e.currentTarget.src = defaultImage;
-                          e.currentTarget.onerror = null;
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-full w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />
-                  )}
-                </div>
+              {/* Image container with natural height */}
+              <div className="relative w-full">
+                {newsletter.top_screenshot_url ? (
+                  <img
+                    src={newsletter.top_screenshot_url}
+                    alt={newsletter.subject || "Newsletter preview"}
+                    className="h-auto w-full object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
+                    onError={e => {
+                      e.currentTarget.src = defaultImage;
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
+                ) : (
+                  <div className="h-64 w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />
+                )}
 
                 {/* Content overlay */}
                 <div className="absolute inset-0 z-10 flex flex-col justify-between">

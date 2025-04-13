@@ -441,7 +441,7 @@ export default function EditProfilePage() {
 
   return (
     <ThreeColumnLayout>
-      <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      <div className="mx-auto w-full max-w-5xl px-4 py-8">
         <Card>
           <CardBody className="gap-4">
             <h1 className="mb-4 text-2xl font-bold">Edit Profile</h1>
