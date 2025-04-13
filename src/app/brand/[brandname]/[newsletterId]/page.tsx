@@ -73,6 +73,17 @@ enum BadgeRank {
   THIRD = "THIRD",
 }
 
+// Define a type for the newsletter result from the database query
+type NewsletterResult = {
+  newsletter_id: number;
+  sender: string | null;
+  subject: string | null;
+  top_screenshot_url: string | null;
+  likes_count: number | null;
+  you_rocks_count: number | null;
+  created_at: Date | string | null;
+};
+
 // Helper function to format brand name
 function formatBrandName(brandname: string): string {
   return brandname
@@ -157,7 +168,7 @@ async function getBrandNewsletters(
   brandname: string,
   currentNewsletterId: number,
   limit = 6
-): Promise<any[]> {
+): Promise<NewsletterResult[]> {
   try {
     // Create variations of the brand name for searching
     const brandKeyword = brandname.split("-").join(" ");
@@ -207,7 +218,7 @@ async function getBrandNewsletters(
     });
 
     console.log(`Found ${newsletters.length} related newsletters for brand: ${brandname}`);
-    return newsletters;
+    return newsletters as NewsletterResult[];
   } catch (error) {
     console.error("Error fetching brand newsletters:", error);
     return [];
@@ -220,7 +231,7 @@ async function getCategoryNewsletters(
   brandname: string,
   currentNewsletterId: number,
   limit = 6
-): Promise<any[]> {
+): Promise<NewsletterResult[]> {
   if (!tags.length) return [];
 
   try {
@@ -260,7 +271,7 @@ async function getCategoryNewsletters(
       take: limit,
     });
 
-    return newsletters;
+    return newsletters as NewsletterResult[];
   } catch (error) {
     console.error("Error fetching category newsletters:", error);
     return [];
@@ -362,7 +373,11 @@ export default async function NewsletterPage({
     top_screenshot_url: nl.top_screenshot_url,
     likes_count: nl.likes_count || 0,
     you_rocks_count: nl.you_rocks_count || 0,
-    created_at: nl.created_at instanceof Date ? nl.created_at : new Date(nl.created_at),
+    created_at: nl.created_at
+      ? nl.created_at instanceof Date
+        ? nl.created_at
+        : new Date(nl.created_at)
+      : null,
     summary: null,
     user_id: null,
   }));
@@ -374,7 +389,11 @@ export default async function NewsletterPage({
     top_screenshot_url: nl.top_screenshot_url,
     likes_count: nl.likes_count || 0,
     you_rocks_count: nl.you_rocks_count || 0,
-    created_at: nl.created_at instanceof Date ? nl.created_at : new Date(nl.created_at),
+    created_at: nl.created_at
+      ? nl.created_at instanceof Date
+        ? nl.created_at
+        : new Date(nl.created_at)
+      : null,
     summary: null,
     user_id: null,
   }));
@@ -420,7 +439,7 @@ export default async function NewsletterPage({
               newsletterId={newsletter.newsletter_id}
               currentUrl={currentUrl}
               subject={newsletter.subject}
-              summary={newsletter.summary}
+              _summary={newsletter.summary}
               initialLikesCount={newsletter.likes_count || 0}
               initialYouRocksCount={newsletter.you_rocks_count || 0}
               initialIsLiked={isLiked}
@@ -468,7 +487,7 @@ export default async function NewsletterPage({
                   initialIsBookmarked={isBookmarked}
                 />
                 <ShareButton
-                  newsletterId={newsletter.newsletter_id}
+                  _newsletterId={newsletter.newsletter_id}
                   url={currentUrl}
                   title={newsletter.subject || "Check out this newsletter"}
                 />

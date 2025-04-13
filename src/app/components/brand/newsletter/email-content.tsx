@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useDisclosure } from "@nextui-org/react";
 import { IconDownload, IconExternalLink } from "@tabler/icons-react";
@@ -39,7 +39,10 @@ export default function EmailContent({
   const { data: session, status } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [downloadType, setDownloadType] = useState<"html" | "image" | null>(null);
-  const router = useRouter();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [showScreenshot, setShowScreenshot] = useState(true);
+  const [iframeHeight, setIframeHeight] = useState(1200);
+  const _router = useRouter();
 
   const isLoggedIn = status === "authenticated" && !!session;
 

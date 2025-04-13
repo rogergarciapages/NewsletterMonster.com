@@ -20,7 +20,7 @@ export default function NewsletterCard({
         subject={newsletter.subject}
         brandname={brandname}
         newsletterId={newsletter.newsletter_id}
-        priority={priority}
+        _priority={priority}
       />
 
       <NewsletterContent newsletter={newsletter} brandname={brandname} />

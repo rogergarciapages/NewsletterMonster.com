@@ -15,10 +15,10 @@ const NEWSLETTERS_PER_PAGE = 20;
 
 interface BookmarksClientProps {
   initialBookmarks: Newsletter[];
-  userId: string;
+  _userId: string;
 }
 
-export function BookmarksClient({ initialBookmarks, userId }: BookmarksClientProps) {
+export function BookmarksClient({ initialBookmarks, _userId }: BookmarksClientProps) {
   const searchParams = useSearchParams();
   const wasUnauthorized = searchParams.get("unauthorized") === "true";
   const [newsletters, setNewsletters] = useState<Newsletter[]>(initialBookmarks);

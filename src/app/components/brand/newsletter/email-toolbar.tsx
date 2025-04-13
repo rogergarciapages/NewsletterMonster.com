@@ -8,7 +8,7 @@ import { YouRockButton } from "../../newsletters/you-rock-button";
 type EmailToolbarProps = {
   currentUrl?: string;
   subject?: string | null;
-  summary?: string | null;
+  _summary?: string | null;
   newsletterId: number;
   initialLikesCount?: number;
   initialYouRocksCount?: number;
@@ -19,7 +19,7 @@ type EmailToolbarProps = {
 export default function EmailToolbar({
   currentUrl,
   subject,
-  summary,
+  _summary,
   newsletterId,
   initialLikesCount = 0,
   initialYouRocksCount = 0,
@@ -51,7 +51,7 @@ export default function EmailToolbar({
           className={buttonClassName}
         />
         <ShareButton
-          newsletterId={newsletterId}
+          _newsletterId={newsletterId}
           size="md"
           url={currentUrl}
           title={subject || "Check out this newsletter on NewsletterMonster"}

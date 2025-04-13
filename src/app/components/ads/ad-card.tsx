@@ -1,11 +1,19 @@
 import { Card } from "@/components/ui/card";
 
+// Simple Ad type definition
+type Ad = {
+  id?: string;
+  title?: string;
+  url?: string;
+};
+
 interface AdCardProps {
-  isLarge?: boolean;
+  ad: Ad;
+  _isLarge?: boolean;
   className?: string;
 }
 
-export function AdCard({ isLarge = false, className = "" }: AdCardProps) {
+export function AdCard({ ad, _isLarge, className = "" }: AdCardProps) {
   // This will be replaced with actual AdSense code when approved
   const AdPlaceholder = () => (
     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">

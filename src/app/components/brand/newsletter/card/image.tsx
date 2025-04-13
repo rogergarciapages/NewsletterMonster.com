@@ -30,12 +30,16 @@ import { IconMailOpened } from "@tabler/icons-react";
 
 // src/app/components/brand/newsletter/card/image.tsx
 
+// src/app/components/brand/newsletter/card/image.tsx
+
+// src/app/components/brand/newsletter/card/image.tsx
+
 interface NewsletterImageProps {
   imageUrl: string | null;
   subject: string | null;
   brandname: string;
   newsletterId: number;
-  priority?: boolean;
+  _priority?: boolean;
   showHoverEffect?: boolean;
 }
 
@@ -45,7 +49,7 @@ const NewsletterImage = memo(
     subject,
     brandname,
     newsletterId,
-    priority = false,
+    _priority = false,
     showHoverEffect = true,
   }: NewsletterImageProps) => {
     if (!imageUrl) return null;

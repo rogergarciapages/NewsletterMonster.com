@@ -82,7 +82,7 @@ export default async function BookmarksPage({ params }: { params: { userId: stri
           </p>
         </header>
 
-        <BookmarksClient initialBookmarks={initialBookmarks} userId={user.user_id} />
+        <BookmarksClient initialBookmarks={initialBookmarks} _userId={user.user_id} />
       </div>
     </ThreeColumnLayout>
   );

@@ -79,7 +79,7 @@ const normalizeGithub = (value: string): string => {
 
 export default function SocialLinksForm({ formMethods, onReset }: SocialLinksFormProps) {
   const {
-    register,
+    register: _register,
     control,
     formState: { errors, dirtyFields },
   } = formMethods;

@@ -21,7 +21,7 @@ import {
 } from "@tabler/icons-react";
 
 interface ShareButtonProps {
-  newsletterId: number;
+  _newsletterId: number;
   size?: "sm" | "md" | "lg";
   showTooltip?: boolean;
   url?: string;
@@ -30,7 +30,7 @@ interface ShareButtonProps {
 }
 
 export function ShareButton({
-  newsletterId,
+  _newsletterId,
   size = "md",
   showTooltip = true,
   url = typeof window !== "undefined" ? window.location.href : "",

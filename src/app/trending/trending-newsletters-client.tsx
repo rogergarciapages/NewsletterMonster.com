@@ -93,7 +93,7 @@ export default function TrendingNewslettersClient() {
             <LargeNewsletterCard newsletter={newsletters[currentIndex]} priority={startIndex < 3} />
           </div>
           <div className="col-span-1 space-y-6">
-            <AdCard />
+            <AdCard ad={{ id: "placeholder" }} />
             {newsletters[currentIndex + 1] && (
               <SmallNewsletterCard
                 newsletter={newsletters[currentIndex + 1]}
@@ -127,7 +127,7 @@ export default function TrendingNewslettersClient() {
         pattern.push(
           <div key={`row3-${startIndex}`} className="grid grid-cols-3 gap-6">
             <div className="col-span-1 space-y-6">
-              <AdCard />
+              <AdCard ad={{ id: "placeholder" }} />
               <div ref={isLastGroup ? lastNewsletterCallback : null}>
                 <SmallNewsletterCard
                   newsletter={newsletters[currentIndex]}
