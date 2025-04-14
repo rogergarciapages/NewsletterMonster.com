@@ -11,9 +11,11 @@ import { useSession } from "next-auth/react";
 import LoginModal from "@/app/components/login-modal";
 
 import NewsletterTags from "../../tags/newsletter-tags";
+import KeyInsights from "./key-insights";
 
 type EmailContentProps = {
   summary: string | null;
+  key_insights: string | null;
   fullScreenshotUrl: string | null;
   htmlFileUrl: string | null;
   subject: string | null;
@@ -29,6 +31,7 @@ type EmailContentProps = {
 
 export default function EmailContent({
   summary,
+  key_insights,
   fullScreenshotUrl,
   htmlFileUrl,
   subject,
@@ -84,6 +87,9 @@ export default function EmailContent({
     <div className="flex flex-col gap-6 bg-white p-6 dark:bg-zinc-900">
       {/* Login Modal */}
       <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} onSuccess={handleLoginSuccess} />
+
+      {/* Key Insights section */}
+      <KeyInsights insights={key_insights} />
 
       {/* Summary section */}
       {summary && (

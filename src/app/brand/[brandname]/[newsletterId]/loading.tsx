@@ -63,14 +63,21 @@ export default function NewsletterPageSkeleton() {
 
           {/* Main Content */}
           <div className="mt-4 space-y-8">
-            {/* Summary Section */}
-            <div className="prose max-w-none rounded-lg">
-              <Skeleton className="mb-4 h-8 w-64 rounded-lg border-none shadow-none" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full rounded-lg border-none shadow-none" />
-                <Skeleton className="h-4 w-5/6 rounded-lg border-none shadow-none" />
-                <Skeleton className="h-4 w-4/6 rounded-lg border-none shadow-none" />
+            {/* Key insights section skeleton */}
+            <div className="mb-6 rounded-lg bg-zinc-800 p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="h-6 w-48 rounded-lg" />
               </div>
+              <Skeleton className="mb-3 h-6 w-full rounded-lg" />
+              <Skeleton className="mb-3 h-6 w-full rounded-lg" />
+              <Skeleton className="h-6 w-full rounded-lg" />
+            </div>
+
+            {/* Summary section skeleton */}
+            <div className="mb-6 rounded-lg bg-zinc-800 p-6">
+              <Skeleton className="mb-2 h-6 w-40 rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
             </div>
 
             {/* Newsletter Screenshot */}

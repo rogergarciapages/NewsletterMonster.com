@@ -148,6 +148,7 @@ model Newsletter {
   published_at        DateTime?
   user_id             String?         @db.Uuid
   brand_id            String?         @db.Uuid
+  key_insights        String?
   Like                Like[]
   Brand               Brand?          @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade)
   User                User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade)

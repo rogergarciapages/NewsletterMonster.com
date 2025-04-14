@@ -39,6 +39,7 @@ type NewsletterDetail = {
   created_at: Date | null;
   products_link: string | null;
   summary: string | null;
+  key_insights: string | null;
   badges: {
     id: string;
     type: BadgeType;
@@ -130,6 +131,7 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
         created_at: true,
         products_link: true,
         summary: true,
+        key_insights: true,
         badges: {
           select: {
             id: true,
@@ -449,6 +451,7 @@ export default async function NewsletterPage({
             {/* Email content */}
             <EmailContent
               summary={newsletter.summary}
+              key_insights={newsletter.key_insights}
               fullScreenshotUrl={newsletter.full_screenshot_url}
               htmlFileUrl={newsletter.html_file_url}
               subject={newsletter.subject}
