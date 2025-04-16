@@ -17,12 +17,21 @@ export default function KeyInsights({ insights, className = "" }: KeyInsightsPro
   if (!insights) return null;
 
   // Don't render if insights contains HTML-like content
+  const lowerCaseInsights = insights.trim().toLowerCase();
   if (
-    insights.trim().toLowerCase().startsWith("<!doctype") ||
-    insights.trim().toLowerCase().startsWith("<html") ||
-    insights.includes("<meta") ||
-    insights.includes("content=") ||
-    insights.includes("charset=")
+    lowerCaseInsights.startsWith("<!doctype") ||
+    lowerCaseInsights.startsWith("<html") ||
+    lowerCaseInsights.includes("<head") ||
+    lowerCaseInsights.includes("<body") ||
+    lowerCaseInsights.includes("<meta") ||
+    lowerCaseInsights.includes("<title") ||
+    lowerCaseInsights.includes("<style") ||
+    lowerCaseInsights.includes("<script") ||
+    lowerCaseInsights.includes("<link") ||
+    lowerCaseInsights.includes("content=") ||
+    lowerCaseInsights.includes("charset=") ||
+    // Count the number of < characters - if too many, likely HTML
+    (insights.match(/</g) || []).length > 5
   ) {
     return null;
   }
@@ -31,7 +40,25 @@ export default function KeyInsights({ insights, className = "" }: KeyInsightsPro
   const parsedInsights: string[] = insights
     .split(",")
     .map(item => item.trim())
-    .filter(item => item.length > 0 && !item.startsWith("<"));
+    .filter(item => {
+      // Skip empty items
+      if (item.length === 0) return false;
+
+      // Skip items that look like HTML tags or contain HTML tags
+      if (
+        item.startsWith("<") ||
+        item.endsWith(">") ||
+        item.includes("</") ||
+        item.includes("/>") ||
+        item.includes("<!") ||
+        // Check for HTML tag pattern like <tag>
+        /(<([^>]+)>)/i.test(item)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
 
   // If we have no valid insights after parsing, don't render
   if (parsedInsights.length === 0) return null;
