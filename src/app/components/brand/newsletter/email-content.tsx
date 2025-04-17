@@ -84,7 +84,7 @@ export default function EmailContent({
     : "this brand";
 
   return (
-    <div className="flex flex-col gap-6 bg-white p-6 dark:bg-zinc-900">
+    <div className="flex flex-col gap-6 rounded-xl bg-white p-6 dark:bg-zinc-900">
       {/* Login Modal */}
       <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} onSuccess={handleLoginSuccess} />
 

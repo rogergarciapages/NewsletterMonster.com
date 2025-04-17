@@ -12,6 +12,7 @@ import NewsletterCard from "@/app/components/brand/newsletter/card";
 import EmailContent from "@/app/components/brand/newsletter/email-content";
 import FollowButton from "@/app/components/brand/profile/header/follow-button";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
+import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
 import { DownloadButton } from "@/app/components/newsletters/download-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
 import { ShareButton } from "@/app/components/newsletters/share-button";
@@ -554,30 +555,40 @@ export default async function NewsletterPage({
                   />
                 </div>
 
-                {/* Right: Action buttons */}
-                <div className="flex flex-wrap gap-2">
+                {/* Action buttons */}
+                <div className="flex flex-wrap items-center gap-1">
                   <LikeButton
                     newsletterId={newsletter.newsletter_id}
                     initialLikesCount={newsletter.likes_count || 0}
                     initialIsLiked={isLiked}
                     size="md"
+                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
                   />
                   <YouRockButton
                     newsletterId={newsletter.newsletter_id}
                     initialYouRocksCount={newsletter.you_rocks_count || 0}
                     size="md"
+                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
                   />
                   <ShareButton
                     newsletterId={newsletter.newsletter_id}
                     url={currentUrl}
                     title={newsletter.subject || "Check out this newsletter"}
                     size="md"
+                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
+                  />
+                  <BookmarkButton
+                    newsletterId={newsletter.newsletter_id}
+                    initialIsBookmarked={isBookmarked}
+                    size="md"
+                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
                   />
                   <DownloadButton
                     newsletterId={newsletter.newsletter_id}
                     fullScreenshotUrl={newsletter.full_screenshot_url}
                     htmlFileUrl={newsletter.html_file_url}
                     size="md"
+                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
                   />
                 </div>
               </div>

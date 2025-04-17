@@ -1,5 +1,6 @@
 "use client";
 
+import { BookmarkButton } from "../../newsletters/bookmark-button";
 import { DownloadButton } from "../../newsletters/download-button";
 import { LikeButton } from "../../newsletters/like-button";
 import { ShareButton } from "../../newsletters/share-button";
@@ -30,11 +31,12 @@ export default function EmailToolbar({
   fullScreenshotUrl,
   htmlFileUrl,
 }: EmailToolbarProps) {
-  const buttonClassName = "min-w-[110px]";
+  // YouTube-like styling for buttons
+  const buttonClassName = "min-w-[90px] px-3 rounded-full bg-zinc-800 hover:bg-zinc-700";
 
   return (
-    <div className="mb-4 flex items-center justify-start rounded-xl bg-zinc-800/30 px-5 py-2">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="mb-4 flex items-center justify-start rounded-xl bg-zinc-900 px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-1">
         <LikeButton
           newsletterId={newsletterId}
           initialLikesCount={initialLikesCount}
@@ -53,6 +55,12 @@ export default function EmailToolbar({
           size="md"
           url={currentUrl}
           title={subject || "Check out this newsletter on NewsletterMonster"}
+          className={buttonClassName}
+        />
+        <BookmarkButton
+          newsletterId={newsletterId}
+          initialIsBookmarked={initialIsBookmarked}
+          size="md"
           className={buttonClassName}
         />
         <DownloadButton

@@ -103,57 +103,54 @@ export function ShareButton({
 
   return (
     <>
-      {showTooltip ? <Tooltip content="Share newsletter">{button}</Tooltip> : button}
+      {showTooltip ? <Tooltip content="Share this newsletter now">{button}</Tooltip> : button}
 
       <Modal isOpen={isOpen} onClose={onClose} placement="center" backdrop="blur">
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">Share Newsletter</ModalHeader>
-          <ModalBody className="gap-4 pb-6">
-            <div className="grid grid-cols-2 gap-4">
+        <ModalContent className="dark:bg-zinc-900">
+          <ModalHeader className="flex flex-col gap-1 text-center">
+            Share this newsletter now
+          </ModalHeader>
+          <ModalBody className="gap-4 px-6 pb-6">
+            <div className="grid grid-cols-2 gap-3">
               <Button
-                variant="flat"
-                color="primary"
+                variant="solid"
+                className="h-12 bg-[#1DA1F2] text-white hover:bg-[#1a94df]"
                 startContent={<IconBrandTwitter />}
-                className="h-12"
                 onClick={() => handleShare("twitter")}
               >
                 Twitter
               </Button>
               <Button
-                variant="flat"
-                color="primary"
+                variant="solid"
+                className="h-12 bg-[#4267B2] text-white hover:bg-[#365899]"
                 startContent={<IconBrandFacebook />}
-                className="h-12"
                 onClick={() => handleShare("facebook")}
               >
                 Facebook
               </Button>
               <Button
-                variant="flat"
-                color="primary"
+                variant="solid"
+                className="h-12 bg-[#0077B5] text-white hover:bg-[#006699]"
                 startContent={<IconBrandLinkedin />}
-                className="h-12"
                 onClick={() => handleShare("linkedin")}
               >
                 LinkedIn
               </Button>
               <Button
-                variant="flat"
-                color="primary"
+                variant="solid"
+                className="h-12 bg-[#25D366] text-white hover:bg-[#20bd5a]"
                 startContent={<IconBrandWhatsapp />}
-                className="h-12"
                 onClick={() => handleShare("whatsapp")}
               >
                 WhatsApp
               </Button>
             </div>
 
-            <div className="relative mt-2">
+            <div className="relative mt-2 w-full">
               <Button
                 variant="flat"
-                color="primary"
+                className="h-12 w-full dark:bg-zinc-800 dark:text-white"
                 startContent={<IconCopy />}
-                className="h-12 w-full"
                 onClick={copyToClipboard}
               >
                 {copied ? "Copied!" : "Copy Link"}
