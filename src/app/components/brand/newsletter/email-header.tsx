@@ -37,16 +37,15 @@ export default function EmailHeader({
   badges = [],
 }: EmailHeaderProps) {
   return (
-    <div className="relative mt-4 rounded-t-lg bg-white p-8 dark:bg-zinc-900">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">{subject || "Untitled Newsletter"}</h1>
-        </div>
-      </div>
+    <div className="relative rounded-t-lg bg-white px-6 py-4 dark:bg-zinc-900">
+      {/* Subject as h1 */}
+      {subject && (
+        <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">{subject}</h1>
+      )}
 
-      <div className="space-y-2 text-sm">
+      <div className="space-y-3 text-sm">
         <div className="grid grid-cols-[80px,1fr] items-center">
-          <span className="text-gray-500">From:</span>
+          <span className="text-gray-500 dark:text-gray-400">From:</span>
           <Link href={`/brand/${brandname}`} className="inline-flex items-center gap-2">
             <Chip
               as="span"
@@ -60,14 +59,14 @@ export default function EmailHeader({
         </div>
 
         <div className="grid grid-cols-[80px,1fr] items-center">
-          <span className="text-gray-500">To:</span>
-          <span>{recipientEmail}</span>
+          <span className="text-gray-500 dark:text-gray-400">To:</span>
+          <span className="text-gray-700 dark:text-gray-200">{recipientEmail}</span>
         </div>
 
         {date && (
           <div className="grid grid-cols-[80px,1fr] items-center">
-            <span className="text-gray-500">Date:</span>
-            <time dateTime={date.toISOString()}>
+            <span className="text-gray-500 dark:text-gray-400">Date:</span>
+            <time className="text-gray-700 dark:text-gray-200" dateTime={date.toISOString()}>
               {date.toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",

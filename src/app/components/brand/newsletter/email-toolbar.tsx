@@ -1,6 +1,6 @@
 "use client";
 
-import { BookmarkButton } from "../../newsletters/bookmark-button";
+import { DownloadButton } from "../../newsletters/download-button";
 import { LikeButton } from "../../newsletters/like-button";
 import { ShareButton } from "../../newsletters/share-button";
 import { YouRockButton } from "../../newsletters/you-rock-button";
@@ -14,6 +14,8 @@ type EmailToolbarProps = {
   initialYouRocksCount?: number;
   initialIsLiked?: boolean;
   initialIsBookmarked?: boolean;
+  fullScreenshotUrl?: string | null;
+  htmlFileUrl?: string | null;
 };
 
 export default function EmailToolbar({
@@ -25,12 +27,14 @@ export default function EmailToolbar({
   initialYouRocksCount = 0,
   initialIsLiked = false,
   initialIsBookmarked = false,
+  fullScreenshotUrl,
+  htmlFileUrl,
 }: EmailToolbarProps) {
-  const buttonClassName = "min-w-[110px] h-10 hover:bg-default-100";
+  const buttonClassName = "min-w-[110px]";
 
   return (
-    <div className="sticky top-0 z-10 flex items-center justify-start bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:bg-zinc-900/80">
-      <div className="flex items-center gap-3">
+    <div className="mb-4 flex items-center justify-start rounded-xl bg-zinc-800/30 px-5 py-2">
+      <div className="flex flex-wrap items-center gap-2">
         <LikeButton
           newsletterId={newsletterId}
           initialLikesCount={initialLikesCount}
@@ -44,17 +48,18 @@ export default function EmailToolbar({
           size="md"
           className={buttonClassName}
         />
-        <BookmarkButton
-          newsletterId={newsletterId}
-          initialIsBookmarked={initialIsBookmarked}
-          size="md"
-          className={buttonClassName}
-        />
         <ShareButton
-          _newsletterId={newsletterId}
+          newsletterId={newsletterId}
           size="md"
           url={currentUrl}
           title={subject || "Check out this newsletter on NewsletterMonster"}
+          className={buttonClassName}
+        />
+        <DownloadButton
+          newsletterId={newsletterId}
+          fullScreenshotUrl={fullScreenshotUrl}
+          htmlFileUrl={htmlFileUrl}
+          size="md"
           className={buttonClassName}
         />
       </div>

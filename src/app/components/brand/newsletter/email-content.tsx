@@ -8,10 +8,10 @@ import { useDisclosure } from "@nextui-org/react";
 import { IconDownload, IconExternalLink } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 
+import { KeyInsights } from "@/app/components/brand/newsletter/key-insights";
 import LoginModal from "@/app/components/login-modal";
 
 import NewsletterTags from "../../tags/newsletter-tags";
-import KeyInsights from "./key-insights";
 
 type EmailContentProps = {
   summary: string | null;
@@ -88,16 +88,27 @@ export default function EmailContent({
       {/* Login Modal */}
       <LoginModal isOpen={isOpen} onOpenChange={onOpenChange} onSuccess={handleLoginSuccess} />
 
-      {/* Key Insights section */}
-      <KeyInsights insights={key_insights} />
+      {/* Key Insights and Summary section container */}
+      <div className="space-y-6">
+        {/* Key Insights section */}
+        {key_insights && (
+          <KeyInsights
+            insights={
+              typeof key_insights === "string"
+                ? key_insights.split(",").map(insight => insight.trim())
+                : key_insights
+            }
+          />
+        )}
 
-      {/* Summary section */}
-      {summary && (
-        <div className="rounded-lg bg-gray-50 p-4 dark:bg-zinc-800">
-          <h2 className="mb-2 text-lg font-semibold">Summary</h2>
-          <p className="text-gray-700 dark:text-gray-300">{summary}</p>
-        </div>
-      )}
+        {/* Summary section */}
+        {summary && (
+          <div className="rounded-lg bg-gray-50 p-6 dark:bg-zinc-800">
+            <h2 className="mb-3 text-xl font-semibold text-gray-800 dark:text-gray-200">Summary</h2>
+            <p className="text-gray-700 dark:text-gray-300">{summary}</p>
+          </div>
+        )}
+      </div>
 
       {/* Tags section */}
       {tags.length > 0 && (

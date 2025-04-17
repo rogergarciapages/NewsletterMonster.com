@@ -1,5 +1,7 @@
 // app/[brandname]/[newsletterId]/page.tsx
 import { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
@@ -8,10 +10,9 @@ import { getServerSession } from "next-auth";
 
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import EmailContent from "@/app/components/brand/newsletter/email-content";
-import EmailHeader from "@/app/components/brand/newsletter/email-header";
-import EmailToolbar from "@/app/components/brand/newsletter/email-toolbar";
+import FollowButton from "@/app/components/brand/profile/header/follow-button";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
+import { DownloadButton } from "@/app/components/newsletters/download-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
 import { ShareButton } from "@/app/components/newsletters/share-button";
 import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
@@ -40,6 +41,7 @@ type NewsletterDetail = {
   products_link: string | null;
   summary: string | null;
   key_insights: string | null;
+  brand_id?: string | null;
   badges: {
     id: string;
     type: BadgeType;
@@ -54,6 +56,13 @@ type NewsletterDetail = {
       name: string;
     };
   }[];
+  Brand?: {
+    brand_id: string;
+    name: string | null;
+    logo: string | null;
+    description: string | null;
+    follower_count?: number;
+  };
 };
 
 // Add enum types from Prisma schema
@@ -105,6 +114,25 @@ async function checkIsNewsletterLiked(userId: string, newsletterId: number): Pro
   return !!like;
 }
 
+// Add a function to check if a user follows a brand
+async function checkIsFollowingBrand(userId: string, brandId: string | null): Promise<boolean> {
+  if (!userId || !brandId) return false;
+
+  try {
+    const follow = await prisma.follow.findFirst({
+      where: {
+        follower_id: userId,
+        brand_id: brandId,
+      },
+    });
+
+    return !!follow;
+  } catch (error) {
+    console.error("Error checking follow status:", error);
+    return false;
+  }
+}
+
 // Data fetching function
 async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | null> {
   if (!newsletterId || isNaN(Number(newsletterId))) {
@@ -132,6 +160,7 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
         products_link: true,
         summary: true,
         key_insights: true,
+        brand_id: true,
         badges: {
           select: {
             id: true,
@@ -153,6 +182,14 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
                 name: true,
               },
             },
+          },
+        },
+        Brand: {
+          select: {
+            brand_id: true,
+            name: true,
+            logo: true,
+            description: true,
           },
         },
       },
@@ -319,11 +356,17 @@ export default async function NewsletterPage({
   // Check if the newsletter is liked and bookmarked by the current user
   let isLiked = false;
   let isBookmarked = false;
+  let isFollowing = false;
 
   if (userId) {
     // Only check these if the user is logged in
     isLiked = await checkIsNewsletterLiked(userId, newsletter.newsletter_id);
     isBookmarked = await isNewsletterBookmarked(userId, newsletter.newsletter_id);
+
+    // Check if following brand
+    if (newsletter.brand_id) {
+      isFollowing = await checkIsFollowingBrand(userId, newsletter.brand_id);
+    }
   }
 
   // Extract tag IDs for related newsletters
@@ -428,27 +471,119 @@ export default async function NewsletterPage({
       <ThreeColumnLayout>
         <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
           <article className="mx-auto max-w-5xl px-4 py-8">
-            <EmailHeader
-              subject={newsletter.subject}
-              sender={newsletter.sender}
-              brandname={params.brandname}
-              date={newsletter.created_at}
-              badges={newsletter.badges}
-            />
+            {/* Newsletter Title as H1 */}
+            <h1 className="mb-6 text-3xl font-bold text-gray-100">{newsletter.subject}</h1>
 
-            {/* Email toolbar */}
-            <EmailToolbar
-              newsletterId={newsletter.newsletter_id}
-              currentUrl={currentUrl}
-              subject={newsletter.subject}
-              _summary={newsletter.summary}
-              initialLikesCount={newsletter.likes_count || 0}
-              initialYouRocksCount={newsletter.you_rocks_count || 0}
-              initialIsLiked={isLiked}
-              initialIsBookmarked={isBookmarked}
-            />
+            {/* Date info only */}
+            <div className="mb-6 space-y-2 text-sm">
+              {newsletter.created_at && (
+                <div className="grid grid-cols-[80px,1fr] items-center">
+                  <span className="text-gray-500 dark:text-gray-400">Date:</span>
+                  <time className="text-gray-200" dateTime={newsletter.created_at.toISOString()}>
+                    {newsletter.created_at.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>
+                </div>
+              )}
 
-            {/* Email content */}
+              {/* Display badges if any */}
+              {newsletter.badges && newsletter.badges.length > 0 && (
+                <div className="flex gap-4 pt-4">
+                  {newsletter.badges.map(badge => (
+                    <div
+                      key={badge.id}
+                      className="relative h-16 w-16 transition-transform hover:scale-110"
+                    >
+                      <Image
+                        src={`/badges/${badge.rank.charAt(0) + (badge.category === "DAY" ? "d" : badge.category === "WEEK" ? "w" : "m")}.png`}
+                        alt={`${badge.rank} ${badge.type} ${badge.category} badge`}
+                        fill
+                        className="object-contain drop-shadow-lg"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* YouTube-style channel info */}
+            <div className="mb-6 rounded-xl bg-zinc-800/50 p-6">
+              {/* Left: Channel info (profile picture, name, follower count) */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Link href={`/brand/${params.brandname}`} className="shrink-0">
+                    {newsletter.Brand?.logo ? (
+                      <Image
+                        src={newsletter.Brand.logo}
+                        alt={brandDisplayName}
+                        width={48}
+                        height={48}
+                        className="h-12 w-12 rounded-full object-cover transition-all hover:opacity-90"
+                        priority
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-700 text-lg font-bold uppercase text-white">
+                        {brandDisplayName.charAt(0)}
+                      </div>
+                    )}
+                  </Link>
+                  <div>
+                    <Link
+                      href={`/brand/${params.brandname}`}
+                      className="text-lg font-semibold text-gray-200 hover:text-primary"
+                    >
+                      {brandDisplayName}
+                    </Link>
+                    <div className="text-sm text-gray-400">
+                      {newsletter.Brand?.follower_count
+                        ? `${newsletter.Brand.follower_count.toLocaleString()} followers`
+                        : "0 followers"}
+                    </div>
+                  </div>
+
+                  <FollowButton
+                    brandId={newsletter.brand_id || ""}
+                    isFollowing={isFollowing}
+                    className="ml-4"
+                  />
+                </div>
+
+                {/* Right: Action buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <LikeButton
+                    newsletterId={newsletter.newsletter_id}
+                    initialLikesCount={newsletter.likes_count || 0}
+                    initialIsLiked={isLiked}
+                    size="md"
+                  />
+                  <YouRockButton
+                    newsletterId={newsletter.newsletter_id}
+                    initialYouRocksCount={newsletter.you_rocks_count || 0}
+                    size="md"
+                  />
+                  <ShareButton
+                    newsletterId={newsletter.newsletter_id}
+                    url={currentUrl}
+                    title={newsletter.subject || "Check out this newsletter"}
+                    size="md"
+                  />
+                  <DownloadButton
+                    newsletterId={newsletter.newsletter_id}
+                    fullScreenshotUrl={newsletter.full_screenshot_url}
+                    htmlFileUrl={newsletter.html_file_url}
+                    size="md"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Key Insights Section is now inside EmailContent */}
             <EmailContent
               summary={newsletter.summary}
               key_insights={newsletter.key_insights}
@@ -465,37 +600,6 @@ export default async function NewsletterPage({
             <meta itemProp="publisher" content="NewsletterMonster" />
             <meta itemProp="author" content={brandDisplayName} />
             {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
-
-            <div className="mb-6 mt-8 rounded-lg p-6">
-              <h3 className="mb-2 text-xl font-bold text-gray-100">
-                Like, share and rock this newsletter
-              </h3>
-              <p className="mb-4 text-gray-400">
-                Show your appreciation for this content by liking, sharing with friends, or giving
-                it a rock. Your engagement helps promote great newsletters!
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                <LikeButton
-                  newsletterId={newsletter.newsletter_id}
-                  initialLikesCount={newsletter.likes_count || 0}
-                  initialIsLiked={isLiked}
-                />
-                <YouRockButton
-                  newsletterId={newsletter.newsletter_id}
-                  initialYouRocksCount={newsletter.you_rocks_count || 0}
-                />
-                <BookmarkButton
-                  newsletterId={newsletter.newsletter_id}
-                  initialIsBookmarked={isBookmarked}
-                />
-                <ShareButton
-                  _newsletterId={newsletter.newsletter_id}
-                  url={currentUrl}
-                  title={newsletter.subject || "Check out this newsletter"}
-                />
-              </div>
-            </div>
 
             {/* Related Newsletters Sections */}
             <div className="mt-12 border-t border-zinc-800 pt-8">

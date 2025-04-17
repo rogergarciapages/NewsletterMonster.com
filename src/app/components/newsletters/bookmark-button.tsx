@@ -66,9 +66,9 @@ export function BookmarkButton({
   };
 
   const sizeClasses = {
-    sm: "h-6 min-w-[100px] text-xs",
-    md: "h-8 min-w-[120px] text-sm",
-    lg: "h-10 min-w-[140px] text-base",
+    sm: "h-8 min-w-[70px] text-xs",
+    md: "h-10 min-w-[90px] text-sm",
+    lg: "h-11 min-w-[110px] text-base",
   };
 
   const iconSizes = {
@@ -90,7 +90,7 @@ export function BookmarkButton({
       color={optimisticIsBookmarked ? "success" : "default"}
       onClick={handleClick}
       isLoading={isLoading}
-      className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-success/10 ${className}`}
+      className={`group flex items-center justify-start gap-2 rounded-full px-4 ${sizeClasses[size]} hover:bg-success/10 ${className}`}
       startContent={
         <AnimatePresence mode="wait">
           <motion.span
@@ -118,11 +118,11 @@ export function BookmarkButton({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
-          className={`font-bold tracking-wide ${countSizes[size]} ${
+          className={`font-semibold ${countSizes[size]} ${
             optimisticIsBookmarked ? "text-success" : "text-default-600"
           }`}
         >
-          {optimisticIsBookmarked ? "Bookmarked" : "Bookmark"}
+          {optimisticIsBookmarked ? "Saved" : "Save"}
         </motion.span>
       </AnimatePresence>
     </Button>

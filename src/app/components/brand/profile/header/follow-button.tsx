@@ -17,16 +17,20 @@ import LoginModal from "@/app/components/login-modal";
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
+// src/app/components/brand/profile/header/follow-button.tsx
+
 interface FollowButtonProps {
-  brandId: string;
-  isFollowing: boolean;
+  brandId?: string | number;
+  isFollowing?: boolean;
   onFollowChange?: (isFollowing: boolean) => void;
+  className?: string;
 }
 
 export default function FollowButton({
   brandId,
-  isFollowing: initialIsFollowing,
+  isFollowing: initialIsFollowing = false,
   onFollowChange,
+  className = "",
 }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isPending, startTransition] = useTransition();
@@ -47,6 +51,12 @@ export default function FollowButton({
   const handleClick = async () => {
     if (status !== "authenticated") {
       setIsLoginModalOpen(true);
+      return;
+    }
+
+    // Check if brandId is provided
+    if (!brandId) {
+      console.error("No brandId provided to FollowButton");
       return;
     }
 
@@ -104,14 +114,14 @@ export default function FollowButton({
     <>
       <Button
         onClick={handleClick}
-        isDisabled={isPending}
+        isDisabled={isPending || !brandId}
         color={isFollowing ? "default" : "warning"}
         variant={isFollowing ? "bordered" : "solid"}
         startContent={
           isFollowing ? <FaUserCheck className="text-xl" /> : <FaUserPlus className="text-xl" />
         }
-        className="h-[44px] w-full font-medium"
-        size="lg"
+        className={`font-medium ${className}`}
+        size="md"
         isLoading={isPending}
       >
         {isFollowing ? "Following" : "Follow"}

@@ -21,7 +21,8 @@ import {
 } from "@tabler/icons-react";
 
 interface ShareButtonProps {
-  _newsletterId: number;
+  _newsletterId?: number;
+  newsletterId?: number;
   size?: "sm" | "md" | "lg";
   showTooltip?: boolean;
   url?: string;
@@ -31,12 +32,15 @@ interface ShareButtonProps {
 
 export function ShareButton({
   _newsletterId,
+  newsletterId,
   size = "md",
   showTooltip = true,
   url = typeof window !== "undefined" ? window.location.href : "",
   title = "Check out this newsletter on NewsletterMonster",
   className = "",
 }: ShareButtonProps) {
+  const effectiveNewsletterId = newsletterId || _newsletterId;
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [copied, setCopied] = useState(false);
 
@@ -67,21 +71,33 @@ export function ShareButton({
     }
   };
 
+  const sizeClasses = {
+    sm: "h-8 min-w-[70px] text-xs",
+    md: "h-10 min-w-[90px] text-sm",
+    lg: "h-11 min-w-[110px] text-base",
+  };
+
   const iconSizes = {
     sm: "h-4 w-4",
     md: "h-5 w-5",
     lg: "h-6 w-6",
   };
 
+  const countSizes = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
+  };
+
   const button = (
     <Button
       variant="light"
       aria-label="Share newsletter"
-      className={`flex items-center justify-center hover:bg-default-100 ${className}`}
+      className={`flex items-center justify-start gap-2 rounded-full px-4 ${sizeClasses[size]} hover:bg-default-100 ${className}`}
       onClick={onOpen}
       startContent={<IconShare className={`${iconSizes[size]} text-default-500`} />}
     >
-      Share
+      <span className={`font-semibold ${countSizes[size]}`}>Share</span>
     </Button>
   );
 

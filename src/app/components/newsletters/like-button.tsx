@@ -45,9 +45,9 @@ export function LikeButton({
   };
 
   const sizeClasses = {
-    sm: "h-6 min-w-[70px] text-xs",
-    md: "h-8 min-w-[80px] text-sm",
-    lg: "h-10 min-w-[100px] text-base",
+    sm: "h-8 min-w-[70px] text-xs",
+    md: "h-10 min-w-[90px] text-sm",
+    lg: "h-11 min-w-[110px] text-base",
   };
 
   const iconSizes = {
@@ -69,7 +69,7 @@ export function LikeButton({
       color={isLiked ? "danger" : "default"}
       onClick={handleClick}
       isLoading={isLoading}
-      className={`group flex items-center justify-start gap-3 px-4 ${sizeClasses[size]} hover:bg-danger/10 ${className}`}
+      className={`group flex items-center justify-start gap-2 rounded-full px-4 ${sizeClasses[size]} hover:bg-danger/10 ${className}`}
       startContent={
         <AnimatePresence mode="wait">
           <motion.span
@@ -97,17 +97,11 @@ export function LikeButton({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
-          className={`font-bold tracking-wide ${countSizes[size]} ${
+          className={`font-semibold ${countSizes[size]} ${
             isLiked ? "text-[#ff0000]" : "text-default-600"
           }`}
         >
-          {likesCount > 0 ? (
-            <>
-              {likesCount.toLocaleString()} <span className="ml-1">Likes</span>
-            </>
-          ) : (
-            "Be the first to like"
-          )}
+          {likesCount > 0 ? likesCount.toLocaleString() : "Like"}
         </motion.span>
       </AnimatePresence>
     </Button>
