@@ -191,12 +191,30 @@ async function getNewsletter(newsletterId: string): Promise<NewsletterDetail | n
             name: true,
             logo: true,
             description: true,
+            _count: {
+              select: {
+                Follow: true,
+              },
+            },
           },
         },
       },
     });
 
-    return newsletter as NewsletterDetail | null;
+    // Add follower_count to Brand object if it exists
+    const newsletterWithFollowers = newsletter
+      ? {
+          ...newsletter,
+          Brand: newsletter.Brand
+            ? {
+                ...newsletter.Brand,
+                follower_count: newsletter.Brand._count?.Follow || 0,
+              }
+            : null,
+        }
+      : null;
+
+    return newsletterWithFollowers as NewsletterDetail | null;
   } catch (error) {
     console.error("Error fetching newsletter:", error);
     return null;
