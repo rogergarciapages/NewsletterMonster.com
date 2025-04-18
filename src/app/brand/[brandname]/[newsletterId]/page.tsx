@@ -482,17 +482,22 @@ export default async function NewsletterPage({
       />
 
       <ThreeColumnLayout>
-        <Card className="border-none bg-[rgb(24_24_27/var(--tw-bg-opacity))] shadow-none">
+        <Card className="border-none bg-white shadow-none dark:bg-[rgb(24_24_27/var(--tw-bg-opacity))]">
           <article className="mx-auto max-w-5xl px-4 py-8">
             {/* Newsletter Title as H1 */}
-            <h1 className="mb-6 text-3xl font-bold text-gray-100">{newsletter.subject}</h1>
+            <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {newsletter.subject}
+            </h1>
 
             {/* Date info only */}
             <div className="mb-6 space-y-2 text-sm">
               {newsletter.created_at && (
                 <div className="grid grid-cols-[80px,1fr] items-center">
                   <span className="text-gray-500 dark:text-gray-400">Date:</span>
-                  <time className="text-gray-200" dateTime={newsletter.created_at.toISOString()}>
+                  <time
+                    className="text-gray-700 dark:text-gray-200"
+                    dateTime={newsletter.created_at.toISOString()}
+                  >
                     {newsletter.created_at.toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -567,7 +572,7 @@ export default async function NewsletterPage({
               {/* Brand-specific newsletters */}
               {brandNewsletters.length > 0 && (
                 <div className="mb-12">
-                  <h2 className="mb-6 text-2xl font-bold text-gray-100">
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {brandNewslettersRaw.some(
                       nl =>
                         nl.sender?.includes(brandDisplayName) ||
@@ -589,7 +594,7 @@ export default async function NewsletterPage({
               {/* Topic-related newsletters (by tags) */}
               {categoryNewsletters.length > 0 && (
                 <div>
-                  <h2 className="mb-6 text-2xl font-bold text-gray-100">
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">
                     Similar newsletters you might enjoy
                   </h2>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

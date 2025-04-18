@@ -32,10 +32,11 @@ export default function EmailToolbar({
   htmlFileUrl,
 }: EmailToolbarProps) {
   // YouTube-like styling for buttons
-  const buttonClassName = "min-w-[90px] px-3 rounded-full bg-zinc-800 hover:bg-zinc-700";
+  const buttonClassName =
+    "min-w-[90px] px-3 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-zinc-800 dark:hover:bg-zinc-700";
 
   return (
-    <div className="mb-4 flex items-center justify-start rounded-xl bg-zinc-900 px-4 py-2.5">
+    <div className="mb-4 flex items-center justify-start rounded-xl bg-gray-100 px-4 py-2.5 shadow-sm dark:bg-zinc-900 dark:shadow-none">
       <div className="flex flex-wrap items-center gap-1">
         <LikeButton
           newsletterId={newsletterId}
