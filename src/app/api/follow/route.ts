@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/config/auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
@@ -14,21 +14,15 @@ export async function POST(req: NextRequest) {
     }
 
     const { brandId, action } = await req.json();
-    if (!brandId || !action) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!brandId) {
+      return NextResponse.json({ error: "Missing required brandId field" }, { status: 400 });
     }
 
     const userId = session.user.user_id;
 
     if (action === "follow") {
-      await prisma.follow.create({
-        data: {
-          follower_id: userId,
-          brand_id: brandId,
-        },
-      });
-    } else if (action === "unfollow") {
-      await prisma.follow.delete({
+      // Check if follow relationship already exists
+      const existingFollow = await prisma.follow.findUnique({
         where: {
           follower_id_brand_id: {
             follower_id: userId,
@@ -36,6 +30,38 @@ export async function POST(req: NextRequest) {
           },
         },
       });
+
+      // If follow relationship doesn't exist, create it
+      if (!existingFollow) {
+        await prisma.follow.create({
+          data: {
+            follower_id: userId,
+            brand_id: brandId,
+          },
+        });
+      }
+    } else if (action === "unfollow") {
+      // Check if follow relationship exists before attempting to delete it
+      const existingFollow = await prisma.follow.findUnique({
+        where: {
+          follower_id_brand_id: {
+            follower_id: userId,
+            brand_id: brandId,
+          },
+        },
+      });
+
+      // If follow relationship exists, delete it
+      if (existingFollow) {
+        await prisma.follow.delete({
+          where: {
+            follower_id_brand_id: {
+              follower_id: userId,
+              brand_id: brandId,
+            },
+          },
+        });
+      }
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }

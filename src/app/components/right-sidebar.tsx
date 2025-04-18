@@ -9,10 +9,14 @@ import WhoToFollow from "./who-to-follow";
 
 // src/app/components/right-sidebar.tsx
 
+// src/app/components/right-sidebar.tsx
+
+// src/app/components/right-sidebar.tsx
+
 const RightSidebar = () => {
   return (
     <div className="w-full bg-background">
-      <div className="sticky top-[64px] flex flex-col gap-6 p-2">
+      <div className="flex flex-col gap-6 p-2">
         <WhoToFollow />
 
         <section>
