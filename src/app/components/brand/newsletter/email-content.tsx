@@ -83,6 +83,25 @@ export default function EmailContent({
         .join(" ")
     : "this brand";
 
+  // Format summary text with paragraph breaks after each sentence
+  const formatSummaryText = (text: string) => {
+    if (!text) return "";
+
+    // Split by periods followed by a space or end of string, preserving the periods
+    // Only match sentences ending with a period (not ! or ?)
+    const sentences = text.match(/[^.]+\.\s?/g) || [];
+
+    if (sentences.length <= 1) {
+      return text; // Return original if it's just one sentence or couldn't be split
+    }
+
+    return sentences.map((sentence, index) => (
+      <p key={index} className={index !== sentences.length - 1 ? "mb-3" : ""}>
+        {sentence.trim()}
+      </p>
+    ));
+  };
+
   return (
     <div className="flex flex-col gap-6 rounded-xl bg-white p-6 dark:bg-zinc-900">
       {/* Login Modal */}
@@ -120,7 +139,7 @@ export default function EmailContent({
         {summary && (
           <div className="rounded-lg bg-gray-50 p-6 dark:bg-zinc-800">
             <h2 className="mb-3 text-xl font-semibold text-gray-800 dark:text-gray-200">Summary</h2>
-            <p className="text-gray-700 dark:text-gray-300">{summary}</p>
+            <div className="text-gray-700 dark:text-gray-300">{formatSummaryText(summary)}</div>
           </div>
         )}
       </div>
