@@ -484,16 +484,16 @@ export default async function NewsletterPage({
       <ThreeColumnLayout>
         <Card className="border-none bg-white shadow-none dark:bg-[rgb(24_24_27/var(--tw-bg-opacity))]">
           <article className="mx-auto max-w-5xl px-4 py-8">
-            {/* Newsletter Title as H1 */}
-            <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {newsletter.subject}
-            </h1>
+            {/* Header section with title and date */}
+            <div className="mb-6 rounded-xl bg-gray-100 p-6 shadow-sm dark:bg-zinc-900 dark:shadow-none">
+              <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {newsletter.subject}
+              </h1>
 
-            {/* Date info only */}
-            <div className="mb-6 space-y-2 text-sm">
+              {/* Date info */}
               {newsletter.created_at && (
-                <div className="grid grid-cols-[80px,1fr] items-center">
-                  <span className="text-gray-500 dark:text-gray-400">Date:</span>
+                <div className="flex items-center text-sm">
+                  <span className="mr-2 text-gray-500 dark:text-gray-400">Date:</span>
                   <time
                     className="text-gray-700 dark:text-gray-200"
                     dateTime={newsletter.created_at.toISOString()}
@@ -512,7 +512,7 @@ export default async function NewsletterPage({
 
               {/* Display badges if any */}
               {newsletter.badges && newsletter.badges.length > 0 && (
-                <div className="flex gap-4 pt-4">
+                <div className="mt-4 flex gap-4">
                   {newsletter.badges.map(badge => (
                     <div
                       key={badge.id}

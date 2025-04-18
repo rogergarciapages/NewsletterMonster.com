@@ -15,9 +15,36 @@ export const KeyInsights = memo(({ insights }: KeyInsightsProps) => {
     return null;
   }
 
+  const validInsights = insights.filter(insight => {
+    if (
+      typeof insight === "string" &&
+      (insight.includes("<") ||
+        insight.includes(">") ||
+        insight.toLowerCase().includes("<!doctype") ||
+        insight.toLowerCase().includes("</") ||
+        insight.toLowerCase().includes("xml"))
+    ) {
+      return false;
+    }
+
+    if (typeof insight === "string" && insight.length > 300) {
+      return false;
+    }
+
+    if (typeof insight !== "string" || insight.trim() === "") {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (validInsights.length === 0) {
+    return null;
+  }
+
   const initialInsightsCount = 3;
-  const displayedInsights = showAll ? insights : insights.slice(0, initialInsightsCount);
-  const hiddenCount = insights.length - initialInsightsCount;
+  const displayedInsights = showAll ? validInsights : validInsights.slice(0, initialInsightsCount);
+  const hiddenCount = validInsights.length - initialInsightsCount;
 
   return (
     <div className="rounded-lg bg-gray-50 p-6 dark:bg-zinc-800">
@@ -46,7 +73,7 @@ export const KeyInsights = memo(({ insights }: KeyInsightsProps) => {
         </button>
       )}
 
-      {showAll && insights.length > initialInsightsCount && (
+      {showAll && validInsights.length > initialInsightsCount && (
         <button
           onClick={() => setShowAll(false)}
           className="mt-4 flex items-center text-sm text-amber-400 hover:text-amber-300"

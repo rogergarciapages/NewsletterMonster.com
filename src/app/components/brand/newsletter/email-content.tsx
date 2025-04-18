@@ -95,7 +95,22 @@ export default function EmailContent({
           <KeyInsights
             insights={
               typeof key_insights === "string"
-                ? key_insights.split(",").map(insight => insight.trim())
+                ? key_insights
+                    .split(",")
+                    .filter(insight => {
+                      const trimmed = insight.trim();
+                      // Skip suspicious content like HTML
+                      if (
+                        trimmed.includes("<") ||
+                        trimmed.includes(">") ||
+                        trimmed.toLowerCase().includes("<!doctype") ||
+                        trimmed.length > 300
+                      ) {
+                        return false;
+                      }
+                      return trimmed !== "";
+                    })
+                    .map(insight => insight.trim())
                 : key_insights
             }
           />
