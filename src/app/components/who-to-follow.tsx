@@ -22,6 +22,11 @@ interface SuggestedUser {
   followerCount: number;
 }
 
+// Cache duration - 30 minutes
+const CACHE_DURATION = 30 * 60 * 1000;
+const SUGGESTED_USERS_CACHE_KEY = "suggested_users_cache";
+const SUGGESTED_USERS_CACHE_EXPIRY = "suggested_users_expiry";
+
 export default function WhoToFollow() {
   const [activeUser, setActiveUser] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -38,6 +43,45 @@ export default function WhoToFollow() {
 
   const fetchSuggestedUsers = async (limit = 10) => {
     try {
+      // Check if we have valid cached data
+      if (typeof window !== "undefined") {
+        try {
+          const cachedUsers = localStorage.getItem(SUGGESTED_USERS_CACHE_KEY);
+          const cacheExpiry = localStorage.getItem(SUGGESTED_USERS_CACHE_EXPIRY);
+
+          if (cachedUsers && cacheExpiry) {
+            const now = Date.now();
+            const expiry = parseInt(cacheExpiry, 10);
+
+            if (now < expiry) {
+              // Cache is still valid
+              const parsedUsers = JSON.parse(cachedUsers);
+
+              // Filter out brands we've already seen
+              const filteredData = parsedUsers.filter(
+                (user: SuggestedUser) => !seenBrandIds.has(user.id)
+              );
+
+              // If we have enough users after filtering, use them
+              if (filteredData.length >= 3) {
+                // Split the data
+                const displayUsers = filteredData.slice(0, 3);
+                const backup = filteredData.slice(3);
+
+                setSuggestedUsers(displayUsers);
+                setBackupUsers(backup);
+                setIsLoading(false);
+                return;
+              }
+              // If not enough users after filtering, continue to API call
+            }
+          }
+        } catch (e) {
+          // Continue with API call if localStorage fails
+          console.error("Error accessing localStorage:", e);
+        }
+      }
+
       setIsLoading(true);
       const response = await fetch(`/api/users/popular?limit=${limit}`);
       if (response.ok) {
@@ -57,6 +101,20 @@ export default function WhoToFollow() {
 
           setSuggestedUsers(displayUsers);
           setBackupUsers(backup);
+
+          // Update cache
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(SUGGESTED_USERS_CACHE_KEY, JSON.stringify(filteredData));
+              localStorage.setItem(
+                SUGGESTED_USERS_CACHE_EXPIRY,
+                (Date.now() + CACHE_DURATION).toString()
+              );
+            } catch (e) {
+              // Ignore localStorage errors
+              console.error("Error storing in localStorage:", e);
+            }
+          }
         } else {
           useFallbackData();
         }
