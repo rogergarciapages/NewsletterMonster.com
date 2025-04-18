@@ -1,7 +1,6 @@
 // app/[brandname]/[newsletterId]/page.tsx
 import { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
@@ -10,13 +9,7 @@ import { getServerSession } from "next-auth";
 
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import EmailContent from "@/app/components/brand/newsletter/email-content";
-import FollowButton from "@/app/components/brand/profile/header/follow-button";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
-import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
-import { DownloadButton } from "@/app/components/newsletters/download-button";
-import { LikeButton } from "@/app/components/newsletters/like-button";
-import { ShareButton } from "@/app/components/newsletters/share-button";
-import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { isNewsletterBookmarked } from "@/lib/services/bookmark";
@@ -25,6 +18,7 @@ import {
   NewsletterStructuredData,
   generateNewsletterMetadata,
 } from "../../../components/brand/seo/newsletter-detail-seo";
+import BrandSection from "./brand-section";
 
 // Type definitions
 type NewsletterDetail = {
@@ -532,85 +526,23 @@ export default async function NewsletterPage({
             </div>
 
             {/* YouTube-style channel info */}
-            <div className="mb-6 rounded-xl bg-zinc-800/50 p-6">
-              {/* Left: Channel info (profile picture, name, follower count) */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <Link href={`/brand/${params.brandname}`} className="shrink-0">
-                    {newsletter.Brand?.logo ? (
-                      <Image
-                        src={newsletter.Brand.logo}
-                        alt={brandDisplayName}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded-full object-cover transition-all hover:opacity-90"
-                        priority
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-700 text-lg font-bold uppercase text-white">
-                        {brandDisplayName.charAt(0)}
-                      </div>
-                    )}
-                  </Link>
-                  <div>
-                    <Link
-                      href={`/brand/${params.brandname}`}
-                      className="text-lg font-semibold text-gray-200 hover:text-primary"
-                    >
-                      {brandDisplayName}
-                    </Link>
-                    <div className="text-sm text-gray-400">
-                      {newsletter.Brand?.follower_count
-                        ? `${newsletter.Brand.follower_count.toLocaleString()} followers`
-                        : "0 followers"}
-                    </div>
-                  </div>
-
-                  <FollowButton
-                    brandId={newsletter.brand_id || ""}
-                    isFollowing={isFollowing}
-                    className="ml-4"
-                  />
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex flex-wrap items-center gap-1">
-                  <LikeButton
-                    newsletterId={newsletter.newsletter_id}
-                    initialLikesCount={newsletter.likes_count || 0}
-                    initialIsLiked={isLiked}
-                    size="md"
-                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
-                  />
-                  <YouRockButton
-                    newsletterId={newsletter.newsletter_id}
-                    initialYouRocksCount={newsletter.you_rocks_count || 0}
-                    size="md"
-                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
-                  />
-                  <ShareButton
-                    newsletterId={newsletter.newsletter_id}
-                    url={currentUrl}
-                    title={newsletter.subject || "Check out this newsletter"}
-                    size="md"
-                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
-                  />
-                  <BookmarkButton
-                    newsletterId={newsletter.newsletter_id}
-                    initialIsBookmarked={isBookmarked}
-                    size="md"
-                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
-                  />
-                  <DownloadButton
-                    newsletterId={newsletter.newsletter_id}
-                    fullScreenshotUrl={newsletter.full_screenshot_url}
-                    htmlFileUrl={newsletter.html_file_url}
-                    size="md"
-                    className="min-w-[90px] rounded-full bg-zinc-800 px-3 hover:bg-zinc-700"
-                  />
-                </div>
-              </div>
-            </div>
+            <BrandSection
+              brandId={newsletter.brand_id || ""}
+              brandDisplayName={brandDisplayName}
+              brandLogo={newsletter.Brand?.logo || null}
+              followerCount={newsletter.Brand?.follower_count || 0}
+              isFollowing={isFollowing}
+              newsletterId={newsletter.newsletter_id}
+              initialLikesCount={newsletter.likes_count || 0}
+              initialYouRocksCount={newsletter.you_rocks_count || 0}
+              initialIsLiked={isLiked}
+              initialIsBookmarked={isBookmarked}
+              fullScreenshotUrl={newsletter.full_screenshot_url}
+              htmlFileUrl={newsletter.html_file_url}
+              currentUrl={currentUrl}
+              subject={newsletter.subject}
+              brandname={params.brandname}
+            />
 
             {/* Key Insights Section is now inside EmailContent */}
             <EmailContent

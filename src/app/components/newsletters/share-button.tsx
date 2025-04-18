@@ -7,18 +7,20 @@ import {
   Modal,
   ModalBody,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   Tooltip,
   useDisclosure,
 } from "@nextui-org/react";
 import {
-  IconBrandFacebook,
-  IconBrandLinkedin,
-  IconBrandTwitter,
-  IconBrandWhatsapp,
-  IconCopy,
-  IconShare,
-} from "@tabler/icons-react";
+  FaCheck,
+  FaFacebook,
+  FaLink,
+  FaLinkedin,
+  FaShare,
+  FaTwitter,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 interface ShareButtonProps {
   _newsletterId?: number;
@@ -92,13 +94,16 @@ export function ShareButton({
   const button = (
     <Button
       variant="light"
-      aria-label="Share newsletter"
-      className={`flex items-center justify-start gap-2 rounded-full px-4 ${sizeClasses[size]} hover:bg-default-100 ${className}`}
       onClick={onOpen}
-      startContent={<IconShare className={`${iconSizes[size]} text-default-500`} />}
-    >
-      <span className={`font-semibold ${countSizes[size]}`}>Share</span>
-    </Button>
+      isIconOnly={size === "sm"}
+      className={`${sizeClasses[size]} ${className}`}
+      startContent={
+        <>
+          <FaShare className={`${iconSizes[size]}`} />
+          {size !== "sm" && <span className={`font-semibold ${countSizes[size]}`}>Share</span>}
+        </>
+      }
+    />
   );
 
   return (
@@ -107,56 +112,58 @@ export function ShareButton({
 
       <Modal isOpen={isOpen} onClose={onClose} placement="center" backdrop="blur">
         <ModalContent className="dark:bg-zinc-900">
-          <ModalHeader className="flex flex-col gap-1 text-center">
+          <ModalHeader className="flex flex-col gap-1 text-center text-xl font-bold dark:text-zinc-50">
             Share this newsletter now
           </ModalHeader>
-          <ModalBody className="gap-4 px-6 pb-6">
-            <div className="grid grid-cols-2 gap-3">
+          <ModalBody>
+            <div className="grid grid-cols-2 gap-4">
               <Button
-                variant="solid"
-                className="h-12 bg-[#1DA1F2] text-white hover:bg-[#1a94df]"
-                startContent={<IconBrandTwitter />}
+                variant="flat"
                 onClick={() => handleShare("twitter")}
+                className="w-full bg-[#1DA1F2] text-white hover:bg-[#1a94df]"
+                startContent={<FaTwitter />}
               >
                 Twitter
               </Button>
               <Button
-                variant="solid"
-                className="h-12 bg-[#4267B2] text-white hover:bg-[#365899]"
-                startContent={<IconBrandFacebook />}
+                variant="flat"
                 onClick={() => handleShare("facebook")}
+                className="w-full bg-[#4267B2] text-white hover:bg-[#3b5998]"
+                startContent={<FaFacebook />}
               >
                 Facebook
               </Button>
               <Button
-                variant="solid"
-                className="h-12 bg-[#0077B5] text-white hover:bg-[#006699]"
-                startContent={<IconBrandLinkedin />}
+                variant="flat"
                 onClick={() => handleShare("linkedin")}
+                className="w-full bg-[#0077B5] text-white hover:bg-[#006699]"
+                startContent={<FaLinkedin />}
               >
                 LinkedIn
               </Button>
               <Button
-                variant="solid"
-                className="h-12 bg-[#25D366] text-white hover:bg-[#20bd5a]"
-                startContent={<IconBrandWhatsapp />}
+                variant="flat"
                 onClick={() => handleShare("whatsapp")}
+                className="w-full bg-[#25D366] text-white hover:bg-[#22c55e]"
+                startContent={<FaWhatsapp />}
               >
                 WhatsApp
               </Button>
-            </div>
-
-            <div className="relative mt-2 w-full">
               <Button
                 variant="flat"
-                className="h-12 w-full dark:bg-zinc-800 dark:text-white"
-                startContent={<IconCopy />}
                 onClick={copyToClipboard}
+                className="col-span-2 w-full bg-[#8B5CF6] text-white hover:bg-[#7C3AED]"
+                startContent={copied ? <FaCheck /> : <FaLink />}
               >
                 {copied ? "Copied!" : "Copy Link"}
               </Button>
             </div>
           </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </>

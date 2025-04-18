@@ -11,13 +11,17 @@ import LoginModal from "@/app/components/login-modal";
 
 // src/app/components/brand/profile/header/follow-button.tsx
 
-// src/app/components/brand/profile/header/follow-button.tsx
-
-// src/app/components/brand/profile/header/follow-button.tsx
-
-// src/app/components/brand/profile/header/follow-button.tsx
-
-// src/app/components/brand/profile/header/follow-button.tsx
+// Custom event for follow status changes
+const broadcastFollowChange = (brandId: string | number, isFollowing: boolean) => {
+  // Use a custom event to broadcast follow status changes
+  if (typeof window !== "undefined") {
+    const event = new CustomEvent("follower-count-change", {
+      detail: { brandId, isFollowing },
+    });
+    window.dispatchEvent(event);
+    console.log("Broadcasting follow change event:", { brandId, isFollowing });
+  }
+};
 
 interface FollowButtonProps {
   brandId?: string | number;
@@ -76,13 +80,23 @@ export default function FollowButton({
 
     // Optimistically update the UI
     setIsFollowing(newIsFollowing);
-    onFollowChange?.(newIsFollowing);
+
+    // Notify parent component about follow change
+    if (onFollowChange) {
+      onFollowChange(newIsFollowing);
+    }
+
+    // Broadcast follow status change to update follower count components
+    broadcastFollowChange(brandId, newIsFollowing);
 
     // Debounce the actual API call
     debounceTimerRef.current = setTimeout(() => {
       // Update the database
       startTransition(async () => {
         try {
+          console.log(
+            `Updating follow status for brand ${brandId} to ${newIsFollowing ? "follow" : "unfollow"}`
+          );
           const response = await fetch("/api/follow", {
             method: "POST",
             headers: {
@@ -97,13 +111,25 @@ export default function FollowButton({
           if (!response.ok) {
             // If the server request fails, revert the optimistic update
             setIsFollowing(!newIsFollowing);
-            onFollowChange?.(!newIsFollowing);
+            if (onFollowChange) {
+              onFollowChange(!newIsFollowing);
+            }
+            // Broadcast reversion of follow status change
+            broadcastFollowChange(brandId, !newIsFollowing);
             console.error("Failed to update follow status");
+          } else {
+            console.log(
+              `Successfully ${newIsFollowing ? "followed" : "unfollowed"} brand ${brandId}`
+            );
           }
         } catch (error) {
           // If there's an error, revert the optimistic update
           setIsFollowing(!newIsFollowing);
-          onFollowChange?.(!newIsFollowing);
+          if (onFollowChange) {
+            onFollowChange(!newIsFollowing);
+          }
+          // Broadcast reversion of follow status change
+          broadcastFollowChange(brandId, !newIsFollowing);
           console.error("Error updating follow status:", error);
         }
       });
