@@ -7,6 +7,9 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+// Cache duration in seconds - 20 minutes
+const CACHE_DURATION = 20 * 60;
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -146,9 +149,28 @@ export async function GET(request: NextRequest) {
       followerCount: brand._count.Follow,
     }));
 
-    return NextResponse.json(formattedBrands);
+    // Determine cache policy based on authentication
+    // For authenticated users: no cache to ensure personalized recommendations
+    // For non-authenticated users: cache for 20 minutes
+    const headers = userId 
+      ? { "Cache-Control": "private, no-cache, no-store, must-revalidate" }
+      : { "Cache-Control": `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}` };
+
+    return new NextResponse(JSON.stringify(formattedBrands), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...headers
+      }
+    });
   } catch (error) {
     console.error("Error fetching popular users:", error);
-    return NextResponse.json({ error: "Failed to fetch popular users" }, { status: 500 });
+    return new NextResponse(JSON.stringify({ error: "Failed to fetch popular users" }), { 
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      }
+    });
   }
 }
