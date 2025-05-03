@@ -116,21 +116,21 @@ export default function WhoToFollow() {
             }
           }
         } else {
-          useFallbackData();
+          setFallbackData();
         }
       } else {
         console.error("Failed to fetch popular users");
-        useFallbackData();
+        setFallbackData();
       }
     } catch (error) {
       console.error("Error fetching suggested users:", error);
-      useFallbackData();
+      setFallbackData();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const useFallbackData = () => {
+  const setFallbackData = () => {
     // Fallback for testing - sample brands when none are returned
     const fallbackData = [
       {

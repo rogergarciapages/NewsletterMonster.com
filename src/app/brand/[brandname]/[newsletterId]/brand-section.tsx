@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
-import FollowerCount from "@/app/components/brand/profile/follower-count";
-import FollowButton from "@/app/components/brand/profile/header/follow-button";
+import { AnimatePresence, motion } from "framer-motion";
+
+import FollowButton from "@/app/components/follow-button";
 import { BookmarkButton } from "@/app/components/newsletters/bookmark-button";
 import { DownloadButton } from "@/app/components/newsletters/download-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
@@ -33,8 +35,8 @@ export default function BrandSection({
   brandId,
   brandDisplayName,
   brandLogo,
-  followerCount,
-  isFollowing,
+  followerCount: initialFollowerCount,
+  isFollowing: initialIsFollowing,
   newsletterId,
   initialLikesCount,
   initialYouRocksCount,
@@ -46,6 +48,15 @@ export default function BrandSection({
   subject,
   brandname,
 }: BrandSectionProps) {
+  const [followerCount, setFollowerCount] = useState(initialFollowerCount);
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+
+  // Handler for optimistic updates from FollowButton
+  const handleFollowChange = (newIsFollowing: boolean, countDelta: number) => {
+    setIsFollowing(newIsFollowing);
+    setFollowerCount(prev => prev + countDelta);
+  };
+
   return (
     <div className="mb-6 rounded-xl bg-gray-100 p-6 shadow-sm dark:bg-zinc-900 dark:shadow-none">
       {/* Top row: Channel info (profile picture, name, follower count) */}
@@ -73,10 +84,28 @@ export default function BrandSection({
           >
             {brandDisplayName}
           </Link>
-          <FollowerCount brandId={brandId} initialFollowersCount={followerCount} />
+          <div className="text-sm text-gray-500">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={followerCount}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 1.2, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {followerCount}
+              </motion.span>
+            </AnimatePresence>{" "}
+            followers
+          </div>
         </div>
 
-        <FollowButton brandId={brandId} isFollowing={isFollowing} className="ml-4" />
+        <FollowButton
+          brandId={brandId}
+          initialIsFollowing={isFollowing}
+          onFollowChange={handleFollowChange}
+          className="ml-4"
+        />
       </div>
 
       {/* Bottom row: Action buttons */}

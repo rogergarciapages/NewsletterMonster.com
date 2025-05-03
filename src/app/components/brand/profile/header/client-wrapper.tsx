@@ -33,6 +33,10 @@ export default function BrandProfileHeaderWrapper({
 }: BrandProfileHeaderProps) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  const handleOpenLoginModal = () => {
+    setIsLoginModalOpen(true);
+  };
+
   return (
     <>
       <BrandProfileHeader

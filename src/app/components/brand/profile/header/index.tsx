@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 
 import { Card, CardBody, Chip, Link } from "@nextui-org/react";
 import { Brand, SocialLinks } from "@prisma/client";
@@ -9,9 +10,35 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BsPatchCheckFill } from "react-icons/bs";
 import { FaGithub, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 
-import { useFollowCount } from "@/hooks/use-follow-count";
+import FollowButton from "@/app/components/follow-button";
 
-import FollowButton from "./follow-button";
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
+
+// src/app/components/brand/profile/header/index.tsx
 
 // src/app/components/brand/profile/header/index.tsx
 
@@ -36,13 +63,13 @@ export default function BrandProfileHeader({
   hideFollowButton = false,
   isOwnProfile = false,
 }: BrandProfileHeaderProps) {
-  const { count: followersCount, updateFollowCount } = useFollowCount({
-    initialCount: initialFollowersCount,
-    brandId,
-  });
+  const [followerCount, setFollowerCount] = useState(initialFollowersCount);
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
 
-  const handleFollowChange = (newIsFollowing: boolean) => {
-    updateFollowCount(newIsFollowing);
+  // Handler for optimistic updates from FollowButton
+  const handleFollowChange = (newIsFollowing: boolean, countDelta: number) => {
+    setIsFollowing(newIsFollowing);
+    setFollowerCount(prev => prev + countDelta);
   };
 
   return (
@@ -69,7 +96,7 @@ export default function BrandProfileHeader({
           </div>
 
           {/* Main Content Column */}
-          <div className="ml-6 flex-grow">
+          <div className="mt-4 flex-1 md:ml-6 md:mt-0">
             {/* Brand Name with Verified Badge */}
             <div className="flex items-center gap-2">
               <h1 className="truncate text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
@@ -100,39 +127,55 @@ export default function BrandProfileHeader({
             </div>
 
             {/* Stats and Buttons Row */}
-            <div className="mt-6 flex flex-col justify-between gap-4 md:flex-row md:items-start">
-              {/* Stats */}
-              <div className="flex items-center gap-8">
-                <div className="flex flex-col items-start">
-                  <span className="text-3xl font-bold text-foreground">{newsletterCount}</span>
-                  <span className="text-sm text-default-500">newsletters</span>
-                </div>
-                <div className="flex flex-col items-start">
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={followersCount}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="text-3xl font-bold text-foreground"
-                    >
-                      {followersCount}
-                    </motion.span>
-                  </AnimatePresence>
-                  <span className="text-sm text-default-500">followers</span>
-                </div>
+            <div className="mt-6 flex flex-wrap items-start gap-8">
+              {/* Newsletter Count */}
+              <div className="flex min-w-[90px] flex-col items-center">
+                <span className="text-3xl font-bold leading-none text-foreground">
+                  {newsletterCount}
+                </span>
+                <span className="mt-1 text-base text-muted-foreground">
+                  {newsletterCount === 1 ? "newsletter" : "newsletters"}
+                </span>
               </div>
 
-              {/* Buttons */}
-              <div className="flex w-full flex-col gap-2 md:w-[160px]">
-                {!hideFollowButton && !isOwnProfile && (
-                  <FollowButton
-                    brandId={brandId}
-                    isFollowing={initialIsFollowing}
-                    onFollowChange={handleFollowChange}
-                  />
-                )}
+              {/* Follower Count */}
+              <div className="flex min-w-[90px] flex-col items-center">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={followerCount}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 1.2, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-3xl font-bold leading-none text-foreground"
+                  >
+                    {followerCount}
+                  </motion.span>
+                </AnimatePresence>
+                <span className="mt-1 text-base text-muted-foreground">
+                  {followerCount === 1 ? "follower" : "followers"}
+                </span>
               </div>
+
+              {/* Follow Button */}
+              <AnimatePresence mode="wait">
+                {!hideFollowButton && !isOwnProfile && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="self-start"
+                  >
+                    <FollowButton
+                      brandId={brandId}
+                      initialIsFollowing={isFollowing}
+                      onFollowChange={handleFollowChange}
+                      className="px-6 py-2 text-base"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Website Link */}
