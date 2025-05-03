@@ -41,8 +41,8 @@ export default function ThreeColumnLayout({ children }: { children: React.ReactN
             <div className="flex-grow">{children}</div>
           </div>
 
-          <aside className="sticky top-16 max-h-[calc(100vh-64px)] self-start overflow-y-auto lg:col-span-2">
-            <div className="py-4">
+          <aside className="h-full lg:col-span-2">
+            <div className="h-full py-4">
               <RightSidebar />
             </div>
           </aside>
