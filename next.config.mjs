@@ -1,6 +1,7 @@
 // next.config.mjs
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  output: "standalone",
   experimental: {
     typedRoutes: true,
   },
@@ -15,7 +16,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "minio-zok40c4wo8s88cks0cwc0kkk.newslettermonster.com",
       },
-      
+
       // Google
       {
         protocol: "https",
@@ -33,7 +34,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "lh6.googleusercontent.com",
       },
-      
+
       // GitHub
       {
         protocol: "https",
@@ -47,7 +48,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
       },
-      
+
       // Discord
       {
         protocol: "https",
@@ -57,7 +58,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.discordapp.net",
       },
-      
+
       // Twitter
       {
         protocol: "https",
@@ -67,7 +68,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "abs.twimg.com",
       },
-      
+
       // Facebook
       {
         protocol: "https",
@@ -81,13 +82,13 @@ const nextConfig = {
         protocol: "https",
         hostname: "scontent.fbom1-1.fna.fbcdn.net",
       },
-      
+
       // LinkedIn
       {
         protocol: "https",
         hostname: "media.licdn.com",
       },
-      
+
       // Additional
       {
         protocol: "https",
@@ -96,7 +97,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "avatar.vercel.sh",
-      }
+      },
     ],
   },
   webpack(config) {
