@@ -32,6 +32,7 @@ interface BrandData {
     is_verified: boolean;
     created_at: Date | null;
     updated_at: Date | null;
+    followers_count: number;
     SocialLinks: {
       instagram?: string;
       twitter?: string;
@@ -188,6 +189,7 @@ async function getBrandData(brandSlug: string): Promise<BrandData | null> {
         is_verified: brand.is_verified,
         created_at: brand.created_at,
         updated_at: brand.updated_at,
+        followers_count: brand._count.Follow,
         SocialLinks: brand.SocialLinks
           ? {
               instagram: brand.SocialLinks.instagram || undefined,
@@ -257,17 +259,7 @@ export default async function BrandPage({ params }: { params: { brandname: strin
               brandId={brand.brand_id}
               brandName={brand.name}
               brand={{
-                brand_id: brand.brand_id,
-                name: brand.name,
-                slug: brand.slug,
-                description: brand.description,
-                website: brand.website,
-                domain: brand.domain,
-                logo: brand.logo,
-                is_claimed: brand.is_claimed,
-                is_verified: brand.is_verified,
-                created_at: brand.created_at,
-                updated_at: brand.updated_at,
+                ...brand,
                 SocialLinks: brand.SocialLinks
                   ? {
                       id: brand.brand_id,
