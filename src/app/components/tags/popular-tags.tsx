@@ -28,7 +28,7 @@ function truncateTag(name: string, maxLength: number = 12): string {
   return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
 }
 
-function getRandomTags(tags: Tag[], count: number = 7): Tag[] {
+function getRandomTags(tags: Tag[], count: number = 12): Tag[] {
   const shuffled = [...tags].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }

@@ -30,7 +30,7 @@ export default function ThreeColumnLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col">
       <div className="container mx-auto flex-grow px-4">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="grid min-h-screen grid-cols-1 gap-8 lg:grid-cols-12">
           <aside className="sticky top-16 max-h-[calc(100vh-64px)] self-start overflow-y-auto lg:col-span-2">
             <div className="py-4">
               <LeftSidebar />
@@ -41,8 +41,8 @@ export default function ThreeColumnLayout({ children }: { children: React.ReactN
             <div className="flex-grow">{children}</div>
           </div>
 
-          <aside className="h-full lg:col-span-2">
-            <div className="h-full py-4">
+          <aside className="min-h-screen lg:col-span-2">
+            <div className="py-4">
               <RightSidebar />
             </div>
           </aside>
