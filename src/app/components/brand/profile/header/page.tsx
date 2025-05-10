@@ -48,6 +48,7 @@ async function getBrandData(brandId: string) {
             created_at: null,
             updated_at: null,
             SocialLinks: user.SocialLinks,
+            followers_count: followersCount,
           }
         : null,
       newsletterCount,
@@ -86,6 +87,7 @@ export default async function BrandProfilePage({ params }: { params: { brandId: 
               created_at: user.created_at,
               updated_at: user.updated_at,
               SocialLinks: user.SocialLinks,
+              followers_count: user.followers_count,
             }}
             newsletterCount={newsletterCount}
             followersCount={followersCount}
