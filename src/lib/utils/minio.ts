@@ -1,19 +1,28 @@
 // src/lib/utils/minio.ts
 import { Client } from "minio";
 
-const minioClient = new Client({
-  endPoint: process.env.MINIO_ENDPOINT!.replace("https://", ""),
-  port: 443,
-  useSSL: process.env.MINIO_USE_SSL === "true",
-  accessKey: process.env.MINIO_ACCESS_KEY!,
-  secretKey: process.env.MINIO_SECRET_KEY!,
-});
+function getMinioClient() {
+  const endpoint = process.env.MINIO_ENDPOINT;
+  if (!endpoint) throw new Error("MINIO_ENDPOINT is not set");
+  const accessKey = process.env.MINIO_ACCESS_KEY;
+  if (!accessKey) throw new Error("MINIO_ACCESS_KEY is not set");
+  const secretKey = process.env.MINIO_SECRET_KEY;
+  if (!secretKey) throw new Error("MINIO_SECRET_KEY is not set");
+  return new Client({
+    endPoint: endpoint.replace("https://", ""),
+    port: 443,
+    useSSL: process.env.MINIO_USE_SSL === "true",
+    accessKey,
+    secretKey,
+  });
+}
 
 const BUCKET_NAME = process.env.MINIO_BUCKET!;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 export async function deleteUserProfileImages(userId: string): Promise<void> {
   try {
+    const minioClient = getMinioClient();
     const objectsList = await minioClient.listObjects(BUCKET_NAME, `public/${userId}/`, true);
 
     for await (const obj of objectsList) {
@@ -48,6 +57,7 @@ export async function uploadProfileImage(file: File, userId: string): Promise<st
     await deleteUserProfileImages(userId);
 
     // Upload the new file
+    const minioClient = getMinioClient();
     await minioClient.putObject(BUCKET_NAME, filePath, Buffer.from(fileBuffer), file.size, {
       "Content-Type": file.type,
       "Cache-Control": "no-cache",
