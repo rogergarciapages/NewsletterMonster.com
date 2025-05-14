@@ -9,13 +9,22 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const minioClient = new Client({
-  endPoint: process.env.MINIO_ENDPOINT!.replace("https://", ""),
-  port: 443,
-  useSSL: process.env.MINIO_USE_SSL === "true",
-  accessKey: process.env.MINIO_ACCESS_KEY!,
-  secretKey: process.env.MINIO_SECRET_KEY!,
-});
+// Move MinIO client initialization into a function
+function getMinioClient() {
+  const endpoint = process.env.MINIO_ENDPOINT;
+  if (!endpoint) throw new Error("MINIO_ENDPOINT is not set");
+  const accessKey = process.env.MINIO_ACCESS_KEY;
+  if (!accessKey) throw new Error("MINIO_ACCESS_KEY is not set");
+  const secretKey = process.env.MINIO_SECRET_KEY;
+  if (!secretKey) throw new Error("MINIO_SECRET_KEY is not set");
+  return new Client({
+    endPoint: endpoint.replace("https://", ""),
+    port: 443,
+    useSSL: process.env.MINIO_USE_SSL === "true",
+    accessKey,
+    secretKey,
+  });
+}
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -35,6 +44,7 @@ const pendingUploads = new Map<
  */
 async function deleteExistingProfileImages(bucket: string, userId: string): Promise<void> {
   try {
+    const minioClient = getMinioClient();
     const objectsList = await minioClient.listObjects(bucket, `public/${userId}/`, true);
     for await (const obj of objectsList) {
       await minioClient.removeObject(bucket, obj.name);
@@ -121,6 +131,7 @@ export async function POST(request: Request) {
     });
 
     // First, delete any existing files with same name to avoid conflicts
+    const minioClient = getMinioClient();
     try {
       console.log("Checking for existing file at path:", objectPath);
       await minioClient.statObject(process.env.MINIO_BUCKET!, objectPath);
@@ -215,6 +226,7 @@ export async function DELETE(request: Request) {
     const transaction = pendingUploads.get(transactionId)!;
 
     // Delete the uploaded file
+    const minioClient = getMinioClient();
     await minioClient.removeObject(process.env.MINIO_BUCKET!, transaction.objectPath);
 
     // Remove transaction from pending
