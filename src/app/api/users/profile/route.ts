@@ -8,13 +8,21 @@ import { userProfileSchema } from "@/lib/schemas/user-profile";
 
 export const dynamic = "force-dynamic";
 
-const minioClient = new Client({
-  endPoint: process.env.MINIO_ENDPOINT!.replace("https://", ""),
-  port: 443,
-  useSSL: process.env.MINIO_USE_SSL === "true",
-  accessKey: process.env.MINIO_ACCESS_KEY!,
-  secretKey: process.env.MINIO_SECRET_KEY!,
-});
+function getMinioClient() {
+  const endpoint = process.env.MINIO_ENDPOINT;
+  if (!endpoint) throw new Error("MINIO_ENDPOINT is not set");
+  const accessKey = process.env.MINIO_ACCESS_KEY;
+  if (!accessKey) throw new Error("MINIO_ACCESS_KEY is not set");
+  const secretKey = process.env.MINIO_SECRET_KEY;
+  if (!secretKey) throw new Error("MINIO_SECRET_KEY is not set");
+  return new Client({
+    endPoint: endpoint.replace("https://", ""),
+    port: 443,
+    useSSL: process.env.MINIO_USE_SSL === "true",
+    accessKey,
+    secretKey,
+  });
+}
 
 async function deleteOldImage(imageUrl: string, userId: string) {
   try {
@@ -33,6 +41,7 @@ async function deleteOldImage(imageUrl: string, userId: string) {
     const objectPath = `public/${userId}/${filename}`;
     console.log(`Deleting image at path: ${objectPath}`);
 
+    const minioClient = getMinioClient();
     try {
       await minioClient.removeObject(process.env.MINIO_BUCKET!, objectPath);
       console.log("Successfully deleted old image:", objectPath);
