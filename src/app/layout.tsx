@@ -15,6 +15,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Newsletter Manager",
   description: "Newsletter Manager",
+  verification: {
+    google: "bvpPc-4eFCo7zYJyOwRQdv5q-qieCEXz-2cQXVHJxj4",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
