@@ -1,9 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getAllCategoryData, getCategoryBySlug, getPostsMetadataForCategory } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
+
+import BlogImage from "../components/blog-image";
 
 export async function generateMetadata({ params }: { params: { category: string } }) {
   const category = await getCategoryBySlug(params.category);
@@ -57,17 +58,11 @@ export default async function CategoryPage({ params }: { params: { category: str
                 {posts.map(post => (
                   <div key={post.slug} className="overflow-hidden rounded-lg bg-card shadow-md">
                     <div className="relative h-48 w-full">
-                      <Image
+                      <BlogImage
                         src={post.coverImage}
                         alt={post.title}
                         fill
                         className="object-cover"
-                        onError={e => {
-                          console.error(`Failed to load image: ${post.coverImage}`);
-                          // Use a fallback on client-side error
-                          const imgElement = e.currentTarget as HTMLImageElement;
-                          imgElement.src = "/images/blog/default-cover.jpg";
-                        }}
                       />
                     </div>
                     <div className="p-4">

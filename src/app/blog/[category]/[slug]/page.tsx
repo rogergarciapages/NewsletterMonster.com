@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -9,6 +8,8 @@ import {
   getPostsMetadataForCategory,
 } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
+
+import BlogImage from "../../components/blog-image";
 
 // Fallback component for when MDX content fails to render
 function MDXErrorFallback({ error }: { error: Error }) {
@@ -78,18 +79,7 @@ export default async function BlogPostPage({
 
             <article className="overflow-hidden rounded-lg bg-card shadow-md">
               <div className="relative h-64 w-full">
-                <Image
-                  src={post.coverImage}
-                  alt={post.title}
-                  fill
-                  className="object-cover"
-                  onError={e => {
-                    console.error(`Failed to load image: ${post.coverImage}`);
-                    // Use a fallback on client-side error
-                    const imgElement = e.currentTarget as HTMLImageElement;
-                    imgElement.src = "/images/blog/default-cover.jpg";
-                  }}
-                />
+                <BlogImage src={post.coverImage} alt={post.title} fill className="object-cover" />
               </div>
 
               <div className="p-6">
@@ -116,17 +106,11 @@ export default async function BlogPostPage({
                       className="overflow-hidden rounded-lg bg-card shadow-md"
                     >
                       <div className="relative h-40 w-full">
-                        <Image
+                        <BlogImage
                           src={relatedPost.coverImage}
                           alt={relatedPost.title}
                           fill
                           className="object-cover"
-                          onError={e => {
-                            console.error(`Failed to load image: ${relatedPost.coverImage}`);
-                            // Use a fallback on client-side error
-                            const imgElement = e.currentTarget as HTMLImageElement;
-                            imgElement.src = "/images/blog/default-cover.jpg";
-                          }}
                         />
                       </div>
                       <div className="p-4">
