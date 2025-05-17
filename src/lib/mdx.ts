@@ -193,15 +193,28 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
 
     // Check if we need to search for a custom slug
     for (const filename of files) {
-      const filePath = path.join(categoryDir, filename);
-      const fileContents = fs.readFileSync(filePath, "utf8");
-      const { data } = matter(fileContents);
+      try {
+        const filePath = path.join(categoryDir, filename);
+        const fileContents = fs.readFileSync(filePath, "utf8");
+        const { data } = matter(fileContents);
 
-      // If this file has a custom slug that matches our requested slug
-      if (data.slug === slug) {
-        targetFile = filename;
-        fileFound = true;
-        break;
+        // If this file has a custom slug that matches our requested slug
+        if (data.slug === slug) {
+          targetFile = filename;
+          fileFound = true;
+          console.log(`Found custom slug match: ${slug} in file ${filename}`);
+          break;
+        }
+
+        // If the filename without extension matches the requested slug
+        if (filename.replace(/\.mdx$/, "") === slug) {
+          targetFile = filename;
+          fileFound = true;
+          console.log(`Found filename match: ${slug}`);
+          break;
+        }
+      } catch (err) {
+        console.error(`Error checking file ${filename} for slug:`, err);
       }
     }
 
@@ -345,14 +358,60 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
     }
 
     const categories = fs.readdirSync(blogDir);
-    let allPosts: BlogPostMeta[] = [];
+    const allPosts: BlogPostMeta[] = [];
+    const slugRegistry = new Map<string, string>(); // Track slug conflicts
 
     for (const category of categories) {
       try {
         const categoryDir = path.join(blogDir, category);
         if (fs.existsSync(categoryDir) && fs.statSync(categoryDir).isDirectory()) {
-          const posts = await getPostsMetadataForCategory(category);
-          allPosts = [...allPosts, ...posts];
+          const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
+
+          for (const filename of files) {
+            try {
+              const filePath = path.join(categoryDir, filename);
+              const fileContents = fs.readFileSync(filePath, "utf8");
+              const { data } = matter(fileContents);
+              const fileSlug = filename.replace(/\.mdx$/, "");
+
+              // Use custom slug if available, otherwise use the filename
+              const slug = data.slug || fileSlug;
+
+              // Check for duplicate slugs across categories
+              const slugKey = `${category}/${slug}`;
+              if (slugRegistry.has(slugKey)) {
+                console.warn(`Duplicate slug detected: ${slugKey}, skipping`);
+                continue;
+              }
+
+              // Register this slug
+              slugRegistry.set(slugKey, filePath);
+
+              // Provide fallback image if needed
+              let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
+
+              // Ensure cover image exists in public directory
+              if (coverImage.startsWith("/")) {
+                const imagePath = path.join(process.cwd(), "public", coverImage);
+                if (!fs.existsSync(imagePath)) {
+                  console.warn(`Cover image not found: ${imagePath}, using default image`);
+                  coverImage = DEFAULT_COVER_IMAGE;
+                }
+              }
+
+              allPosts.push({
+                slug,
+                category,
+                title: data.title,
+                date: data.date,
+                excerpt: data.excerpt,
+                author: data.author,
+                coverImage,
+              });
+            } catch (error) {
+              console.error(`Error processing file ${filename}:`, error);
+            }
+          }
         }
       } catch (error) {
         console.error(`Error processing category ${category}:`, error);
