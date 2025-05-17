@@ -1,28 +1,46 @@
 import Image from "next/image";
-import { notFound } from "next/navigation";
 
 import { getAllPostSlugs, getPostBySlug } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
 
+// Set a longer timeout for this route
+export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
+export const fetchCache = "force-no-store";
+export const runtime = "nodejs";
+
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  const posts = await getAllPostSlugs();
-  return posts;
+  try {
+    const posts = await getAllPostSlugs();
+    return posts;
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
-  const post = await getPostBySlug(params.category, params.slug);
+  try {
+    const post = await getPostBySlug(params.category, params.slug);
 
-  if (!post) {
+    if (!post) {
+      return {
+        title: "Post Not Found",
+      };
+    }
+
     return {
-      title: "Post Not Found",
+      title: post.title,
+      description: post.excerpt,
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Blog Post",
+      description: "View our blog post",
     };
   }
-
-  return {
-    title: post.title,
-    description: post.excerpt,
-  };
 }
 
 export default async function BlogPostPage({
@@ -32,11 +50,49 @@ export default async function BlogPostPage({
 }) {
   try {
     console.log(`Rendering blog post page for ${params.category}/${params.slug}`);
-    const post = await getPostBySlug(params.category, params.slug);
+
+    // Add a timeout to prevent hanging
+    const postPromise = getPostBySlug(params.category, params.slug);
+
+    // Create a timeout promise
+    const timeoutPromise = new Promise<null>(resolve => {
+      setTimeout(() => {
+        console.error(`Timeout reached for ${params.category}/${params.slug}`);
+        resolve(null);
+      }, 5000); // 5 second timeout
+    });
+
+    // Race the post fetch against the timeout
+    const post = await Promise.race([postPromise, timeoutPromise]);
 
     if (!post) {
-      console.error(`Post not found: ${params.category}/${params.slug}`);
-      notFound();
+      console.error(`Post not found or timed out: ${params.category}/${params.slug}`);
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-6 text-center">
+            <h1 className="mb-4 text-2xl font-bold text-red-800">Blog Post Not Available</h1>
+            <p className="mb-4 text-red-700">
+              We're having trouble loading this blog post. It might be temporarily unavailable.
+            </p>
+            <p className="mb-6">
+              <a
+                href={`/blog/${params.category}/${params.slug}/simple`}
+                className="text-blue-600 hover:underline"
+              >
+                Try viewing the simplified version
+              </a>
+            </p>
+            <div className="mt-6">
+              <a
+                href="/blog"
+                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                Return to Blog Home
+              </a>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     return (

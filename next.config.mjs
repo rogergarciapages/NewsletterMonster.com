@@ -8,7 +8,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "2mb",
     },
+    // Add improved MDX support
+    mdxRs: true,
   },
+  // Add increased memory limit for builds
+  env: {
+    NODE_OPTIONS: "--max-old-space-size=4096",
+  },
+  // Increase timeout for page generation
+  staticPageGenerationTimeout: 180,
   images: {
     remotePatterns: [
       // S3 bucket
@@ -109,6 +117,36 @@ const nextConfig = {
       test: /\.svg$/,
       use: [{ loader: "@svgr/webpack" }],
     });
+
+    // Optimize build for production
+    if (process.env.NODE_ENV === "production") {
+      // Increase chunk size limit to avoid too many small chunks
+      config.optimization.splitChunks = {
+        chunks: "all",
+        minSize: 20000,
+        maxSize: 70000,
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          framework: {
+            name: "framework",
+            test: /[\\/]node_modules[\\/](@next|next|react|react-dom)[\\/]/,
+            priority: 40,
+            chunks: "all",
+          },
+          lib: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: 30,
+            chunks: "all",
+            name(module) {
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+              return `npm.${packageName.replace("@", "")}`;
+            },
+          },
+        },
+      };
+    }
+
     return config;
   },
   // Add error handling for build process
@@ -126,7 +164,7 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=10, stale-while-revalidate=59",
+            value: "public, max-age=60, stale-while-revalidate=300",
           },
         ],
       },

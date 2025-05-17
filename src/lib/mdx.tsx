@@ -245,6 +245,66 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
     try {
       console.log("Compiling MDX content...");
 
+      // Check if content is too large (might cause memory issues)
+      if (content.length > 50000) {
+        // ~50KB threshold
+        console.warn(
+          `Content for ${slug} is very large (${content.length} bytes), using fallback rendering`
+        );
+        // Skip compilation for very large content
+        return {
+          slug: fileSlug!,
+          category,
+          title: data.title,
+          date: data.date,
+          excerpt: data.excerpt,
+          author: data.author,
+          coverImage,
+          content: (
+            <div className="prose prose-lg">
+              <div className="mb-4 rounded-md bg-amber-50 p-4">
+                <p className="text-amber-800">
+                  <strong>Note:</strong> This content is being displayed in simplified format due to
+                  its size.
+                </p>
+              </div>
+              <div className="markdown-content">
+                {content.split("\n").map((line, i) => {
+                  // Basic markdown parsing for headings
+                  if (line.startsWith("# ")) {
+                    return (
+                      <h1 key={i} className="my-4 text-3xl font-bold">
+                        {line.substring(2)}
+                      </h1>
+                    );
+                  } else if (line.startsWith("## ")) {
+                    return (
+                      <h2 key={i} className="my-3 text-2xl font-bold">
+                        {line.substring(3)}
+                      </h2>
+                    );
+                  } else if (line.startsWith("### ")) {
+                    return (
+                      <h3 key={i} className="my-2 text-xl font-bold">
+                        {line.substring(4)}
+                      </h3>
+                    );
+                  } else if (line.trim() === "") {
+                    return <br key={i} />;
+                  } else {
+                    return (
+                      <p key={i} className="my-2">
+                        {line}
+                      </p>
+                    );
+                  }
+                })}
+              </div>
+            </div>
+          ),
+        };
+      }
+
       // Use a simpler MDX compilation approach with fewer plugins
       const mdxSource = await compileMDX({
         source: content,
@@ -274,6 +334,8 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
 
       // Return the post with raw content instead of failing completely
       console.log("Falling back to raw content display");
+
+      // Create a simplified version of the content with basic formatting
       return {
         slug: fileSlug!,
         category,
@@ -286,13 +348,42 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
           <div className="prose prose-lg">
             <div className="mb-4 rounded-md bg-amber-50 p-4">
               <p className="text-amber-800">
-                <strong>Note:</strong> This content couldn't be fully rendered. Showing raw markdown
-                instead.
+                <strong>Note:</strong> This content couldn't be fully rendered. Showing simplified
+                version instead.
               </p>
             </div>
-            <pre className="overflow-auto whitespace-pre-wrap rounded-md bg-gray-50 p-4">
-              {content}
-            </pre>
+            <div className="markdown-content">
+              {content.split("\n").map((line, i) => {
+                // Basic markdown parsing for headings
+                if (line.startsWith("# ")) {
+                  return (
+                    <h1 key={i} className="my-4 text-3xl font-bold">
+                      {line.substring(2)}
+                    </h1>
+                  );
+                } else if (line.startsWith("## ")) {
+                  return (
+                    <h2 key={i} className="my-3 text-2xl font-bold">
+                      {line.substring(3)}
+                    </h2>
+                  );
+                } else if (line.startsWith("### ")) {
+                  return (
+                    <h3 key={i} className="my-2 text-xl font-bold">
+                      {line.substring(4)}
+                    </h3>
+                  );
+                } else if (line.trim() === "") {
+                  return <br key={i} />;
+                } else {
+                  return (
+                    <p key={i} className="my-2">
+                      {line}
+                    </p>
+                  );
+                }
+              })}
+            </div>
           </div>
         ),
       };
