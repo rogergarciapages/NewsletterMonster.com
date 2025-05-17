@@ -1,52 +1,14 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import fs from "fs";
+import matter from "gray-matter";
+import path from "path";
 
-import {
-  getAllCategoryData,
-  getAllPostSlugs,
-  getPostBySlug,
-  getPostsMetadataForCategory,
-} from "@/lib/mdx";
-import { formatDate } from "@/lib/utils";
-
-import BlogImage from "../../components/blog-image";
-
-// Fallback component for when MDX content fails to render
-function MDXErrorFallback({ error }: { error: Error }) {
-  return (
-    <div className="rounded-md bg-red-50 p-4 text-red-800">
-      <h3 className="mb-2 text-lg font-medium">Error rendering content</h3>
-      <p>There was an error rendering this content. Please try again later.</p>
-      <p className="mt-2 text-sm text-red-600">{error.message}</p>
-    </div>
-  );
-}
+// Base directory for content
+const contentDirectory = path.join(process.cwd(), "content");
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
-  const post = await getPostBySlug(params.category, params.slug);
-
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    };
-  }
-
   return {
-    title: `${post.title} | Newsletter Monster Blog`,
-    description: post.excerpt,
+    title: `Diagnostic | ${params.category}/${params.slug}`,
   };
-}
-
-export async function generateStaticParams() {
-  console.log("Generating static params for blog posts");
-  try {
-    const posts = await getAllPostSlugs();
-    console.log(`Generated static params for ${posts.length} blog posts`);
-    return posts;
-  } catch (error) {
-    console.error("Error generating static params for blog posts:", error);
-    return [];
-  }
 }
 
 export default async function BlogPostPage({
@@ -55,161 +17,174 @@ export default async function BlogPostPage({
   params: { category: string; slug: string };
 }) {
   try {
-    console.log(`Rendering blog post page for ${params.category}/${params.slug}`);
-    const post = await getPostBySlug(params.category, params.slug);
+    console.log(`Diagnostic page for ${params.category}/${params.slug}`);
 
-    if (!post) {
-      console.error(`Post not found: ${params.category}/${params.slug}`);
-      notFound();
+    // Direct file system check
+    const categoryDir = path.join(contentDirectory, "blog", params.category);
+    let categoryExists = false;
+    let files: string[] = [];
+    let matchingFile = null;
+    let frontMatter = null;
+
+    try {
+      categoryExists = fs.existsSync(categoryDir);
+      if (categoryExists) {
+        files = fs.readdirSync(categoryDir).filter(f => f.endsWith(".mdx"));
+
+        // Look for a matching file
+        for (const file of files) {
+          const filePath = path.join(categoryDir, file);
+          const content = fs.readFileSync(filePath, "utf8");
+          const { data } = matter(content);
+
+          if (data.slug === params.slug || file.replace(/\.mdx$/, "") === params.slug) {
+            matchingFile = file;
+            frontMatter = data;
+            break;
+          }
+        }
+      }
+    } catch (fsError) {
+      console.error("File system error:", fsError);
     }
 
-    // Get categories for sidebar
-    const categories = await getAllCategoryData();
-
-    // Get related posts (same category, excluding current post)
-    const categoryPosts = await getPostsMetadataForCategory(params.category);
-    const relatedPosts = categoryPosts.filter(p => p.slug !== params.slug).slice(0, 3);
-
+    // Return diagnostic HTML
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col gap-8 md:flex-row">
-          {/* Main content */}
-          <div className="md:w-2/3">
-            <div className="mb-4">
-              <Link
-                href={`/blog/${params.category}`}
-                className="mb-2 inline-block text-primary hover:underline"
-              >
-                ← Back to {params.category.replace(/-/g, " ")}
-              </Link>
-            </div>
+      <div style={{ padding: "2rem", fontFamily: "system-ui, sans-serif" }}>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Diagnostic Information</h1>
 
-            <article className="overflow-hidden rounded-lg bg-card shadow-md">
-              <div className="relative h-64 w-full">
-                <BlogImage src={post.coverImage} alt={post.title} fill className="object-cover" />
-              </div>
+        <div
+          style={{
+            marginTop: "1.5rem",
+            padding: "1rem",
+            border: "1px solid #ccc",
+            borderRadius: "0.5rem",
+          }}
+        >
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>Request Parameters</h2>
+          <p>
+            <strong>Category:</strong> {params.category}
+          </p>
+          <p>
+            <strong>Slug:</strong> {params.slug}
+          </p>
+        </div>
 
-              <div className="p-6">
-                <div className="mb-6">
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(post.date)} • {params.category.replace(/-/g, " ")}
-                  </span>
-                  <h1 className="mt-2 text-3xl font-bold">{post.title}</h1>
-                  <p className="mt-2 text-muted-foreground">{post.excerpt}</p>
-                </div>
-
-                <div className="prose prose-lg max-w-none">{post.content}</div>
-              </div>
-            </article>
-
-            {/* Related posts */}
-            {relatedPosts.length > 0 && (
-              <div className="mt-8">
-                <h2 className="mb-4 text-xl font-semibold">Related Articles</h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {relatedPosts.map(relatedPost => (
-                    <div
-                      key={relatedPost.slug}
-                      className="overflow-hidden rounded-lg bg-card shadow-md"
-                    >
-                      <div className="relative h-40 w-full">
-                        <BlogImage
-                          src={relatedPost.coverImage}
-                          alt={relatedPost.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(relatedPost.date)}
-                        </span>
-                        <h3 className="mb-2 mt-2 text-lg font-bold">
-                          <Link
-                            href={`/blog/${relatedPost.category}/${relatedPost.slug}`}
-                            className="transition-colors hover:text-primary"
-                          >
-                            {relatedPost.title}
-                          </Link>
-                        </h3>
-                        <Link
-                          href={`/blog/${relatedPost.category}/${relatedPost.slug}`}
-                          className="text-sm font-medium text-primary hover:underline"
-                        >
-                          Read more →
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="md:w-1/3">
-            <div className="mb-6 rounded-lg bg-card p-6 shadow-md">
-              <h2 className="mb-4 text-xl font-semibold">Categories</h2>
-              <ul className="space-y-2">
-                {categories.map(category => (
-                  <li
-                    key={category.slug}
-                    className={category.slug === params.category ? "font-bold" : ""}
-                  >
-                    <Link
-                      href={`/blog/${category.slug}`}
-                      className={`block py-1 ${category.slug === params.category ? "text-primary" : "hover:text-primary"}`}
-                    >
-                      {category.name}
-                    </Link>
+        <div
+          style={{
+            marginTop: "1.5rem",
+            padding: "1rem",
+            border: "1px solid #ccc",
+            borderRadius: "0.5rem",
+          }}
+        >
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>Category Directory</h2>
+          <p>
+            <strong>Path:</strong> {categoryDir}
+          </p>
+          <p>
+            <strong>Directory exists:</strong> {categoryExists ? "Yes" : "No"}
+          </p>
+          {categoryExists && (
+            <>
+              <p>
+                <strong>Files found:</strong> {files.length}
+              </p>
+              <ul style={{ marginTop: "0.5rem", listStyleType: "disc", paddingLeft: "1.5rem" }}>
+                {files.map(file => (
+                  <li key={file} style={{ fontWeight: file === matchingFile ? "bold" : "normal" }}>
+                    {file} {file === matchingFile ? "(MATCH)" : ""}
                   </li>
                 ))}
               </ul>
-            </div>
+            </>
+          )}
+        </div>
 
-            <div className="rounded-lg bg-card p-6 shadow-md">
-              <h2 className="mb-4 text-xl font-semibold">Subscribe</h2>
-              <p className="mb-4 text-muted-foreground">
-                Get the latest newsletter tips and strategies delivered directly to your inbox.
-              </p>
-              <form className="space-y-3">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="w-full rounded-md border px-3 py-2"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full rounded-md bg-primary py-2 text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
+        {matchingFile ? (
+          <div
+            style={{
+              marginTop: "1.5rem",
+              padding: "1rem",
+              border: "1px solid #ccc",
+              borderRadius: "0.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>Matching File Found</h2>
+            <p>
+              <strong>Filename:</strong> {matchingFile}
+            </p>
+            <p>
+              <strong>Title:</strong> {frontMatter?.title || "No title found"}
+            </p>
+            <p>
+              <strong>Slug in frontmatter:</strong> {frontMatter?.slug || "No slug in frontmatter"}
+            </p>
+            <pre
+              style={{
+                marginTop: "0.5rem",
+                padding: "0.5rem",
+                backgroundColor: "#f5f5f5",
+                overflow: "auto",
+              }}
+            >
+              {JSON.stringify(frontMatter, null, 2)}
+            </pre>
           </div>
+        ) : (
+          <div
+            style={{
+              marginTop: "1.5rem",
+              padding: "1rem",
+              border: "1px solid #f88",
+              backgroundColor: "#fff5f5",
+              borderRadius: "0.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#c00" }}>
+              No Matching File Found
+            </h2>
+            <p>Could not find a file matching slug: {params.slug}</p>
+          </div>
+        )}
+
+        <div style={{ marginTop: "2rem" }}>
+          <a
+            href={`/blog/${params.category}`}
+            style={{ color: "#0066cc", textDecoration: "underline" }}
+          >
+            Return to Category Page
+          </a>
         </div>
       </div>
     );
   } catch (error) {
-    console.error(`Error rendering blog post page for ${params.category}/${params.slug}:`, error);
-    // Display a more user-friendly error page instead of notFound()
+    console.error("Error in diagnostic page:", error);
+
+    // Return error details
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-6 text-center">
-          <h1 className="mb-4 text-2xl font-bold text-red-800">Error Loading Blog Post</h1>
-          <p className="mb-4 text-red-700">
-            We encountered an error while trying to load this blog post. This might be due to a
-            temporary issue.
-          </p>
-          <div className="mt-6">
-            <Link
-              href="/blog"
-              className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-            >
-              Return to Blog Home
-            </Link>
-          </div>
+      <div style={{ padding: "2rem", fontFamily: "system-ui, sans-serif" }}>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#c00" }}>Error Occurred</h1>
+        <p style={{ marginTop: "1rem" }}>
+          <strong>Error:</strong> {error instanceof Error ? error.message : "Unknown error"}
+        </p>
+        {error instanceof Error && error.stack && (
+          <pre
+            style={{
+              marginTop: "1rem",
+              padding: "1rem",
+              backgroundColor: "#f5f5f5",
+              overflow: "auto",
+              fontSize: "0.875rem",
+            }}
+          >
+            {error.stack}
+          </pre>
+        )}
+        <div style={{ marginTop: "2rem" }}>
+          <a href="/blog" style={{ color: "#0066cc", textDecoration: "underline" }}>
+            Return to Blog
+          </a>
         </div>
       </div>
     );
