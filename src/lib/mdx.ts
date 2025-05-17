@@ -128,17 +128,28 @@ export async function getAllPostSlugs() {
       try {
         const categoryDir = path.join(blogDir, category);
         if (fs.existsSync(categoryDir) && fs.statSync(categoryDir).isDirectory()) {
-          const slugs = fs
-            .readdirSync(categoryDir)
-            .filter(filename => filename.endsWith(".mdx"))
-            .map(filename => ({
-              params: {
-                category,
-                slug: filename.replace(/\.mdx$/, ""),
-              },
-            }));
+          const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
 
-          allSlugs.push(...slugs);
+          for (const filename of files) {
+            try {
+              const filePath = path.join(categoryDir, filename);
+              const fileContents = fs.readFileSync(filePath, "utf8");
+              const { data } = matter(fileContents);
+              const fileSlug = filename.replace(/\.mdx$/, "");
+
+              // Use custom slug if available, otherwise use the filename
+              const slug = data.slug || fileSlug;
+
+              allSlugs.push({
+                params: {
+                  category,
+                  slug,
+                },
+              });
+            } catch (error) {
+              console.error(`Error processing file ${filename}:`, error);
+            }
+          }
         }
       } catch (error) {
         console.error(`Error processing category directory ${category}:`, error);
@@ -194,7 +205,7 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       console.log("MDX compilation successful");
 
       return {
-        slug,
+        slug: data.slug || slug,
         category,
         title: data.title,
         date: data.date,
@@ -231,7 +242,7 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
           const filePath = path.join(categoryDir, filename);
           const fileContents = fs.readFileSync(filePath, "utf8");
           const { data } = matter(fileContents);
-          const slug = filename.replace(/\.mdx$/, "");
+          const fileSlug = filename.replace(/\.mdx$/, "");
 
           // Provide fallback image if needed
           let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
@@ -246,7 +257,7 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
           }
 
           return {
-            slug,
+            slug: data.slug || fileSlug,
             category,
             title: data.title,
             date: data.date,

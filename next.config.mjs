@@ -107,6 +107,13 @@ const nextConfig = {
     });
     return config;
   },
+  // Add error handling for build process
+  onDemandEntries: {
+    // Keep the page in memory for this many ms (default 15 seconds)
+    maxInactiveAge: 60 * 1000,
+    // Number of pages to keep in memory (default 5)
+    pagesBufferLength: 5,
+  },
 };
 
 export default nextConfig;
