@@ -3,10 +3,6 @@
 # Set Node memory settings
 export NODE_OPTIONS="--max-old-space-size=4096"
 
-# Clean previous build
-echo "Cleaning previous build..."
-npm run clean
-
 # Generate Prisma client
 echo "Generating Prisma client..."
 npx prisma generate

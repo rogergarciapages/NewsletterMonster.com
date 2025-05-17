@@ -3,7 +3,8 @@ import Image from "next/image";
 import { formatMarkdown, getAllPostSlugs, getSimplePostBySlug } from "@/lib/simple-mdx";
 import { formatDate } from "@/lib/utils";
 
-// Set revalidation period
+// Set options for better server rendering
+export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
 
 // Generate static params for all blog posts

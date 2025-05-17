@@ -12,12 +12,6 @@ const nextConfig = {
   experimental: {
     // Enable typed routes for better type safety
     typedRoutes: true,
-
-    // Memory optimizations
-    optimizeCss: true,
-
-    // Improve serverless functions
-    serverMinification: true,
   },
 
   // Image configuration

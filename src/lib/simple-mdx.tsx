@@ -416,185 +416,66 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
 export function formatMarkdown(markdown: string): React.ReactNode {
   const formattedContent = [];
   let key = 0;
-  let inCodeBlock = false;
-  let codeBlockContent = "";
-  let codeBlockLanguage = "";
-  let inOrderedList = false;
-  let inUnorderedList = false;
-  let listItems: React.ReactNode[] = [];
 
   const lines = markdown.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Handle code blocks
-    if (line.startsWith("```")) {
-      if (!inCodeBlock) {
-        // Start of code block
-        inCodeBlock = true;
-        codeBlockLanguage = line.slice(3).trim();
-        codeBlockContent = "";
-      } else {
-        // End of code block
-        inCodeBlock = false;
-        formattedContent.push(
-          <div key={key++} className="my-4 overflow-auto rounded-md bg-gray-800 p-4">
-            <pre className="text-white">
-              <code>{codeBlockContent}</code>
-            </pre>
-          </div>
-        );
-      }
-      continue;
-    }
-
-    if (inCodeBlock) {
-      codeBlockContent += `${line}\n`;
-      continue;
-    }
-
-    // Handle list endings
-    if (inOrderedList && !line.match(/^\d+\. /)) {
-      inOrderedList = false;
-      formattedContent.push(
-        <ol key={key++} className="list-decimal pl-6">
-          {listItems}
-        </ol>
-      );
-      listItems = [];
-    }
-
-    if (inUnorderedList && !line.startsWith("- ")) {
-      inUnorderedList = false;
-      formattedContent.push(
-        <ul key={key++} className="list-disc pl-6">
-          {listItems}
-        </ul>
-      );
-      listItems = [];
-    }
-
-    // Handle headings
+    // Basic markdown parsing
     if (line.startsWith("# ")) {
       formattedContent.push(
         <h1 key={key++} className="my-4 text-3xl font-bold">
-          {processInlineFormatting(line.substring(2))}
+          {line.substring(2)}
         </h1>
       );
     } else if (line.startsWith("## ")) {
       formattedContent.push(
         <h2 key={key++} className="my-3 text-2xl font-bold">
-          {processInlineFormatting(line.substring(3))}
+          {line.substring(3)}
         </h2>
       );
     } else if (line.startsWith("### ")) {
       formattedContent.push(
         <h3 key={key++} className="my-2 text-xl font-bold">
-          {processInlineFormatting(line.substring(4))}
+          {line.substring(4)}
         </h3>
       );
-      // Handle lists
     } else if (line.startsWith("- ")) {
-      if (!inUnorderedList) {
-        inUnorderedList = true;
-        listItems = [];
-      }
-      listItems.push(
-        <li key={`list-${key++}`} className="my-1">
-          {processInlineFormatting(line.substring(2))}
+      formattedContent.push(
+        <li key={key++} className="my-1 ml-6">
+          {line.substring(2)}
         </li>
       );
     } else if (line.match(/^\d+\. /)) {
-      if (!inOrderedList) {
-        inOrderedList = true;
-        listItems = [];
-      }
-      listItems.push(
-        <li key={`list-${key++}`} className="my-1">
-          {processInlineFormatting(line.replace(/^\d+\. /, ""))}
+      formattedContent.push(
+        <li key={key++} className="my-1 ml-6 list-decimal">
+          {line.replace(/^\d+\. /, "")}
         </li>
       );
-      // Handle blank lines
     } else if (line.trim() === "") {
-      if (!inOrderedList && !inUnorderedList) {
-        formattedContent.push(<br key={key++} />);
-      }
-      // Handle horizontal rule
+      formattedContent.push(<br key={key++} />);
+    } else if (line.startsWith("```")) {
+      // Skip code blocks for now
+      continue;
     } else if (line.startsWith("---")) {
-      formattedContent.push(<hr key={key++} className="my-4 border-t border-gray-300" />);
-      // Handle paragraphs
+      formattedContent.push(<hr key={key++} className="my-4" />);
     } else {
+      // Simple link processing for basic Markdown links [text](url)
+      let processedLine = line;
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+      if (linkRegex.test(line)) {
+        processedLine = line.replace(linkRegex, (match, text, url) => {
+          return `<a href="${url}" class="text-blue-600 hover:underline">${text}</a>`;
+        });
+      }
+
       formattedContent.push(
-        <p key={key++} className="my-2">
-          {processInlineFormatting(line)}
-        </p>
+        <p key={key++} className="my-2" dangerouslySetInnerHTML={{ __html: processedLine }} />
       );
     }
-  }
-
-  // Handle any unclosed lists
-  if (inOrderedList) {
-    formattedContent.push(
-      <ol key={key++} className="list-decimal pl-6">
-        {listItems}
-      </ol>
-    );
-  }
-
-  if (inUnorderedList) {
-    formattedContent.push(
-      <ul key={key++} className="list-disc pl-6">
-        {listItems}
-      </ul>
-    );
   }
 
   return <div className="markdown-content">{formattedContent}</div>;
-}
-
-// Helper function to process inline markdown formatting
-function processInlineFormatting(text: string): React.ReactNode {
-  // Process links first
-  const parts: React.ReactNode[] = [];
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-  let lastIndex = 0;
-  let match;
-
-  // eslint-disable-next-line no-cond-assign
-  while ((match = linkRegex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(processTextFormatting(text.substring(lastIndex, match.index)));
-    }
-    parts.push(
-      <a key={`link-${match.index}`} href={match[2]} className="text-blue-600 hover:underline">
-        {match[1]}
-      </a>
-    );
-    lastIndex = match.index + match[0].length;
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(processTextFormatting(text.substring(lastIndex)));
-  }
-
-  return parts.length > 0 ? parts : text;
-}
-
-// Helper function to process other text formatting (bold, italic)
-function processTextFormatting(text: string): React.ReactNode {
-  // Process bold with ** or __
-  text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  text = text.replace(/__([^_]+)__/g, "<strong>$1</strong>");
-
-  // Process italic with * or _
-  text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-  text = text.replace(/_([^_]+)_/g, "<em>$1</em>");
-
-  // If HTML tags were added, use dangerouslySetInnerHTML
-  if (text.includes("<")) {
-    return <span dangerouslySetInnerHTML={{ __html: text }} />;
-  }
-
-  return text;
 }
