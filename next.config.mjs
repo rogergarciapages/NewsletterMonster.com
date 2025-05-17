@@ -11,10 +11,6 @@ const nextConfig = {
     // Add improved MDX support
     mdxRs: true,
   },
-  // Add increased memory limit for builds
-  env: {
-    NODE_OPTIONS: "--max-old-space-size=4096",
-  },
   // Increase timeout for page generation
   staticPageGenerationTimeout: 180,
   images: {
