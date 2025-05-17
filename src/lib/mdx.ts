@@ -123,6 +123,7 @@ export async function getAllPostSlugs() {
 
     const categories = fs.readdirSync(blogDir);
     const allSlugs: { params: { category: string; slug: string } }[] = [];
+    const slugRegistry = new Map<string, string>(); // Track slug conflicts
 
     for (const category of categories) {
       try {
@@ -139,6 +140,17 @@ export async function getAllPostSlugs() {
 
               // Use custom slug if available, otherwise use the filename
               const slug = data.slug || fileSlug;
+
+              // Check for duplicate slugs across categories
+              const slugKey = `${category}/${slug}`;
+              if (slugRegistry.has(slugKey)) {
+                console.warn(`Duplicate slug detected: ${slugKey}`);
+                // Skip this entry to avoid conflicts
+                continue;
+              }
+
+              // Register this slug
+              slugRegistry.set(slugKey, filePath);
 
               allSlugs.push({
                 params: {
@@ -166,10 +178,37 @@ export async function getAllPostSlugs() {
 // Get post data by category and slug
 export async function getPostBySlug(category: string, slug: string): Promise<BlogPost | null> {
   try {
-    const postPath = path.join(contentDirectory, "blog", category, `${slug}.mdx`);
-    console.log(`Attempting to read post at: ${postPath}`);
+    // First, try to find a post with a matching custom slug
+    const categoryDir = path.join(contentDirectory, "blog", category);
+    if (!fs.existsSync(categoryDir)) {
+      console.error(`Category directory not found: ${categoryDir}`);
+      return null;
+    }
 
-    if (!fs.existsSync(postPath)) {
+    // Read all files in the category directory to find matching custom slug
+    const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
+
+    let targetFile = `${slug}.mdx`;
+    let fileFound = false;
+
+    // Check if we need to search for a custom slug
+    for (const filename of files) {
+      const filePath = path.join(categoryDir, filename);
+      const fileContents = fs.readFileSync(filePath, "utf8");
+      const { data } = matter(fileContents);
+
+      // If this file has a custom slug that matches our requested slug
+      if (data.slug === slug) {
+        targetFile = filename;
+        fileFound = true;
+        break;
+      }
+    }
+
+    // If we didn't find a file with a matching custom slug, fallback to the slug as filename
+    const postPath = path.join(categoryDir, targetFile);
+
+    if (!fileFound && !fs.existsSync(postPath)) {
       console.error(`Post file not found: ${postPath}`);
       return null;
     }
@@ -234,15 +273,29 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
       return [];
     }
 
-    const posts = fs
-      .readdirSync(categoryDir)
-      .filter(filename => filename.endsWith(".mdx"))
+    const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
+    const slugRegistry = new Map<string, string>(); // Track slug conflicts
+
+    const posts = files
       .map(filename => {
         try {
           const filePath = path.join(categoryDir, filename);
           const fileContents = fs.readFileSync(filePath, "utf8");
           const { data } = matter(fileContents);
           const fileSlug = filename.replace(/\.mdx$/, "");
+
+          // Use custom slug if available, otherwise use the filename
+          const slug = data.slug || fileSlug;
+
+          // Check for duplicate slugs
+          if (slugRegistry.has(slug)) {
+            console.warn(`Duplicate slug detected in category ${category}: ${slug}`);
+            // Skip this entry to avoid conflicts
+            return null;
+          }
+
+          // Register this slug
+          slugRegistry.set(slug, filePath);
 
           // Provide fallback image if needed
           let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
@@ -257,7 +310,7 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
           }
 
           return {
-            slug: data.slug || fileSlug,
+            slug,
             category,
             title: data.title,
             date: data.date,

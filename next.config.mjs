@@ -4,6 +4,10 @@ const nextConfig = {
   output: "standalone",
   experimental: {
     typedRoutes: true,
+    // Add improved memory management for blog content
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
   },
   images: {
     remotePatterns: [
@@ -113,6 +117,20 @@ const nextConfig = {
     maxInactiveAge: 60 * 1000,
     // Number of pages to keep in memory (default 5)
     pagesBufferLength: 5,
+  },
+  // Add custom headers for caching behavior
+  async headers() {
+    return [
+      {
+        source: "/blog/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=10, stale-while-revalidate=59",
+          },
+        ],
+      },
+    ];
   },
 };
 
