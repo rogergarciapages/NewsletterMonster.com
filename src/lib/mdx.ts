@@ -114,6 +114,7 @@ export async function getPostSlugsForCategory(category: string) {
 export async function getAllPostSlugs() {
   try {
     const blogDir = path.join(contentDirectory, "blog");
+    console.log(`Fetching all post slugs from: ${blogDir}`);
 
     // Check if directory exists
     if (!fs.existsSync(blogDir)) {
@@ -123,13 +124,14 @@ export async function getAllPostSlugs() {
 
     const categories = fs.readdirSync(blogDir);
     const allSlugs: { params: { category: string; slug: string } }[] = [];
-    const slugRegistry = new Map<string, string>(); // Track slug conflicts
+    const slugRegistry = new Map<string, boolean>(); // Track slug conflicts
 
     for (const category of categories) {
       try {
         const categoryDir = path.join(blogDir, category);
         if (fs.existsSync(categoryDir) && fs.statSync(categoryDir).isDirectory()) {
           const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
+          console.log(`Found ${files.length} MDX files in category: ${category}`);
 
           for (const filename of files) {
             try {
@@ -144,14 +146,14 @@ export async function getAllPostSlugs() {
               // Check for duplicate slugs across categories
               const slugKey = `${category}/${slug}`;
               if (slugRegistry.has(slugKey)) {
-                console.warn(`Duplicate slug detected: ${slugKey}`);
-                // Skip this entry to avoid conflicts
+                console.warn(`Duplicate slug detected: ${slugKey}, skipping`);
                 continue;
               }
 
               // Register this slug
-              slugRegistry.set(slugKey, filePath);
+              slugRegistry.set(slugKey, true);
 
+              console.log(`Adding slug: ${category}/${slug}`);
               allSlugs.push({
                 params: {
                   category,
@@ -168,6 +170,7 @@ export async function getAllPostSlugs() {
       }
     }
 
+    console.log(`Total slugs found: ${allSlugs.length}`);
     return allSlugs;
   } catch (error) {
     console.error("Error getting all post slugs:", error);
@@ -178,64 +181,59 @@ export async function getAllPostSlugs() {
 // Get post data by category and slug
 export async function getPostBySlug(category: string, slug: string): Promise<BlogPost | null> {
   try {
-    // First, try to find a post with a matching custom slug
+    // Step 1: Check if the category directory exists
     const categoryDir = path.join(contentDirectory, "blog", category);
     if (!fs.existsSync(categoryDir)) {
       console.error(`Category directory not found: ${categoryDir}`);
       return null;
     }
 
-    // Read all files in the category directory to find matching custom slug
+    // Step 2: Get all MDX files in the category directory
     const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
+    if (files.length === 0) {
+      console.error(`No MDX files found in category directory: ${categoryDir}`);
+      return null;
+    }
 
-    let targetFile = `${slug}.mdx`;
-    let fileFound = false;
+    // Step 3: Find the file with matching slug (either in frontmatter or filename)
+    let targetFilePath: string | null = null;
+    let fileSlug: string | null = null;
 
-    // Check if we need to search for a custom slug
+    console.log(`Looking for post with slug '${slug}' in category '${category}'`);
+
     for (const filename of files) {
       try {
         const filePath = path.join(categoryDir, filename);
         const fileContents = fs.readFileSync(filePath, "utf8");
         const { data } = matter(fileContents);
+        const currentFileSlug = data.slug || filename.replace(/\.mdx$/, "");
 
-        // If this file has a custom slug that matches our requested slug
-        if (data.slug === slug) {
-          targetFile = filename;
-          fileFound = true;
-          console.log(`Found custom slug match: ${slug} in file ${filename}`);
-          break;
-        }
+        console.log(`Checking file: ${filename}, slug: ${currentFileSlug}`);
 
-        // If the filename without extension matches the requested slug
-        if (filename.replace(/\.mdx$/, "") === slug) {
-          targetFile = filename;
-          fileFound = true;
-          console.log(`Found filename match: ${slug}`);
+        if (currentFileSlug === slug) {
+          targetFilePath = filePath;
+          fileSlug = currentFileSlug;
+          console.log(`✓ Match found in file: ${filename}`);
           break;
         }
       } catch (err) {
-        console.error(`Error checking file ${filename} for slug:`, err);
+        console.error(`Error reading file ${filename}:`, err);
       }
     }
 
-    // If we didn't find a file with a matching custom slug, fallback to the slug as filename
-    const postPath = path.join(categoryDir, targetFile);
-
-    if (!fileFound && !fs.existsSync(postPath)) {
-      console.error(`Post file not found: ${postPath}`);
+    // Step 4: If no matching file was found, return null
+    if (!targetFilePath) {
+      console.error(`No file with slug '${slug}' found in category '${category}'`);
       return null;
     }
 
-    const fileContents = fs.readFileSync(postPath, "utf8");
-    console.log(`File contents loaded, length: ${fileContents.length}`);
-
+    // Step 5: Read and parse the matching file
+    console.log(`Reading matched file at: ${targetFilePath}`);
+    const fileContents = fs.readFileSync(targetFilePath, "utf8");
     const { content, data } = matter(fileContents);
-    console.log("Front matter parsed:", data);
 
-    // Provide fallback image if needed
+    // Step 6: Prepare the cover image
     let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
-
-    // Ensure cover image exists in public directory
     if (coverImage.startsWith("/")) {
       const imagePath = path.join(process.cwd(), "public", coverImage);
       if (!fs.existsSync(imagePath)) {
@@ -244,6 +242,7 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       }
     }
 
+    // Step 7: Compile the MDX content
     try {
       console.log("Compiling MDX content...");
       const mdxSource = await compileMDX({
@@ -256,8 +255,9 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       });
       console.log("MDX compilation successful");
 
+      // Step 8: Return the compiled blog post
       return {
-        slug: data.slug || slug,
+        slug: fileSlug!,
         category,
         title: data.title,
         date: data.date,

@@ -38,8 +38,15 @@ export async function generateMetadata({ params }: { params: { category: string;
 }
 
 export async function generateStaticParams() {
-  const posts = await getAllPostSlugs();
-  return posts;
+  console.log("Generating static params for blog posts");
+  try {
+    const posts = await getAllPostSlugs();
+    console.log(`Generated static params for ${posts.length} blog posts`);
+    return posts;
+  } catch (error) {
+    console.error("Error generating static params for blog posts:", error);
+    return [];
+  }
 }
 
 export default async function BlogPostPage({

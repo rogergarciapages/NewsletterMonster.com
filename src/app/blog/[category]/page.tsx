@@ -31,13 +31,17 @@ export async function generateStaticParams() {
 
 export default async function CategoryPage({ params }: { params: { category: string } }) {
   try {
+    console.log(`Rendering category page for: ${params.category}`);
     const category = await getCategoryBySlug(params.category);
 
     if (!category) {
+      console.error(`Category not found: ${params.category}`);
       notFound();
     }
 
     const posts = await getPostsMetadataForCategory(params.category);
+    console.log(`Found ${posts.length} posts in category: ${params.category}`);
+
     const categories = await getAllCategoryData();
 
     return (
