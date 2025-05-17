@@ -83,8 +83,11 @@ export default async function BlogPostPage({
                   alt={post.title}
                   fill
                   className="object-cover"
-                  onError={() => {
+                  onError={e => {
                     console.error(`Failed to load image: ${post.coverImage}`);
+                    // Use a fallback on client-side error
+                    const imgElement = e.currentTarget as HTMLImageElement;
+                    imgElement.src = "/images/blog/default-cover.jpg";
                   }}
                 />
               </div>
@@ -92,7 +95,7 @@ export default async function BlogPostPage({
               <div className="p-6">
                 <div className="mb-6">
                   <span className="text-sm text-muted-foreground">
-                    {formatDate(post.date)} • {post.category.replace(/-/g, " ")}
+                    {formatDate(post.date)} • {params.category.replace(/-/g, " ")}
                   </span>
                   <h1 className="mt-2 text-3xl font-bold">{post.title}</h1>
                   <p className="mt-2 text-muted-foreground">{post.excerpt}</p>
@@ -118,8 +121,11 @@ export default async function BlogPostPage({
                           alt={relatedPost.title}
                           fill
                           className="object-cover"
-                          onError={() => {
+                          onError={e => {
                             console.error(`Failed to load image: ${relatedPost.coverImage}`);
+                            // Use a fallback on client-side error
+                            const imgElement = e.currentTarget as HTMLImageElement;
+                            imgElement.src = "/images/blog/default-cover.jpg";
                           }}
                         />
                       </div>
@@ -196,6 +202,25 @@ export default async function BlogPostPage({
     );
   } catch (error) {
     console.error(`Error rendering blog post page for ${params.category}/${params.slug}:`, error);
-    notFound();
+    // Display a more user-friendly error page instead of notFound()
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-6 text-center">
+          <h1 className="mb-4 text-2xl font-bold text-red-800">Error Loading Blog Post</h1>
+          <p className="mb-4 text-red-700">
+            We encountered an error while trying to load this blog post. This might be due to a
+            temporary issue.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/blog"
+              className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
+            >
+              Return to Blog Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 }

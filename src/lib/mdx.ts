@@ -21,6 +21,9 @@ export type BlogPostMeta = Omit<BlogPost, "content">;
 // Base directory for content
 const contentDirectory = path.join(process.cwd(), "content");
 
+// Default cover image that's guaranteed to exist
+const DEFAULT_COVER_IMAGE = "/images/blog/default-cover.jpg";
+
 // Get all category slugs
 export async function getAllCategoryData() {
   try {
@@ -167,12 +170,15 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
     console.log("Front matter parsed:", data);
 
     // Provide fallback image if needed
-    const coverImage = data.coverImage || "/images/blog/default-cover.jpg";
+    let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
 
-    // Check if image exists
-    const imagePath = path.join(process.cwd(), "public", coverImage);
-    if (!fs.existsSync(imagePath)) {
-      console.warn(`Cover image not found: ${imagePath}, using placeholder`);
+    // Ensure cover image exists in public directory
+    if (coverImage.startsWith("/")) {
+      const imagePath = path.join(process.cwd(), "public", coverImage);
+      if (!fs.existsSync(imagePath)) {
+        console.warn(`Cover image not found: ${imagePath}, using default image`);
+        coverImage = DEFAULT_COVER_IMAGE;
+      }
     }
 
     try {
@@ -228,7 +234,16 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
           const slug = filename.replace(/\.mdx$/, "");
 
           // Provide fallback image if needed
-          const coverImage = data.coverImage || "/images/blog/default-cover.jpg";
+          let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
+
+          // Ensure cover image exists in public directory
+          if (coverImage.startsWith("/")) {
+            const imagePath = path.join(process.cwd(), "public", coverImage);
+            if (!fs.existsSync(imagePath)) {
+              console.warn(`Cover image not found: ${imagePath}, using default image`);
+              coverImage = DEFAULT_COVER_IMAGE;
+            }
+          }
 
           return {
             slug,

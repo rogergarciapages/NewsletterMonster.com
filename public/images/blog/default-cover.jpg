@@ -1,1 +1,7 @@
-This is a placeholder for a default cover image. In a production environment, you should replace this with an actual image file. 
+This is a placeholder text file that should be replaced with an actual JPG image.
+The image should be approximately 1200x630 pixels in size for optimal display.
+This file will be used as a fallback when a blog post's cover image is missing.
+
+Note: In a production environment, you should place a real JPG image at this location.
+The system has been configured to handle missing images gracefully, but for best appearance,
+replace this text file with an actual image. 
