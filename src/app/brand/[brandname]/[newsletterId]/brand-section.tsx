@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,6 +11,7 @@ import { DownloadButton } from "@/app/components/newsletters/download-button";
 import { LikeButton } from "@/app/components/newsletters/like-button";
 import { ShareButton } from "@/app/components/newsletters/share-button";
 import { YouRockButton } from "@/app/components/newsletters/you-rock-button";
+import NextLink from "@/app/components/ui/next-link";
 
 interface BrandSectionProps {
   brandId: string;
@@ -61,7 +61,7 @@ export default function BrandSection({
     <div className="mb-6 rounded-xl bg-gray-100 p-6 shadow-sm dark:bg-zinc-900 dark:shadow-none">
       {/* Top row: Channel info (profile picture, name, follower count) */}
       <div className="mb-4 flex items-center gap-4">
-        <Link href={`/brand/${brandname}`} className="shrink-0">
+        <NextLink href={`/brand/${brandname}`} className="shrink-0">
           {brandLogo ? (
             <Image
               src={brandLogo}
@@ -76,14 +76,14 @@ export default function BrandSection({
               {brandDisplayName.charAt(0)}
             </div>
           )}
-        </Link>
+        </NextLink>
         <div>
-          <Link
+          <NextLink
             href={`/brand/${brandname}`}
             className="text-lg font-semibold text-gray-800 hover:text-primary dark:text-gray-200"
           >
             {brandDisplayName}
-          </Link>
+          </NextLink>
           <div className="text-sm text-gray-500">
             <AnimatePresence mode="wait">
               <motion.span

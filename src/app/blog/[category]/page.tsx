@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import NextLink from "@/app/components/ui/next-link";
 import { getAllCategoryData, getCategoryBySlug, getPostsMetadataForCategory } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
 
@@ -50,9 +50,9 @@ export default async function CategoryPage({ params }: { params: { category: str
           {/* Main content */}
           <div className="md:w-2/3">
             <div className="mb-8">
-              <Link href="/blog" className="mb-2 inline-block text-primary hover:underline">
+              <NextLink href="/blog" className="mb-2 inline-block text-primary hover:underline">
                 ← Back to all articles
-              </Link>
+              </NextLink>
               <h1 className="text-3xl font-bold">{category.name}</h1>
               <p className="mt-2 text-muted-foreground">{category.description}</p>
             </div>
@@ -72,20 +72,20 @@ export default async function CategoryPage({ params }: { params: { category: str
                     <div className="p-4">
                       <span className="text-xs text-muted-foreground">{formatDate(post.date)}</span>
                       <h2 className="mb-2 mt-2 text-xl font-bold">
-                        <Link
+                        <NextLink
                           href={`/blog/${post.category}/${post.slug}`}
                           className="transition-colors hover:text-primary"
                         >
                           {post.title}
-                        </Link>
+                        </NextLink>
                       </h2>
                       <p className="mb-4 text-muted-foreground">{post.excerpt}</p>
-                      <Link
+                      <NextLink
                         href={`/blog/${post.category}/${post.slug}`}
                         className="text-sm font-medium text-primary hover:underline"
                       >
                         Read more →
-                      </Link>
+                      </NextLink>
                     </div>
                   </div>
                 ))}
@@ -104,12 +104,12 @@ export default async function CategoryPage({ params }: { params: { category: str
               <ul className="space-y-2">
                 {categories.map(cat => (
                   <li key={cat.slug} className={cat.slug === params.category ? "font-bold" : ""}>
-                    <Link
+                    <NextLink
                       href={`/blog/${cat.slug}`}
                       className={`block py-1 ${cat.slug === params.category ? "text-primary" : "hover:text-primary"}`}
                     >
                       {cat.name}
-                    </Link>
+                    </NextLink>
                   </li>
                 ))}
               </ul>
@@ -151,12 +151,12 @@ export default async function CategoryPage({ params }: { params: { category: str
             temporary issue.
           </p>
           <div className="mt-6">
-            <Link
+            <NextLink
               href="/blog"
               className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
             >
               Return to Blog Home
-            </Link>
+            </NextLink>
           </div>
         </div>
       </div>

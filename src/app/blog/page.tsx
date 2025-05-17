@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import NextLink from "@/app/components/ui/next-link";
 import { getAllCategoryData, getAllPostsMetadata } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
 
@@ -45,19 +44,19 @@ export default async function BlogPage() {
                   <div className="p-4">
                     <span className="text-xs text-muted-foreground">{formatDate(post.date)}</span>
                     <h3 className="mb-2 mt-2 text-lg font-bold">
-                      <Link
+                      <NextLink
                         href={`/blog/${post.category}/${post.slug}`}
                         className="transition-colors hover:text-primary"
                       >
                         {post.title}
-                      </Link>
+                      </NextLink>
                     </h3>
-                    <Link
+                    <NextLink
                       href={`/blog/${post.category}/${post.slug}`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Read more →
-                    </Link>
+                    </NextLink>
                   </div>
                 </div>
               ))}
@@ -84,20 +83,20 @@ export default async function BlogPage() {
                     <div className="p-4">
                       <span className="text-xs text-muted-foreground">{formatDate(post.date)}</span>
                       <h3 className="mb-2 mt-2 text-xl font-bold">
-                        <Link
+                        <NextLink
                           href={`/blog/${post.category}/${post.slug}`}
                           className="transition-colors hover:text-primary"
                         >
                           {post.title}
-                        </Link>
+                        </NextLink>
                       </h3>
                       <p className="mb-4 text-muted-foreground">{post.excerpt}</p>
-                      <Link
+                      <NextLink
                         href={`/blog/${post.category}/${post.slug}`}
                         className="text-sm font-medium text-primary hover:underline"
                       >
                         Read more →
-                      </Link>
+                      </NextLink>
                     </div>
                   </div>
                 ))}
@@ -116,12 +115,12 @@ export default async function BlogPage() {
               <ul className="space-y-2">
                 {categories.map(category => (
                   <li key={category.slug}>
-                    <Link
+                    <NextLink
                       href={`/blog/${category.slug}`}
                       className="block py-1 text-primary hover:underline"
                     >
                       {category.name}
-                    </Link>
+                    </NextLink>
                   </li>
                 ))}
               </ul>
@@ -162,12 +161,12 @@ export default async function BlogPage() {
             issue.
           </p>
           <div className="mt-6">
-            <Link
+            <NextLink
               href="/"
               className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
             >
               Return to Home
-            </Link>
+            </NextLink>
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@ import fs from "fs";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
 import path from "path";
-import rehypePrism from "rehype-prism-plus";
 
 // Types for blog posts
 export type BlogPost = {
@@ -187,29 +186,29 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       console.error(`Category directory not found: ${categoryDir}`);
       return null;
     }
-    
+
     // Step 2: Get all MDX files in the category directory
     const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
     if (files.length === 0) {
       console.error(`No MDX files found in category directory: ${categoryDir}`);
       return null;
     }
-    
+
     // Step 3: Find the file with matching slug (either in frontmatter or filename)
     let targetFilePath: string | null = null;
     let fileSlug: string | null = null;
-    
+
     console.log(`Looking for post with slug '${slug}' in category '${category}'`);
-    
+
     for (const filename of files) {
       try {
         const filePath = path.join(categoryDir, filename);
         const fileContents = fs.readFileSync(filePath, "utf8");
         const { data } = matter(fileContents);
         const currentFileSlug = data.slug || filename.replace(/\.mdx$/, "");
-        
+
         console.log(`Checking file: ${filename}, slug: ${currentFileSlug}`);
-        
+
         if (currentFileSlug === slug) {
           targetFilePath = filePath;
           fileSlug = currentFileSlug;
@@ -220,18 +219,18 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
         console.error(`Error reading file ${filename}:`, err);
       }
     }
-    
+
     // Step 4: If no matching file was found, return null
     if (!targetFilePath) {
       console.error(`No file with slug '${slug}' found in category '${category}'`);
       return null;
     }
-    
+
     // Step 5: Read and parse the matching file
     console.log(`Reading matched file at: ${targetFilePath}`);
     const fileContents = fs.readFileSync(targetFilePath, "utf8");
     const { content, data } = matter(fileContents);
-    
+
     // Step 6: Prepare the cover image
     let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
     if (coverImage.startsWith("/")) {
@@ -241,24 +240,24 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
         coverImage = DEFAULT_COVER_IMAGE;
       }
     }
-    
+
     // Step 7: Compile the MDX content with better error handling
     try {
       console.log("Compiling MDX content...");
-      
+
       // Use a simpler MDX compilation approach with fewer plugins
       const mdxSource = await compileMDX({
         source: content,
         options: {
           mdxOptions: {
-            development: process.env.NODE_ENV === 'development',
-            rehypePlugins: [],  // Remove plugins to simplify compilation
+            development: process.env.NODE_ENV === "development",
+            rehypePlugins: [], // Remove plugins to simplify compilation
           },
         },
       });
-      
+
       console.log("MDX compilation successful");
-      
+
       // Step 8: Return the compiled blog post
       return {
         slug: fileSlug!,
@@ -272,7 +271,7 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       };
     } catch (mdxError) {
       console.error(`Error compiling MDX for ${slug}:`, mdxError);
-      
+
       // Return the post with raw content instead of failing completely
       console.log("Falling back to raw content display");
       return {
@@ -283,16 +282,19 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
         excerpt: data.excerpt,
         author: data.author,
         coverImage,
-        content: <div className="prose prose-lg">
-          <div className="rounded-md bg-amber-50 p-4 mb-4">
-            <p className="text-amber-800">
-              <strong>Note:</strong> This content couldn't be fully rendered. Showing raw markdown instead.
-            </p>
+        content: (
+          <div className="prose prose-lg">
+            <div className="mb-4 rounded-md bg-amber-50 p-4">
+              <p className="text-amber-800">
+                <strong>Note:</strong> This content couldn't be fully rendered. Showing raw markdown
+                instead.
+              </p>
+            </div>
+            <pre className="overflow-auto whitespace-pre-wrap rounded-md bg-gray-50 p-4">
+              {content}
+            </pre>
           </div>
-          <pre className="whitespace-pre-wrap p-4 bg-gray-50 rounded-md overflow-auto">
-            {content}
-          </pre>
-        </div>,
+        ),
       };
     }
   } catch (error) {
