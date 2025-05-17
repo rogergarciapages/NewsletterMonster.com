@@ -1,10 +1,18 @@
 #!/bin/bash
-# Set memory limit for Node.js
-export NODE_OPTIONS="--max-old-space-size=4096 --no-deprecation"
 
-# Run the build process
+# Set Node memory settings
+export NODE_OPTIONS="--max-old-space-size=4096"
+
+# Clean previous build
+echo "Cleaning previous build..."
 npm run clean
+
+# Generate Prisma client
+echo "Generating Prisma client..."
 npx prisma generate
-next build
+
+# Build Next.js application
+echo "Building Next.js application..."
+npx next build
 
 echo "Build completed successfully!" 

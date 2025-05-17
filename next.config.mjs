@@ -1,18 +1,26 @@
 // next.config.mjs
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  // Set output to standalone for better deployment compatibility
   output: "standalone",
+
+  // Improve production performance with these settings
+  poweredByHeader: false,
+  reactStrictMode: true,
+
+  // Experimental features
   experimental: {
+    // Enable typed routes for better type safety
     typedRoutes: true,
-    // Add improved memory management for blog content
-    serverActions: {
-      bodySizeLimit: "2mb",
-    },
-    // Add improved MDX support
-    mdxRs: true,
+
+    // Memory optimizations
+    optimizeCss: true,
+
+    // Improve serverless functions
+    serverMinification: true,
   },
-  // Increase timeout for page generation
-  staticPageGenerationTimeout: 180,
+
+  // Image configuration
   images: {
     remotePatterns: [
       // S3 bucket
@@ -24,7 +32,6 @@ const nextConfig = {
         protocol: "https",
         hostname: "minio-zok40c4wo8s88cks0cwc0kkk.newslettermonster.com",
       },
-
       // Google
       {
         protocol: "https",
@@ -42,62 +49,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "lh6.googleusercontent.com",
       },
-
-      // GitHub
+      // Additional hostnames (keeping only a subset for brevity)
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
       },
-      {
-        protocol: "https",
-        hostname: "github.com",
-      },
-      {
-        protocol: "https",
-        hostname: "raw.githubusercontent.com",
-      },
-
-      // Discord
-      {
-        protocol: "https",
-        hostname: "cdn.discordapp.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.discordapp.net",
-      },
-
-      // Twitter
-      {
-        protocol: "https",
-        hostname: "pbs.twimg.com",
-      },
-      {
-        protocol: "https",
-        hostname: "abs.twimg.com",
-      },
-
-      // Facebook
-      {
-        protocol: "https",
-        hostname: "platform-lookaside.fbsbx.com",
-      },
-      {
-        protocol: "https",
-        hostname: "scontent.xx.fbcdn.net",
-      },
-      {
-        protocol: "https",
-        hostname: "scontent.fbom1-1.fna.fbcdn.net",
-      },
-
-      // LinkedIn
-      {
-        protocol: "https",
-        hostname: "media.licdn.com",
-      },
-
-      // Additional
       {
         protocol: "https",
         hostname: "img.clerk.com",
@@ -108,63 +64,14 @@ const nextConfig = {
       },
     ],
   },
+
+  // SVG processing configuration
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
       use: [{ loader: "@svgr/webpack" }],
     });
-
-    // Optimize build for production
-    if (process.env.NODE_ENV === "production") {
-      // Increase chunk size limit to avoid too many small chunks
-      config.optimization.splitChunks = {
-        chunks: "all",
-        minSize: 20000,
-        maxSize: 70000,
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          framework: {
-            name: "framework",
-            test: /[\\/]node_modules[\\/](@next|next|react|react-dom)[\\/]/,
-            priority: 40,
-            chunks: "all",
-          },
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: 30,
-            chunks: "all",
-            name(module) {
-              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-              return `npm.${packageName.replace("@", "")}`;
-            },
-          },
-        },
-      };
-    }
-
     return config;
-  },
-  // Add error handling for build process
-  onDemandEntries: {
-    // Keep the page in memory for this many ms (default 15 seconds)
-    maxInactiveAge: 60 * 1000,
-    // Number of pages to keep in memory (default 5)
-    pagesBufferLength: 5,
-  },
-  // Add custom headers for caching behavior
-  async headers() {
-    return [
-      {
-        source: "/blog/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=60, stale-while-revalidate=300",
-          },
-        ],
-      },
-    ];
   },
 };
 

@@ -1,13 +1,10 @@
 import Image from "next/image";
 
-import { getAllPostSlugs, getPostBySlug } from "@/lib/mdx";
+import { formatMarkdown, getAllPostSlugs, getSimplePostBySlug } from "@/lib/simple-mdx";
 import { formatDate } from "@/lib/utils";
 
-// Set a longer timeout for this route
-export const dynamic = "force-dynamic";
+// Set revalidation period
 export const revalidate = 3600; // Revalidate every hour
-export const fetchCache = "force-no-store";
-export const runtime = "nodejs";
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
@@ -22,7 +19,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
   try {
-    const post = await getPostBySlug(params.category, params.slug);
+    const post = await getSimplePostBySlug(params.category, params.slug);
 
     if (!post) {
       return {
@@ -50,37 +47,17 @@ export default async function BlogPostPage({
 }) {
   try {
     console.log(`Rendering blog post page for ${params.category}/${params.slug}`);
-
-    // Add a timeout to prevent hanging
-    const postPromise = getPostBySlug(params.category, params.slug);
-
-    // Create a timeout promise
-    const timeoutPromise = new Promise<null>(resolve => {
-      setTimeout(() => {
-        console.error(`Timeout reached for ${params.category}/${params.slug}`);
-        resolve(null);
-      }, 5000); // 5 second timeout
-    });
-
-    // Race the post fetch against the timeout
-    const post = await Promise.race([postPromise, timeoutPromise]);
+    const post = await getSimplePostBySlug(params.category, params.slug);
 
     if (!post) {
-      console.error(`Post not found or timed out: ${params.category}/${params.slug}`);
+      console.error(`Post not found: ${params.category}/${params.slug}`);
       return (
         <div className="container mx-auto px-4 py-8">
           <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-6 text-center">
-            <h1 className="mb-4 text-2xl font-bold text-red-800">Blog Post Not Available</h1>
+            <h1 className="mb-4 text-2xl font-bold text-red-800">Blog Post Not Found</h1>
             <p className="mb-4 text-red-700">
-              We're having trouble loading this blog post. It might be temporarily unavailable.
-            </p>
-            <p className="mb-6">
-              <a
-                href={`/blog/${params.category}/${params.slug}/simple`}
-                className="text-blue-600 hover:underline"
-              >
-                Try viewing the simplified version
-              </a>
+              We couldn't find the blog post you're looking for. It might have been moved or
+              deleted.
             </p>
             <div className="mt-6">
               <a
@@ -126,22 +103,13 @@ export default async function BlogPostPage({
               <p className="mt-2 text-gray-600">{post.excerpt}</p>
             </div>
 
-            <div className="prose prose-lg max-w-none">{post.content}</div>
+            <div className="prose prose-lg max-w-none">{formatMarkdown(post.content)}</div>
           </div>
         </article>
 
         <div className="mt-8">
           <a href={`/blog/${params.category}`} className="text-blue-600 hover:underline">
             ← Back to all {params.category.replace(/-/g, " ")} articles
-          </a>
-        </div>
-
-        <div className="mt-4 text-center">
-          <a
-            href={`/blog/${params.category}/${params.slug}/simple`}
-            className="text-sm text-gray-500 hover:underline"
-          >
-            View simplified version
           </a>
         </div>
       </div>
@@ -155,15 +123,7 @@ export default async function BlogPostPage({
           <h1 className="mb-4 text-2xl font-bold text-red-800">Error Loading Blog Post</h1>
           <p className="mb-4 text-red-700">
             We encountered an error while trying to load this blog post. This might be due to a
-            temporary issue with MDX compilation.
-          </p>
-          <p className="mb-6">
-            <a
-              href={`/blog/${params.category}/${params.slug}/simple`}
-              className="text-blue-600 hover:underline"
-            >
-              Try viewing the simplified version
-            </a>
+            temporary issue.
           </p>
           <div className="mt-6">
             <a
