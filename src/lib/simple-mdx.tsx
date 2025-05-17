@@ -425,31 +425,31 @@ export function formatMarkdown(markdown: string): React.ReactNode {
     // Basic markdown parsing
     if (line.startsWith("# ")) {
       formattedContent.push(
-        <h1 key={key++} className="my-4 text-3xl font-bold">
+        <h1 key={key++} className="my-4 text-3xl font-bold dark:text-white">
           {line.substring(2)}
         </h1>
       );
     } else if (line.startsWith("## ")) {
       formattedContent.push(
-        <h2 key={key++} className="my-3 text-2xl font-bold">
+        <h2 key={key++} className="my-3 text-2xl font-bold dark:text-white">
           {line.substring(3)}
         </h2>
       );
     } else if (line.startsWith("### ")) {
       formattedContent.push(
-        <h3 key={key++} className="my-2 text-xl font-bold">
+        <h3 key={key++} className="my-2 text-xl font-bold dark:text-white">
           {line.substring(4)}
         </h3>
       );
     } else if (line.startsWith("- ")) {
       formattedContent.push(
-        <li key={key++} className="my-1 ml-6">
+        <li key={key++} className="my-1 ml-6 dark:text-gray-300">
           {line.substring(2)}
         </li>
       );
     } else if (line.match(/^\d+\. /)) {
       formattedContent.push(
-        <li key={key++} className="my-1 ml-6 list-decimal">
+        <li key={key++} className="my-1 ml-6 list-decimal dark:text-gray-300">
           {line.replace(/^\d+\. /, "")}
         </li>
       );
@@ -459,7 +459,7 @@ export function formatMarkdown(markdown: string): React.ReactNode {
       // Skip code blocks for now
       continue;
     } else if (line.startsWith("---")) {
-      formattedContent.push(<hr key={key++} className="my-4" />);
+      formattedContent.push(<hr key={key++} className="my-4 dark:border-gray-700" />);
     } else {
       // Simple link processing for basic Markdown links [text](url)
       let processedLine = line;
@@ -467,12 +467,16 @@ export function formatMarkdown(markdown: string): React.ReactNode {
 
       if (linkRegex.test(line)) {
         processedLine = line.replace(linkRegex, (match, text, url) => {
-          return `<a href="${url}" class="text-blue-600 hover:underline">${text}</a>`;
+          return `<a href="${url}" class="text-blue-600 hover:underline dark:text-blue-400">${text}</a>`;
         });
       }
 
       formattedContent.push(
-        <p key={key++} className="my-2" dangerouslySetInnerHTML={{ __html: processedLine }} />
+        <p
+          key={key++}
+          className="my-2 dark:text-gray-300"
+          dangerouslySetInnerHTML={{ __html: processedLine }}
+        />
       );
     }
   }
