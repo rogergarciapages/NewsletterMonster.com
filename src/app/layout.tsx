@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import { Inter } from "next/font/google";
+import Script from "next/script";
 
 import { getServerSession } from "next-auth";
 
@@ -25,6 +26,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning className={`light ${inter.className}`}>
+      <head>
+        {/* Google tag (gtag.js) */}
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-3T0PVJVF3K" />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3T0PVJVF3K');
+          `}
+        </Script>
+      </head>
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
         <Providers _session={session}>
           <AuthRedirect />
