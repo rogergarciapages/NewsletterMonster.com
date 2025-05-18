@@ -14,6 +14,9 @@ const nextConfig = {
     typedRoutes: true,
   },
 
+  // Note: Sitemap and robots.txt are automatically generated at build time
+  // via App Router Route Handlers in src/app/sitemap.ts and src/app/robots.ts
+
   // Image configuration
   images: {
     remotePatterns: [
