@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Accordion, AccordionItem, Button, Chip, Tooltip } from "@nextui-org/react";
+import { Button, Chip, Tooltip } from "@nextui-org/react";
 import {
   IconAlertCircle,
+  IconArticle,
   IconBell,
   IconBookmark,
   IconCompass,
@@ -272,50 +273,46 @@ const LeftSidebar: React.FC = () => {
         </div>
       </div>
 
-      <Accordion>
-        <AccordionItem
-          key="navigation"
-          aria-label="Blog"
-          title={
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Blog Categories</h3>
-          }
-          classNames={{
-            title: "text-gray-800 dark:text-gray-200",
-            content: "text-gray-700 dark:text-gray-300",
-          }}
-        >
-          <div className="flex flex-col gap-2 pl-2">
-            <Button
-              variant="light"
-              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
-              onClick={() => router.push("/blog")}
-            >
-              All Blog Posts
-            </Button>
-            <Button
-              variant="light"
-              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
-              onClick={() => router.push("/blog/newsletter-strategy")}
-            >
-              Newsletter Strategy
-            </Button>
-            <Button
-              variant="light"
-              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
-              onClick={() => router.push("/blog/email-marketing")}
-            >
-              Email Marketing
-            </Button>
-            <Button
-              variant="light"
-              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
-              onClick={() => router.push("/blog/content-creation")}
-            >
-              Content Creation
-            </Button>
-          </div>
-        </AccordionItem>
-      </Accordion>
+      {/* Blog Categories Section */}
+      <div>
+        <h2 className="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">
+          Newsletter Knowledge Vault
+        </h2>
+        <div className="flex flex-col gap-1.5">
+          <Button
+            variant="light"
+            className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+            onClick={() => router.push("/blog")}
+            startContent={<IconArticle className="h-5 w-5" />}
+          >
+            All Blog Posts
+          </Button>
+          <Button
+            variant="light"
+            className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+            onClick={() => router.push("/blog/newsletter-strategy")}
+            startContent={<IconArticle className="h-5 w-5" />}
+          >
+            Newsletter Strategy
+          </Button>
+          <Button
+            variant="light"
+            className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+            onClick={() => router.push("/blog/email-marketing")}
+            startContent={<IconArticle className="h-5 w-5" />}
+          >
+            Email Marketing
+          </Button>
+          <Button
+            variant="light"
+            className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+            onClick={() => router.push("/blog/content-creation")}
+            startContent={<IconArticle className="h-5 w-5" />}
+          >
+            Content Creation
+          </Button>
+        </div>
+      </div>
 
       <LoginModal
         isOpen={isLoginModalOpen}
