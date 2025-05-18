@@ -1,5 +1,6 @@
-import { IconCircleCheckFilled } from "@tabler/icons-react";
 import React from "react";
+
+import { IconCircleCheckFilled } from "@tabler/icons-react";
 
 interface PricingProps {
   title: string;
@@ -30,13 +31,15 @@ interface CallToAction {
 
 const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
   return (
-    <div className="max-w-7xl mx-auto my-8">
-      <div className="text-center mb-12">
-        <h2 className="text-5xl font-bold tracking-tighter text-torch-700">{title}</h2>
-        <p className="text-xl">{subtitle}</p>
+    <div className="mx-auto my-8 max-w-7xl px-4">
+      <div className="mb-12 text-center">
+        <h2 className="text-5xl font-bold tracking-tighter text-torch-700 dark:text-torch-500">
+          {title}
+        </h2>
+        <p className="text-xl text-gray-800 dark:text-gray-200">{subtitle}</p>
       </div>
       <div className="flex items-stretch justify-center">
-        <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-[#111]">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {prices.map(
             ({
               title,
@@ -50,28 +53,32 @@ const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
             }) => (
               <div
                 key={title}
-                className="relative p-6 bg-white dark:bg-[#2e2e2e] border border-gray-200 dark:border-[#2e2e2e] rounded-lg shadow flex flex-col justify-between text-center"
+                className="relative flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-800"
               >
                 {hasRibbon && ribbonTitle && (
-                  <div className="absolute right-0 top-0 z-10 p-2 bg-green-700 text-white font-bold rounded-bl-lg rounded-tr-lg">
+                  <div className="absolute right-0 top-0 z-10 rounded-bl-lg rounded-tr-lg bg-torch-600 p-2 font-bold text-white">
                     {ribbonTitle}
                   </div>
                 )}
                 <div>
-                  <h3 className="text-2xl font-semibold uppercase mb-3">{title}</h3>
-                  <p className="text-gray-600 dark:text-gray-100">{subtitle}</p>
+                  <h3 className="mb-3 text-2xl font-semibold uppercase text-gray-900 dark:text-white">
+                    {title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">{subtitle}</p>
                   <div className="my-8">
-                    <div className="flex items-center justify-center text-center mb-1">
-                      <span className="text-5xl">$</span>
-                      <span className="text-6xl font-extrabold">{price}</span>
+                    <div className="mb-1 flex items-center justify-center text-center">
+                      <span className="text-5xl text-gray-900 dark:text-white">$</span>
+                      <span className="text-6xl font-extrabold text-gray-900 dark:text-white">
+                        {price}
+                      </span>
                     </div>
-                    <span className="text-base text-gray-600 dark:text-gray-100">{period}</span>
+                    <span className="text-base text-gray-600 dark:text-gray-300">{period}</span>
                   </div>
-                  <ul className="my-8 md:my-10 space-y-2 text-left">
+                  <ul className="my-8 space-y-3 text-left md:my-10">
                     {items.map(({ description }, index) => (
                       <li key={index} className="flex items-start space-x-3">
-                        <IconCircleCheckFilled className="text-torch-600/80 mt-1" />
-                        <span>{description}</span>
+                        <IconCircleCheckFilled className="mt-1 flex-shrink-0 text-torch-600 dark:text-torch-500" />
+                        <span className="text-gray-700 dark:text-gray-200">{description}</span>
                       </li>
                     ))}
                   </ul>
@@ -80,9 +87,11 @@ const Pricing: React.FC<PricingProps> = ({ title, subtitle, prices }) => {
                   <a
                     href={callToAction.href}
                     target={callToAction.target}
-                    className={`px-4 py-2 font-semibold text-white rounded ${
-                      hasRibbon ? "bg-torch-700 border-gray-100" : "bg-gray-800  border-gray-100"
-                    } hover:${hasRibbon ? "bg-green-800" : "bg-blue-700"}`}
+                    className={`rounded-md px-5 py-2.5 font-semibold text-white transition-colors duration-300 ${
+                      hasRibbon
+                        ? "bg-torch-700 hover:bg-torch-800 dark:bg-torch-600 dark:hover:bg-torch-700"
+                        : "bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600"
+                    }`}
                   >
                     {callToAction.text}
                   </a>
@@ -103,8 +112,7 @@ const PricingWrapper = () => {
     prices: [
       {
         title: "free starter",
-        subtitle:
-          "Get things started, get your newsletter out there for the world to see.",
+        subtitle: "Get things started, get your newsletter out there for the world to see.",
         price: "0",
         period: "forever",
         items: [
@@ -154,8 +162,7 @@ const PricingWrapper = () => {
       },
       {
         title: "premium",
-        subtitle:
-          "Best option for major exposure, outreach and link building. ",
+        subtitle: "Best option for major exposure, outreach and link building. ",
         price: 289,
         period: "Per Month",
         items: [
