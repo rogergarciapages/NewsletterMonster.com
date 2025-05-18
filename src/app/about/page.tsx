@@ -8,8 +8,7 @@ import "aos/dist/aos.css";
 import { HeroParallaxDemo } from "@/app/components/parallax";
 
 import Benefits from "../components/benefits";
-import Companies from "../components/companies";
-import PainPoints from "../components/pain-points";
+import BenefitsGrid from "../components/benefits-grid";
 import Solutions from "../components/solutions";
 import Statement from "../components/statement";
 
@@ -57,7 +56,7 @@ export default function AboutPage() {
               no permanent place to be discovered or appreciated by new audiences.
             </p>
           </div>
-          <PainPoints />
+          <BenefitsGrid />
         </section>
 
         {/* Our Solutions */}
@@ -83,20 +82,6 @@ export default function AboutPage() {
         {/* Visual Showcase */}
         <section data-aos="fade-up" data-aos-delay="300">
           <HeroParallaxDemo />
-        </section>
-
-        {/* Trusted By Companies */}
-        <section data-aos="fade-up" data-aos-delay="350">
-          <div className="container mx-auto px-4 py-8 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-              Trusted By Newsletter Creators
-            </h2>
-            <p className="mx-auto mb-8 max-w-3xl text-lg text-gray-600 dark:text-gray-300">
-              From independent writers to major brands, newsletter creators trust our platform to
-              give their content a second life beyond the inbox.
-            </p>
-          </div>
-          <Companies />
         </section>
 
         {/* Team Section - Can be added later */}

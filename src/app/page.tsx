@@ -10,6 +10,8 @@ import { IconArrowRight } from "@tabler/icons-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
+import BenefitsGrid from "./components/benefits-grid";
+import Companies from "./components/companies";
 import Footer from "./components/footer";
 import { HeroSection } from "./components/hero/hero-section";
 import PricingWrapper from "./components/pricing";
@@ -40,10 +42,15 @@ export default function Home() {
           <HeroLanding currentImageIndex={0} images={[]} />
         </section>
 
+        {/* Benefits Section - What users get from the platform */}
+        <section data-aos="fade-up" data-aos-delay="150">
+          <BenefitsGrid />
+        </section>
+
         {/* Learn More About Section */}
         <section
           data-aos="fade-up"
-          data-aos-delay="150"
+          data-aos-delay="200"
           className="bg-gray-50 py-16 dark:bg-gray-900"
         >
           <div className="container mx-auto px-4 text-center">
@@ -66,18 +73,32 @@ export default function Home() {
         </section>
 
         {/* Save Newsletters - Direct call to action */}
-        <section data-aos="fade-up" data-aos-delay="200">
+        <section data-aos="fade-up" data-aos-delay="250">
           <SaveNewsletters />
         </section>
 
         {/* Popular Newsletters Showcase - Show the product in action */}
-        <section data-aos="fade-up" data-aos-delay="250">
+        <section data-aos="fade-up" data-aos-delay="300">
           <PopularNewsletters />
         </section>
 
         {/* Pricing Section - Clear value proposition */}
-        <section data-aos="fade-up" data-aos-delay="300">
+        <section data-aos="fade-up" data-aos-delay="350">
           <PricingWrapper />
+        </section>
+
+        {/* Trusted By Newsletter Creators */}
+        <section data-aos="fade-up" data-aos-delay="400">
+          <div className="container mx-auto px-4 py-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+              Trusted By Newsletter Creators
+            </h2>
+            <p className="mx-auto mb-8 max-w-3xl text-lg text-gray-600 dark:text-gray-300">
+              From independent writers to major brands, newsletter creators trust our platform to
+              give their content a second life beyond the inbox.
+            </p>
+          </div>
+          <Companies />
         </section>
       </div>
 
