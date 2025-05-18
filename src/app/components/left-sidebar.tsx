@@ -262,35 +262,67 @@ const LeftSidebar: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="w-full bg-background">
-        <div className="flex flex-col gap-6">
-          <nav className="grid gap-2">
-            <div className="block lg:hidden">
-              <Accordion>
-                <AccordionItem key="1" aria-label="Menu" title="Menu">
-                  {menuItems.map((item, index) => (
-                    <div key={index}>{renderMenuItem(item)}</div>
-                  ))}
-                </AccordionItem>
-              </Accordion>
-            </div>
-
-            <div className="hidden lg:block">
-              {menuItems.map((item, index) => (
-                <div key={index}>{renderMenuItem(item)}</div>
-              ))}
-            </div>
-          </nav>
+    <div className="flex flex-col gap-4">
+      <div>
+        <h2 className="mb-3 text-lg font-bold text-gray-800 dark:text-gray-200">Menu</h2>
+        <div className="flex flex-col gap-1.5">
+          {menuItems.map(item => {
+            return renderMenuItem(item);
+          })}
         </div>
       </div>
+
+      <Accordion>
+        <AccordionItem
+          key="navigation"
+          aria-label="Blog"
+          title={
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Blog Categories</h3>
+          }
+          classNames={{
+            title: "text-gray-800 dark:text-gray-200",
+            content: "text-gray-700 dark:text-gray-300",
+          }}
+        >
+          <div className="flex flex-col gap-2 pl-2">
+            <Button
+              variant="light"
+              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+              onClick={() => router.push("/blog")}
+            >
+              All Blog Posts
+            </Button>
+            <Button
+              variant="light"
+              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+              onClick={() => router.push("/blog/newsletter-strategy")}
+            >
+              Newsletter Strategy
+            </Button>
+            <Button
+              variant="light"
+              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+              onClick={() => router.push("/blog/email-marketing")}
+            >
+              Email Marketing
+            </Button>
+            <Button
+              variant="light"
+              className="w-full justify-start text-gray-700 hover:text-torch-800 dark:text-gray-300 dark:hover:text-torch-400"
+              onClick={() => router.push("/blog/content-creation")}
+            >
+              Content Creation
+            </Button>
+          </div>
+        </AccordionItem>
+      </Accordion>
 
       <LoginModal
         isOpen={isLoginModalOpen}
         onOpenChange={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
       />
-    </>
+    </div>
   );
 };
 

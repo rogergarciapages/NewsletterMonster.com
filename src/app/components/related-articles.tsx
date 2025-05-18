@@ -35,7 +35,7 @@ export default function RelatedArticles({
 
   return (
     <div className="mt-12">
-      <h2 className="mb-6 text-2xl font-bold">Related Articles</h2>
+      <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-gray-200">Related Articles</h2>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {relatedPosts.map(post => (
           <div
@@ -50,11 +50,11 @@ export default function RelatedArticles({
                 <span className="inline-flex items-center rounded-full bg-torch-800/10 px-2.5 py-0.5 text-xs font-medium text-torch-800 dark:bg-torch-800/20 dark:text-torch-400">
                   {post.category.replace(/-/g, " ")}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
                   {formatDate(post.date)}
                 </span>
               </div>
-              <h3 className="mt-2 line-clamp-2 text-lg font-bold">
+              <h3 className="mt-2 line-clamp-2 text-lg font-bold text-gray-800 dark:text-gray-200">
                 <Link
                   href={`/blog/${post.category}/${post.slug}`}
                   className="hover:text-torch-800 dark:hover:text-torch-400"
@@ -62,7 +62,7 @@ export default function RelatedArticles({
                   {post.title}
                 </Link>
               </h3>
-              <p className="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300">
+              <p className="mt-2 line-clamp-2 text-sm text-gray-700 dark:text-gray-300">
                 {post.excerpt}
               </p>
               <Link

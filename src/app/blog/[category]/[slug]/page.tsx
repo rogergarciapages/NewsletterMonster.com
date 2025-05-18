@@ -1,7 +1,9 @@
 import Image from "next/image";
 
 import Footer from "@/app/components/footer";
+import LeftSidebar from "@/app/components/left-sidebar";
 import RelatedArticles from "@/app/components/related-articles";
+import RightSidebar from "@/app/components/right-sidebar";
 import {
   formatMarkdown,
   getAllPostSlugs,
@@ -96,96 +98,115 @@ export default async function BlogPostPage({
     return (
       <div className="flex min-h-screen flex-col">
         <div className="container mx-auto flex-grow px-4 py-8">
-          <div className="mb-6">
-            <a
-              href={`/blog/${params.category}`}
-              className="group inline-flex items-center rounded-md bg-torch-800/10 px-3 py-1.5 text-sm font-medium text-torch-800 transition-colors hover:bg-torch-800/20 dark:bg-torch-800/20 dark:text-torch-400 dark:hover:bg-torch-800/30"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-1"
-              >
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-              Back to {params.category.replace(/-/g, " ")}
-            </a>
-          </div>
-
-          {/* Hero section with integrated image and title */}
-          <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg">
-            <div className="relative h-80 w-full sm:h-96 md:h-[28rem]">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                style={{ objectFit: "cover" }}
-                priority
-                className="brightness-75"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <div className="mb-2">
-                  <span className="inline-flex items-center rounded-full bg-torch-800 px-2.5 py-1 text-xs font-medium text-white">
-                    {params.category.replace(/-/g, " ")}
-                  </span>
-                  <span className="ml-3 text-sm text-gray-200">{formatDate(post.date)}</span>
-                </div>
-                <h1 className="text-2xl font-bold leading-tight md:text-3xl lg:text-4xl">
-                  {post.title}
-                </h1>
-                <p className="mt-3 text-sm text-gray-200 md:text-base lg:w-3/4">{post.excerpt}</p>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            {/* Left Sidebar */}
+            <aside className="sticky top-16 max-h-[calc(100vh-64px)] self-start overflow-y-auto lg:col-span-2">
+              <div className="py-4">
+                <LeftSidebar />
               </div>
-            </div>
-          </div>
+            </aside>
 
-          <div className="mx-auto max-w-3xl">
-            <article className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
-              <div className="px-6 py-8 md:px-10">
-                <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-base prose-p:leading-relaxed prose-li:text-base dark:text-gray-300 md:prose-p:text-lg md:prose-li:text-lg">
-                  {formatMarkdown(contentWithoutFirstH1)}
-                </div>
-              </div>
-            </article>
-
-            <div className="mt-8">
-              <a
-                href={`/blog/${params.category}`}
-                className="group inline-flex items-center rounded-md bg-torch-800/10 px-3 py-1.5 text-sm font-medium text-torch-800 transition-colors hover:bg-torch-800/20 dark:bg-torch-800/20 dark:text-torch-400 dark:hover:bg-torch-800/30"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-1"
+            {/* Main Content Area */}
+            <div className="lg:col-span-8">
+              <div className="mb-6">
+                <a
+                  href={`/blog/${params.category}`}
+                  className="group inline-flex items-center rounded-md bg-torch-800/10 px-3 py-1.5 text-sm font-medium text-torch-800 transition-colors hover:bg-torch-800/20 dark:bg-torch-800/20 dark:text-torch-400 dark:hover:bg-torch-800/30"
                 >
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                Back to all {params.category.replace(/-/g, " ")} articles
-              </a>
-            </div>
-          </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-1"
+                  >
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  Back to {params.category.replace(/-/g, " ")}
+                </a>
+              </div>
 
-          {/* Related Articles Section */}
-          <div className="mx-auto mt-16 max-w-7xl">
-            <RelatedArticles
-              currentPostSlug={post.slug}
-              categoryPosts={categoryPosts}
-              allPosts={allPosts}
-            />
+              {/* Hero section with integrated image and title */}
+              <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg">
+                <div className="relative h-80 w-full sm:h-96 md:h-[28rem]">
+                  <Image
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    priority
+                    className="brightness-75"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div className="mb-2">
+                      <span className="inline-flex items-center rounded-full bg-torch-800 px-2.5 py-1 text-xs font-medium text-white">
+                        {params.category.replace(/-/g, " ")}
+                      </span>
+                      <span className="ml-3 text-sm text-gray-200">{formatDate(post.date)}</span>
+                    </div>
+                    <h1 className="text-2xl font-bold leading-tight md:text-3xl lg:text-4xl">
+                      {post.title}
+                    </h1>
+                    <p className="mt-3 text-sm text-gray-200 md:text-base lg:w-3/4">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <article className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
+                <div className="px-6 py-8 md:px-10">
+                  <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-gray-800 prose-p:leading-relaxed prose-p:text-gray-700 prose-li:text-gray-700 dark:prose-headings:text-gray-200 dark:prose-p:text-gray-300 dark:prose-li:text-gray-300 md:prose-p:text-lg md:prose-li:text-lg">
+                    {formatMarkdown(contentWithoutFirstH1)}
+                  </div>
+                </div>
+              </article>
+
+              <div className="mt-8">
+                <a
+                  href={`/blog/${params.category}`}
+                  className="group inline-flex items-center rounded-md bg-torch-800/10 px-3 py-1.5 text-sm font-medium text-torch-800 transition-colors hover:bg-torch-800/20 dark:bg-torch-800/20 dark:text-torch-400 dark:hover:bg-torch-800/30"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-1.5 h-4 w-4 transition-transform group-hover:-translate-x-1"
+                  >
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  Back to all {params.category.replace(/-/g, " ")} articles
+                </a>
+              </div>
+
+              {/* Related Articles Section */}
+              <div className="mt-16">
+                <RelatedArticles
+                  currentPostSlug={post.slug}
+                  categoryPosts={categoryPosts}
+                  allPosts={allPosts}
+                />
+              </div>
+            </div>
+
+            {/* Right Sidebar */}
+            <aside className="hidden lg:col-span-2 lg:block">
+              <div className="sticky top-16 py-4">
+                <RightSidebar />
+              </div>
+            </aside>
           </div>
         </div>
         <Footer />
