@@ -477,7 +477,7 @@ export function formatMarkdown(markdown: string): React.ReactNode {
 
       if (linkRegex.test(line)) {
         processedLine = line.replace(linkRegex, (match, text, url) => {
-          return `<a href="${url}" class="text-blue-600 hover:underline dark:text-blue-400">${text}</a>`;
+          return `<a href="${url}" class="text-torch-800 hover:underline dark:text-torch-400">${text}</a>`;
         });
       }
 
