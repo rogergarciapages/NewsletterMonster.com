@@ -471,22 +471,41 @@ export function formatMarkdown(markdown: string): React.ReactNode {
         </p>
       );
     } else {
-      // Simple link processing for basic Markdown links [text](url)
-      let processedLine = line;
+      // Process links in a React-friendly way
+      const parts = [];
+      let currentIndex = 0;
       const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      let match;
 
-      if (linkRegex.test(line)) {
-        processedLine = line.replace(linkRegex, (match, text, url) => {
-          return `<a href="${url}" class="text-torch-800 hover:underline dark:text-torch-400">${text}</a>`;
-        });
+      while ((match = linkRegex.exec(line)) !== null) {
+        // Add text before the link
+        if (match.index > currentIndex) {
+          parts.push(line.slice(currentIndex, match.index));
+        }
+
+        // Add the link
+        parts.push(
+          <a
+            key={`link-${key}-${match.index}`}
+            href={match[2]}
+            className="text-torch-800 hover:underline dark:text-torch-400"
+          >
+            {match[1]}
+          </a>
+        );
+
+        currentIndex = match.index + match[0].length;
+      }
+
+      // Add any remaining text
+      if (currentIndex < line.length) {
+        parts.push(line.slice(currentIndex));
       }
 
       formattedContent.push(
-        <p
-          key={key++}
-          className="my-4 leading-relaxed dark:text-gray-300"
-          dangerouslySetInnerHTML={{ __html: processedLine }}
-        />
+        <p key={key++} className="my-4 leading-relaxed dark:text-gray-300">
+          {parts.length > 0 ? parts : line}
+        </p>
       );
     }
   }
