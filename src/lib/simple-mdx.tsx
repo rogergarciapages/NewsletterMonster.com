@@ -4,6 +4,8 @@ import fs from "fs";
 import matter from "gray-matter";
 import path from "path";
 
+import NewsletterExample from "@/app/components/newsletter-example";
+
 // Types for blog posts
 export type SimpleBlogPost = {
   slug: string;
@@ -421,6 +423,65 @@ export function formatMarkdown(markdown: string): React.ReactNode {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+
+    // Handle custom components
+    if (line.startsWith("::NewsletterExample")) {
+      try {
+        // Parse the component props from the next few lines
+        const props: any = {};
+        let j = i + 1;
+        while (j < lines.length && lines[j].startsWith("  ")) {
+          const [key, value] = lines[j].trim().split(":");
+          if (key && value) {
+            props[key.trim()] = value.trim();
+          }
+          j++;
+        }
+        i = j - 1; // Skip the processed lines
+
+        // Process tags and relatedNewsletters
+        if (props.tags) {
+          props.tags = props.tags.split(",").map((tag: string) => tag.trim());
+        } else {
+          props.tags = [];
+        }
+
+        if (props.relatedNewsletters) {
+          props.relatedNewsletters = props.relatedNewsletters.split(",").map((slug: string) => {
+            const trimmedSlug = slug.trim();
+            return {
+              id: trimmedSlug,
+              slug: trimmedSlug,
+              title: trimmedSlug
+                .split("-")
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" "),
+              image: `/images/blog/${trimmedSlug}.webp`,
+              tags: ["real-estate"],
+            };
+          });
+        } else {
+          props.relatedNewsletters = [];
+        }
+
+        // Create a stable key based on the title
+        const componentKey = props.title.toLowerCase().replace(/[^a-z0-9]/g, "-");
+
+        formattedContent.push(
+          <NewsletterExample
+            key={componentKey}
+            image={props.image}
+            title={props.title}
+            description={props.description}
+            tags={props.tags}
+            relatedNewsletters={props.relatedNewsletters}
+          />
+        );
+        continue;
+      } catch (error) {
+        console.error("Error parsing NewsletterExample component:", error);
+      }
+    }
 
     // Basic markdown parsing
     if (line.startsWith("# ")) {

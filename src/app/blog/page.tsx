@@ -42,7 +42,7 @@ export default async function BlogPage() {
                     key={post.slug}
                     className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-card"
                   >
-                    <div className="relative h-40 w-full">
+                    <div className="relative aspect-[16/9] w-full">
                       <BlogImage
                         src={post.coverImage}
                         alt={post.title}
@@ -88,7 +88,7 @@ export default async function BlogPage() {
                       key={post.slug}
                       className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-card"
                     >
-                      <div className="relative h-48 w-full">
+                      <div className="relative aspect-[16/9] w-full">
                         <BlogImage
                           src={post.coverImage}
                           alt={post.title}

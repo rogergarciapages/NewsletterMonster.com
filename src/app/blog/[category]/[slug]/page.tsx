@@ -4,12 +4,11 @@ import Footer from "@/app/components/footer";
 import LeftSidebar from "@/app/components/left-sidebar";
 import RelatedArticles from "@/app/components/related-articles";
 import RightSidebar from "@/app/components/right-sidebar";
+import { getPostBySlug } from "@/lib/mdx";
 import {
-  formatMarkdown,
   getAllPostSlugs,
   getAllPostsMetadata,
   getPostsMetadataForCategory,
-  getSimplePostBySlug,
 } from "@/lib/simple-mdx";
 import { formatDate } from "@/lib/utils";
 
@@ -30,7 +29,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }) {
   try {
-    const post = await getSimplePostBySlug(params.category, params.slug);
+    const post = await getPostBySlug(params.category, params.slug);
 
     if (!post) {
       return {
@@ -58,7 +57,7 @@ export default async function BlogPostPage({
 }) {
   try {
     console.log(`Rendering blog post page for ${params.category}/${params.slug}`);
-    const post = await getSimplePostBySlug(params.category, params.slug);
+    const post = await getPostBySlug(params.category, params.slug);
 
     if (!post) {
       console.error(`Post not found: ${params.category}/${params.slug}`);
@@ -87,9 +86,6 @@ export default async function BlogPostPage({
         </div>
       );
     }
-
-    // Extract the first h1 from the content to avoid duplication
-    const contentWithoutFirstH1 = removeFirstH1(post.content);
 
     // Fetch posts for related articles section
     const categoryPosts = await getPostsMetadataForCategory(params.category);
@@ -133,7 +129,7 @@ export default async function BlogPostPage({
 
               {/* Hero section with integrated image and title */}
               <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg">
-                <div className="relative h-80 w-full sm:h-96 md:h-[28rem]">
+                <div className="relative aspect-[16/9] w-full">
                   <Image
                     src={post.coverImage}
                     alt={post.title}
@@ -163,7 +159,7 @@ export default async function BlogPostPage({
               <article className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
                 <div className="px-6 py-8 md:px-10">
                   <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-gray-800 prose-p:leading-relaxed prose-p:text-gray-700 prose-li:text-gray-700 dark:prose-headings:text-gray-200 dark:prose-p:text-gray-300 dark:prose-li:text-gray-300 md:prose-p:text-lg md:prose-li:text-lg">
-                    {formatMarkdown(contentWithoutFirstH1)}
+                    {post.content}
                   </div>
                 </div>
               </article>
@@ -240,17 +236,4 @@ export default async function BlogPostPage({
       </div>
     );
   }
-}
-
-// Helper function to remove the first H1 heading from the content
-function removeFirstH1(content: string): string {
-  const lines = content.split("\n");
-  const h1Index = lines.findIndex(line => line.trim().startsWith("# "));
-
-  if (h1Index !== -1) {
-    lines.splice(h1Index, 1);
-    return lines.join("\n");
-  }
-
-  return content;
 }
