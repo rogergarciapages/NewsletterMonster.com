@@ -38,6 +38,7 @@
     "@supabase/supabase-js": "^2.46.1",
     "@svgr/webpack": "^8.1.0",
     "@tabler/icons-react": "^3.21.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "^0.5.15",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node-cron": "^3.0.11",

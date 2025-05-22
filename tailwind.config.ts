@@ -21,7 +21,7 @@ const config: Config = {
           "700": "#d7002e",
           "800": "#b10329",
           "900": "#920a27",
-          "950": "#500011"
+          "950": "#500011",
         },
         torch: {
           "50": "#fff0f3",
@@ -34,7 +34,7 @@ const config: Config = {
           "700": "#d7002e",
           "800": "#b10329",
           "900": "#920a27",
-          "950": "#500011"
+          "950": "#500011",
         },
         indigo: {
           "50": "#f1f8fa",
@@ -47,7 +47,7 @@ const config: Config = {
           "700": "#30566e",
           "800": "#2e485c",
           "900": "#2a3e4f",
-          "950": "#182734"
+          "950": "#182734",
         },
         daisy: {
           "50": "#fefde8",
@@ -60,7 +60,7 @@ const config: Config = {
           "700": "#a26b06",
           "800": "#86540d",
           "900": "#724511",
-          "950": "#432405"
+          "950": "#432405",
         },
         space: {
           "50": "#f4f7f7",
@@ -73,7 +73,7 @@ const config: Config = {
           "700": "#475457",
           "800": "#3f484b",
           "900": "#383f41",
-          "950": "#2c3336"
+          "950": "#2c3336",
         },
         aquamarine: {
           "50": "#e9fff8",
@@ -86,7 +86,7 @@ const config: Config = {
           "700": "#008f77",
           "800": "#00715f",
           "900": "#005c50",
-          "950": "#00342e"
+          "950": "#00342e",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -95,39 +95,39 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))"
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))"
+          foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))"
+          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))"
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))"
+          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))"
+          foreground: "hsl(var(--popover-foreground))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))"
+          foreground: "hsl(var(--card-foreground))",
         },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
           "3": "hsl(var(--chart-3))",
           "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))"
-        }
+          "5": "hsl(var(--chart-5))",
+        },
       },
       fontSize: {
         "7xl": ["4.5rem", { lineHeight: "1" }],
@@ -136,47 +136,45 @@ const config: Config = {
         "4xl": ["3rem", { lineHeight: "1" }],
         "3xl": ["2.5rem", { lineHeight: "1.2" }],
         "2xl": ["2rem", { lineHeight: "1.3" }],
-        "xl": ["1.75rem", { lineHeight: "1.4" }],
-        "lg": ["1.5rem", { lineHeight: "1.5" }],
-        "base": ["1rem", { lineHeight: "1.6" }],
-        "sm": ["0.875rem", { lineHeight: "1.6" }],
-        "xs": ["0.75rem", { lineHeight: "1.6" }],
+        xl: ["1.75rem", { lineHeight: "1.4" }],
+        lg: ["1.5rem", { lineHeight: "1.5" }],
+        base: ["1rem", { lineHeight: "1.6" }],
+        sm: ["0.875rem", { lineHeight: "1.6" }],
+        xs: ["0.75rem", { lineHeight: "1.6" }],
         "2xs": ["0.625rem", { lineHeight: "1.6" }],
         "3xs": ["0.5rem", { lineHeight: "1.6" }],
-        "4xs": ["0.375rem", { lineHeight: "1.6" }]
+        "4xs": ["0.375rem", { lineHeight: "1.6" }],
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"]
+        sans: ["Inter", "sans-serif"],
       },
       animation: {
-        move: "move 5s linear infinite"
+        move: "move 5s linear infinite",
       },
       keyframes: {
         move: {
           "0%": {
-            transform: "translateX(-200px)"
+            transform: "translateX(-200px)",
           },
           "100%": {
-            transform: "translateX(200px)"
-          }
-        }
+            transform: "translateX(200px)",
+          },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)"
-      }
-    }
+        sm: "calc(var(--radius) - 4px)",
+      },
+    },
   },
   darkMode: ["class"], // Fixed duplicate value
   plugins: [
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/typography"),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("daisyui"),
     nextui(),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require("tailwindcss-animate")
+    require("tailwindcss-animate"),
   ],
 };
 

@@ -16,6 +16,15 @@ import { formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
 
+// Default cover image that's guaranteed to exist
+const DEFAULT_COVER_IMAGE = "/images/blog/default-cover.jpg";
+
+// Function to check if a URL is valid
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return url.startsWith("/") || url.startsWith("http");
+}
+
 // Generate static params for all blog posts
 export async function generateStaticParams() {
   try {
@@ -87,6 +96,9 @@ export default async function BlogPostPage({
       );
     }
 
+    // Ensure cover image is valid or use default
+    const coverImage = isValidUrl(post.coverImage) ? post.coverImage : DEFAULT_COVER_IMAGE;
+
     // Fetch posts for related articles section
     const categoryPosts = await getPostsMetadataForCategory(params.category);
     const allPosts = await getAllPostsMetadata();
@@ -131,7 +143,7 @@ export default async function BlogPostPage({
               <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg">
                 <div className="relative aspect-[16/9] w-full">
                   <Image
-                    src={post.coverImage}
+                    src={coverImage}
                     alt={post.title}
                     fill
                     style={{ objectFit: "cover" }}
