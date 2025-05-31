@@ -71,6 +71,14 @@ body {
   }
 }
 
+/* Make blog post images full width */
+.prose img {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 0.5rem;
+}
+
 /* Text selection styling for paragraphs */
 p::selection {
   color: #fa0036;

@@ -33,7 +33,6 @@ export async function getAllCategoryData() {
 
     // Check if directory exists
     if (!fs.existsSync(categoriesDir)) {
-      console.error(`Categories directory not found: ${categoriesDir}`);
       return [];
     }
 
@@ -47,13 +46,11 @@ export async function getAllCategoryData() {
           const categoryData = JSON.parse(fileContents);
           return categoryData;
         } catch (error) {
-          console.error(`Error processing category file ${filename}:`, error);
           return null;
         }
       })
       .filter(Boolean);
   } catch (error) {
-    console.error("Error getting all category data:", error);
     return [];
   }
 }
@@ -65,7 +62,6 @@ export async function getCategoryBySlug(slug: string) {
 
     // Check if directory exists
     if (!fs.existsSync(categoriesDir)) {
-      console.error(`Categories directory not found: ${categoriesDir}`);
       return null;
     }
 
@@ -81,13 +77,12 @@ export async function getCategoryBySlug(slug: string) {
           return categoryData;
         }
       } catch (error) {
-        console.error(`Error processing category file ${filename}:`, error);
+        // Continue to next file
       }
     }
 
     return null;
   } catch (error) {
-    console.error(`Error getting category by slug ${slug}:`, error);
     return null;
   }
 }
@@ -98,7 +93,6 @@ export async function getPostSlugsForCategory(category: string) {
     const categoryDir = path.join(contentDirectory, "blog", category);
 
     if (!fs.existsSync(categoryDir)) {
-      console.error(`Category directory not found: ${categoryDir}`);
       return [];
     }
 
@@ -107,7 +101,6 @@ export async function getPostSlugsForCategory(category: string) {
       .filter(filename => filename.endsWith(".mdx"))
       .map(filename => filename.replace(/\.mdx$/, ""));
   } catch (error) {
-    console.error(`Error getting post slugs for category ${category}:`, error);
     return [];
   }
 }
@@ -116,11 +109,9 @@ export async function getPostSlugsForCategory(category: string) {
 export async function getAllPostSlugs() {
   try {
     const blogDir = path.join(contentDirectory, "blog");
-    console.log(`Fetching all post slugs from: ${blogDir}`);
 
     // Check if directory exists
     if (!fs.existsSync(blogDir)) {
-      console.error(`Blog directory not found: ${blogDir}`);
       return [];
     }
 
@@ -133,7 +124,6 @@ export async function getAllPostSlugs() {
         const categoryDir = path.join(blogDir, category);
         if (fs.existsSync(categoryDir) && fs.statSync(categoryDir).isDirectory()) {
           const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
-          console.log(`Found ${files.length} MDX files in category: ${category}`);
 
           for (const filename of files) {
             try {
@@ -148,14 +138,12 @@ export async function getAllPostSlugs() {
               // Check for duplicate slugs across categories
               const slugKey = `${category}/${slug}`;
               if (slugRegistry.has(slugKey)) {
-                console.warn(`Duplicate slug detected: ${slugKey}, skipping`);
                 continue;
               }
 
               // Register this slug
               slugRegistry.set(slugKey, true);
 
-              console.log(`Adding slug: ${category}/${slug}`);
               allSlugs.push({
                 params: {
                   category,
@@ -163,19 +151,17 @@ export async function getAllPostSlugs() {
                 },
               });
             } catch (error) {
-              console.error(`Error processing file ${filename}:`, error);
+              // Continue to next file
             }
           }
         }
       } catch (error) {
-        console.error(`Error processing category directory ${category}:`, error);
+        // Continue to next category
       }
     }
 
-    console.log(`Total slugs found: ${allSlugs.length}`);
     return allSlugs;
   } catch (error) {
-    console.error("Error getting all post slugs:", error);
     return [];
   }
 }
@@ -189,22 +175,18 @@ export async function getSimplePostBySlug(
     // Step 1: Check if the category directory exists
     const categoryDir = path.join(contentDirectory, "blog", category);
     if (!fs.existsSync(categoryDir)) {
-      console.error(`Category directory not found: ${categoryDir}`);
       return null;
     }
 
     // Step 2: Get all MDX files in the category directory
     const files = fs.readdirSync(categoryDir).filter(filename => filename.endsWith(".mdx"));
     if (files.length === 0) {
-      console.error(`No MDX files found in category directory: ${categoryDir}`);
       return null;
     }
 
     // Step 3: Find the file with matching slug (either in frontmatter or filename)
     let targetFilePath: string | null = null;
     let fileSlug: string | null = null;
-
-    console.log(`Looking for post with slug '${slug}' in category '${category}'`);
 
     for (const filename of files) {
       try {
@@ -213,27 +195,22 @@ export async function getSimplePostBySlug(
         const { data } = matter(fileContents);
         const currentFileSlug = data.slug || filename.replace(/\.mdx$/, "");
 
-        console.log(`Checking file: ${filename}, slug: ${currentFileSlug}`);
-
         if (currentFileSlug === slug) {
           targetFilePath = filePath;
           fileSlug = currentFileSlug;
-          console.log(`✓ Match found in file: ${filename}`);
           break;
         }
       } catch (err) {
-        console.error(`Error reading file ${filename}:`, err);
+        // Continue to next file
       }
     }
 
     // Step 4: If no matching file was found, return null
     if (!targetFilePath) {
-      console.error(`No file with slug '${slug}' found in category '${category}'`);
       return null;
     }
 
     // Step 5: Read and parse the matching file
-    console.log(`Reading matched file at: ${targetFilePath}`);
     const fileContents = fs.readFileSync(targetFilePath, "utf8");
     const { content, data } = matter(fileContents);
 
@@ -242,7 +219,6 @@ export async function getSimplePostBySlug(
     if (coverImage.startsWith("/")) {
       const imagePath = path.join(process.cwd(), "public", coverImage);
       if (!fs.existsSync(imagePath)) {
-        console.warn(`Cover image not found: ${imagePath}, using default image`);
         coverImage = DEFAULT_COVER_IMAGE;
       }
     }
@@ -259,7 +235,6 @@ export async function getSimplePostBySlug(
       content, // Raw content as string, no MDX compilation
     };
   } catch (error) {
-    console.error(`Error getting post by slug ${category}/${slug}:`, error);
     return null;
   }
 }
@@ -270,7 +245,6 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
     const categoryDir = path.join(contentDirectory, "blog", category);
 
     if (!fs.existsSync(categoryDir)) {
-      console.error(`Category directory not found: ${categoryDir}`);
       return [];
     }
 
@@ -290,7 +264,6 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
 
           // Check for duplicate slugs
           if (slugRegistry.has(slug)) {
-            console.warn(`Duplicate slug detected in category ${category}: ${slug}`);
             // Skip this entry to avoid conflicts
             return null;
           }
@@ -305,7 +278,6 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
           if (coverImage.startsWith("/")) {
             const imagePath = path.join(process.cwd(), "public", coverImage);
             if (!fs.existsSync(imagePath)) {
-              console.warn(`Cover image not found: ${imagePath}, using default image`);
               coverImage = DEFAULT_COVER_IMAGE;
             }
           }
@@ -320,7 +292,6 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
             coverImage,
           };
         } catch (error) {
-          console.error(`Error processing post file ${filename}:`, error);
           return null;
         }
       })
@@ -329,7 +300,6 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
     // Sort by date (newest first)
     return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
-    console.error(`Error getting posts metadata for category ${category}:`, error);
     return [];
   }
 }
@@ -341,7 +311,6 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
 
     // Check if directory exists
     if (!fs.existsSync(blogDir)) {
-      console.error(`Blog directory not found: ${blogDir}`);
       return [];
     }
 
@@ -368,7 +337,6 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
               // Check for duplicate slugs across categories
               const slugKey = `${category}/${slug}`;
               if (slugRegistry.has(slugKey)) {
-                console.warn(`Duplicate slug detected: ${slugKey}, skipping`);
                 continue;
               }
 
@@ -382,7 +350,6 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
               if (coverImage.startsWith("/")) {
                 const imagePath = path.join(process.cwd(), "public", coverImage);
                 if (!fs.existsSync(imagePath)) {
-                  console.warn(`Cover image not found: ${imagePath}, using default image`);
                   coverImage = DEFAULT_COVER_IMAGE;
                 }
               }
@@ -397,19 +364,18 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
                 coverImage,
               });
             } catch (error) {
-              console.error(`Error processing file ${filename}:`, error);
+              // Continue to next file
             }
           }
         }
       } catch (error) {
-        console.error(`Error processing category ${category}:`, error);
+        // Continue to next category
       }
     }
 
     // Sort by date (newest first)
     return allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
-    console.error("Error getting all posts metadata:", error);
     return [];
   }
 }
@@ -479,7 +445,7 @@ export function formatMarkdown(markdown: string): React.ReactNode {
         );
         continue;
       } catch (error) {
-        console.error("Error parsing NewsletterExample component:", error);
+        // Skip if component parsing fails
       }
     }
 

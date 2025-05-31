@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import BlogImage from "@/app/blog/components/blog-image";
 import Footer from "@/app/components/footer";
 import LeftSidebar from "@/app/components/left-sidebar";
 import RelatedArticles from "@/app/components/related-articles";
@@ -17,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
 
 // Default cover image that's guaranteed to exist
-const DEFAULT_COVER_IMAGE = "/images/blog/default-cover.jpg";
+const DEFAULT_COVER_IMAGE = "/images/blog/default-cover.webp";
 
 // Function to check if a URL is valid
 function isValidUrl(url: string | null | undefined): boolean {
@@ -96,8 +95,9 @@ export default async function BlogPostPage({
       );
     }
 
-    // Ensure cover image is valid or use default
-    const coverImage = isValidUrl(post.coverImage) ? post.coverImage : DEFAULT_COVER_IMAGE;
+    // Pass the original coverImage without pre-validation
+    // (client component will handle validation and fallbacks)
+    const coverImage = post.coverImage;
 
     // Fetch posts for related articles section
     const categoryPosts = await getPostsMetadataForCategory(params.category);
@@ -142,13 +142,12 @@ export default async function BlogPostPage({
               {/* Hero section with integrated image and title */}
               <div className="relative mb-8 overflow-hidden rounded-xl shadow-lg">
                 <div className="relative aspect-[16/9] w-full">
-                  <Image
+                  <BlogImage
                     src={coverImage}
                     alt={post.title}
                     fill
-                    style={{ objectFit: "cover" }}
-                    priority
                     className="brightness-75"
+                    priority={true}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -168,7 +167,7 @@ export default async function BlogPostPage({
                 </div>
               </div>
 
-              <article className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
+              <article className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-zinc-900/80">
                 <div className="px-6 py-8 md:px-10">
                   <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-gray-800 prose-p:leading-relaxed prose-p:text-gray-700 prose-li:text-gray-700 dark:prose-headings:text-gray-200 dark:prose-p:text-gray-300 dark:prose-li:text-gray-300 md:prose-p:text-lg md:prose-li:text-lg">
                     {post.content}

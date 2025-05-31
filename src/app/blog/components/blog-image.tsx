@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Default cover image that's guaranteed to exist
 const DEFAULT_COVER_IMAGE = "/images/blog/default-cover.jpg";
@@ -19,12 +19,29 @@ type BlogImageProps = {
   fill?: boolean;
   width?: number;
   height?: number;
+  priority?: boolean;
 };
 
-export default function BlogImage({ src, alt, className, fill, width, height }: BlogImageProps) {
-  // Start with validated source or default image
-  const initialSrc = isValidUrl(src) ? (src as string) : DEFAULT_COVER_IMAGE;
-  const [fallbackSrc, setFallbackSrc] = useState(initialSrc);
+export default function BlogImage({
+  src,
+  alt,
+  className,
+  fill,
+  width,
+  height,
+  priority,
+}: BlogImageProps) {
+  // Only verify URL on the client side to avoid hydration mismatch
+  // Initially use whatever source was passed in, even if it might be invalid
+  const [fallbackSrc, setFallbackSrc] = useState<string>(src as string);
+
+  // Update the image source on the client side after hydration
+  useEffect(() => {
+    // Validate URL only after component is mounted (client-side)
+    if (!isValidUrl(src)) {
+      setFallbackSrc(DEFAULT_COVER_IMAGE);
+    }
+  }, [src]);
 
   const handleError = () => {
     console.error(`Failed to load image: ${src}`);
@@ -33,13 +50,15 @@ export default function BlogImage({ src, alt, className, fill, width, height }: 
 
   return (
     <Image
-      src={fallbackSrc}
+      src={fallbackSrc || DEFAULT_COVER_IMAGE} // Ensure we never pass undefined or null
       alt={alt}
       fill={fill}
       width={!fill ? width : undefined}
       height={!fill ? height : undefined}
       className={className}
+      style={{ objectFit: "cover" }}
       onError={handleError}
+      priority={priority}
     />
   );
 }

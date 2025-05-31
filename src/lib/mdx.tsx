@@ -235,9 +235,12 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
     let coverImage = data.coverImage || DEFAULT_COVER_IMAGE;
     if (coverImage.startsWith("/")) {
       const imagePath = path.join(process.cwd(), "public", coverImage);
+      console.log(`Checking for cover image at: ${imagePath}`);
       if (!fs.existsSync(imagePath)) {
         console.warn(`Cover image not found: ${imagePath}, using default image`);
         coverImage = DEFAULT_COVER_IMAGE;
+      } else {
+        console.log(`Cover image found: ${imagePath}`);
       }
     }
 
