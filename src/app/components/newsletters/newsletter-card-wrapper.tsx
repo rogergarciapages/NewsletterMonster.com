@@ -18,5 +18,19 @@ export default function NewsletterCardWrapper({ newsletter }: { newsletter: News
     return <NewsletterCardSkeleton />;
   }
 
-  return <NewsletterCard newsletter={newsletter} />;
+  // Return the newsletter card with a specific no-gap wrapper
+  return (
+    <div className="no-gap-wrapper">
+      <style jsx>{`
+        .no-gap-wrapper :global(.border) {
+          padding-top: 0 !important;
+          margin-top: 0 !important;
+        }
+        .no-gap-wrapper :global(.border > div) {
+          margin-top: 0 !important;
+        }
+      `}</style>
+      <NewsletterCard newsletter={newsletter} priority={true} />
+    </div>
+  );
 }

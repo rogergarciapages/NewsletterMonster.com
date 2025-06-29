@@ -29,6 +29,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "minio-zok40c4wo8s88cks0cwc0kkk.newslettermonster.com",
       },
+      {
+        protocol: "https",
+        hostname: "source.unsplash.com",
+      },
       // Google
       {
         protocol: "https",

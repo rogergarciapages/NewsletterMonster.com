@@ -1,7 +1,24 @@
+import dynamic from "next/dynamic";
+
 import fs from "fs";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
 import path from "path";
+
+// Dynamically import the TaggedNewsletters component
+const TaggedNewsletters = dynamic(() => import("@/app/components/tagged-newsletters"), {
+  ssr: false,
+  loading: () => (
+    <div className="my-8 grid place-items-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-torch-600 border-t-transparent"></div>
+    </div>
+  ),
+});
+
+// Define MDX components
+const components = {
+  TaggedNewsletters,
+};
 
 // Types for blog posts
 export type BlogPost = {
@@ -12,6 +29,7 @@ export type BlogPost = {
   excerpt: string;
   author: string;
   coverImage: string;
+  tag?: string; // Add tag as an optional property
   content: React.ReactElement;
 };
 
@@ -311,6 +329,7 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
       // Use a simpler MDX compilation approach with fewer plugins
       const mdxSource = await compileMDX({
         source: content,
+        components,
         options: {
           mdxOptions: {
             development: process.env.NODE_ENV === "development",
@@ -330,6 +349,7 @@ export async function getPostBySlug(category: string, slug: string): Promise<Blo
         excerpt: data.excerpt,
         author: data.author,
         coverImage,
+        tag: data.tag,
         content: mdxSource.content,
       };
     } catch (mdxError) {

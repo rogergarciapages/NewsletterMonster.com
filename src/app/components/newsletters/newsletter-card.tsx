@@ -84,39 +84,29 @@ export function NewsletterCard({
 
   return (
     <Card
-      className="group relative w-full cursor-pointer overflow-hidden rounded-xl bg-white/5 transition-all duration-300 hover:scale-[1.02]"
       onClick={handleCardClick}
+      className="group relative aspect-[3/4] w-full cursor-pointer overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
     >
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-torch-900 to-torch-800 opacity-0 transition-opacity duration-300 group-hover:opacity-[0.995]" />
+      <div className="relative h-full w-full">
+        {newsletter.top_screenshot_url ? (
+          <Image
+            src={newsletter.top_screenshot_url}
+            alt={newsletter.subject || "Newsletter preview"}
+            fill
+            priority={priority}
+            className="object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
+            onError={e => {
+              e.currentTarget.src = defaultImage;
+              e.currentTarget.onerror = null;
+            }}
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />
+        )}
 
-      {/* Aspect ratio container */}
-      <div className="relative w-full pt-[132.35%]">
-        <div className="absolute inset-0 overflow-hidden">
-          {!imageError ? (
-            <Image
-              src={newsletter.top_screenshot_url || defaultImage}
-              alt={newsletter.subject || "Newsletter preview"}
-              fill
-              className="object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-5"
-              sizes={
-                isLarge
-                  ? "(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                  : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              }
-              quality={isLarge ? 85 : 75}
-              priority={priority}
-              onError={() => setImageError(true)}
-              loading={priority ? "eager" : "lazy"}
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-b from-gray-800/90 to-gray-900/90 group-hover:from-gray-800/30 group-hover:to-gray-900/30" />
-          )}
-        </div>
+        <div className="absolute inset-0 bg-torch-700 opacity-0 transition-opacity duration-300 group-hover:opacity-85" />
 
-        {/* Content overlay */}
         <div className="absolute inset-0 z-10 flex flex-col justify-between">
-          {/* Title area */}
           <div className="space-y-2 p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <CardTitle className="line-clamp-4 text-xl leading-tight tracking-tight text-white">
               {newsletter.subject || "No Subject"}
@@ -129,7 +119,6 @@ export function NewsletterCard({
             )}
           </div>
 
-          {/* Footer with permanent glassy effect */}
           <div className="space-y-4 bg-white/10 p-4 backdrop-blur-sm transition-all duration-300 group-hover:bg-transparent">
             <div className="flex items-center space-x-4">
               {typeof newsletter.likes_count === "number" && (

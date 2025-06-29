@@ -15,6 +15,7 @@ export type SimpleBlogPost = {
   excerpt: string;
   author: string;
   coverImage: string;
+  tag?: string; // Add tag as an optional property
   content: string; // Raw content as string
 };
 
@@ -232,6 +233,7 @@ export async function getSimplePostBySlug(
       excerpt: data.excerpt,
       author: data.author,
       coverImage,
+      tag: data.tag,
       content, // Raw content as string, no MDX compilation
     };
   } catch (error) {
@@ -290,6 +292,7 @@ export async function getPostsMetadataForCategory(category: string): Promise<Blo
             excerpt: data.excerpt,
             author: data.author,
             coverImage,
+            tag: data.tag,
           };
         } catch (error) {
           return null;
@@ -362,6 +365,7 @@ export async function getAllPostsMetadata(): Promise<BlogPostMeta[]> {
                 excerpt: data.excerpt,
                 author: data.author,
                 coverImage,
+                tag: data.tag,
               });
             } catch (error) {
               // Continue to next file
