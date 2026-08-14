@@ -1,7 +1,7 @@
 // src/hooks/use-follow.ts
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 

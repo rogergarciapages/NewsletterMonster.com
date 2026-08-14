@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, Input, Spinner, Textarea, Tooltip } from "@nextui-org/react";
 import { IconRefresh } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 

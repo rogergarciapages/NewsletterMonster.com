@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
 import { NextUIProvider } from "@nextui-org/react";
-import type { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ParallaxProvider } from "react-scroll-parallax";
 import { Toaster } from "sonner";
 import { SWRConfig } from "swr";
+
+import { SupabaseAuthProvider } from "@/components/providers/supabase-auth-provider";
 
 /* eslint-disable quotes */
 
@@ -28,10 +28,9 @@ const fetcher = async (url: string) => {
 
 interface ProvidersProps {
   children: ReactNode;
-  _session?: Session | null;
 }
 
-export default function Providers({ children, _session }: ProvidersProps) {
+export default function Providers({ children }: ProvidersProps) {
   const router = useRouter();
 
   const navigate = (href: string) => {
@@ -46,7 +45,7 @@ export default function Providers({ children, _session }: ProvidersProps) {
         revalidateOnReconnect: false,
       }}
     >
-      <SessionProvider>
+      <SupabaseAuthProvider>
         <NextUIProvider navigate={navigate}>
           <NextThemesProvider
             attribute="class"
@@ -61,7 +60,7 @@ export default function Providers({ children, _session }: ProvidersProps) {
             <Toaster position="bottom-right" richColors closeButton expand visibleToasts={6} />
           </NextThemesProvider>
         </NextUIProvider>
-      </SessionProvider>
+      </SupabaseAuthProvider>
     </SWRConfig>
   );
 }

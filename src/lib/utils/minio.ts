@@ -1,76 +1,80 @@
 // src/lib/utils/minio.ts
-import { Client } from "minio";
+import { createClient } from "@supabase/supabase-js";
 
-function getMinioClient() {
-  const endpoint = process.env.MINIO_ENDPOINT;
-  if (!endpoint) throw new Error("MINIO_ENDPOINT is not set");
-  const accessKey = process.env.MINIO_ACCESS_KEY;
-  if (!accessKey) throw new Error("MINIO_ACCESS_KEY is not set");
-  const secretKey = process.env.MINIO_SECRET_KEY;
-  if (!secretKey) throw new Error("MINIO_SECRET_KEY is not set");
-  return new Client({
-    endPoint: endpoint.replace("https://", ""),
-    port: 443,
-    useSSL: process.env.MINIO_USE_SSL === "true",
-    accessKey,
-    secretKey,
-  });
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const BUCKET_NAME = process.env.MINIO_BUCKET || "userpics";
+
+function getSupabaseClient() {
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase URL and Anon Key must be configured in environment");
+  }
+  return createClient(supabaseUrl, supabaseKey);
 }
 
-const BUCKET_NAME = process.env.MINIO_BUCKET!;
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
 export async function deleteUserProfileImages(userId: string): Promise<void> {
   try {
-    const minioClient = getMinioClient();
-    const objectsList = await minioClient.listObjects(BUCKET_NAME, `public/${userId}/`, true);
+    const supabase = getSupabaseClient();
+    const { data: files, error: listError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .list(`public/${userId}`);
 
-    for await (const obj of objectsList) {
-      await minioClient.removeObject(BUCKET_NAME, obj.name);
+    if (listError) {
+      console.warn("Could not list images for deletion:", listError.message);
+      return;
+    }
+
+    if (files && files.length > 0) {
+      const paths = files.map((f) => `public/${userId}/${f.name}`);
+      const { error: removeError } = await supabase.storage.from(BUCKET_NAME).remove(paths);
+      if (removeError) {
+        console.warn("Could not remove old images:", removeError.message);
+      }
     }
   } catch (error) {
     console.error("Error deleting user profile images:", error);
-    throw new Error("Failed to delete old images");
   }
 }
 
 export function isMinioUrl(url: string): boolean {
-  return url.startsWith(process.env.MINIO_ENDPOINT!);
+  if (!url) return false;
+  return (
+    url.includes("/storage/v1/object/public/") ||
+    url.includes(process.env.NEXT_PUBLIC_SUPABASE_URL || "supabase")
+  );
 }
 
 export async function uploadProfileImage(file: File, userId: string): Promise<string> {
   try {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      throw new Error("Invalid file type");
+      throw new Error(`Invalid file type: ${file.type}`);
     }
 
-    // Get file extension while preserving the original format
     const fileExt = file.type.split("/")[1].replace("jpeg", "jpg");
-
-    // Create the file path
     const filePath = `public/${userId}/${userId}.${fileExt}`;
-
-    // Convert File to Buffer
     const fileBuffer = await file.arrayBuffer();
 
-    // Delete any existing files in the user's directory
     await deleteUserProfileImages(userId);
 
-    // Upload the new file
-    const minioClient = getMinioClient();
-    await minioClient.putObject(BUCKET_NAME, filePath, Buffer.from(fileBuffer), file.size, {
-      "Content-Type": file.type,
-      "Cache-Control": "no-cache",
-      "x-amz-acl": "public-read",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET",
-      "Access-Control-Allow-Headers": "*",
-    });
+    const supabase = getSupabaseClient();
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, Buffer.from(fileBuffer), {
+        contentType: file.type,
+        upsert: true,
+      });
 
-    // Return the full URL
-    return `${process.env.MINIO_ENDPOINT}/${BUCKET_NAME}/${filePath}`;
+    if (uploadError) {
+      console.error("Supabase Storage upload error:", uploadError);
+      throw new Error(`Failed to upload image: ${uploadError.message}`);
+    }
+
+    const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+    return data.publicUrl;
   } catch (error) {
-    console.error("Error uploading to MinIO:", error);
-    throw new Error("Failed to upload image");
+    console.error("Error uploading to Supabase Storage:", error);
+    throw error;
   }
 }

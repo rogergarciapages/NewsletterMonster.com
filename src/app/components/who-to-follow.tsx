@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 import { useEffect, useState } from "react";
 
 import { Button, Tooltip } from "@nextui-org/react";
 import { IconLoader2, IconUserPlus } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/assets/avatar";

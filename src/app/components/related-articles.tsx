@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 
 import BlogImage from "@/app/blog/components/blog-image";
 import { BlogPostMeta } from "@/lib/simple-mdx";

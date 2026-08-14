@@ -16,7 +16,7 @@ import {
   NavbarItem,
   Link as NextUILink,
 } from "@nextui-org/react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 export default function AppNavbar() {
   console.log("RENDERING THE FIXED NAVBAR WITH LOGIN MODAL");
@@ -118,8 +118,10 @@ export default function AppNavbar() {
 
   // Memoize the sign out handler
   const handleSignOut = useCallback(async () => {
-    const { signOut } = await import("next-auth/react");
-    await signOut({ callbackUrl: "/" });
+    const { createClient } = await import("@/utils/supabase/client");
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
   }, []);
 
   // Memoize the profile navigation handler
@@ -208,8 +210,7 @@ export default function AppNavbar() {
             <Button
               color="warning"
               onClick={() => {
-                console.log("Sign In button clicked");
-                signIn();
+                router.push("/?login=true");
               }}
               variant="flat"
               className="text-inherit"

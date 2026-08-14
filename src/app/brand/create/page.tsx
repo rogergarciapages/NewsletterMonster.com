@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button, Input, Textarea } from "@nextui-org/react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import slugify from "slugify";
 import { toast } from "sonner";
 

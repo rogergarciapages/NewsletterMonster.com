@@ -1,0 +1,32 @@
+-- Enable Row Level Security (RLS) on all public tables to secure PostgREST API access
+ALTER TABLE "Account" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Bookmark" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Brand" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "BrandManager" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Comment" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "CommentLike" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Favorite" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Follow" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Like" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Newsletter" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "NewsletterTag" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Post" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "PostTag" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Session" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "SocialLinks" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Tag" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "UserTag" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "VerificationToken" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "YouRock" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "badges" ENABLE ROW LEVEL SECURITY;
+
+-- Enable public read-only policies for public content tables
+CREATE POLICY "Allow public read access on Brand" ON "Brand" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on Newsletter" ON "Newsletter" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on Tag" ON "Tag" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on NewsletterTag" ON "NewsletterTag" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on Post" ON "Post" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on PostTag" ON "PostTag" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on SocialLinks" ON "SocialLinks" FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on badges" ON "badges" FOR SELECT USING (true);

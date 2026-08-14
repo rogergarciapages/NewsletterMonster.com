@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 import { useEffect, useState } from "react";
 
 import { Button } from "@nextui-org/react";

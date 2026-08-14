@@ -22,9 +22,9 @@ import {
   IconLock,
   IconMail,
 } from "@tabler/icons-react";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
+import { createClient } from "@/utils/supabase/client";
 import { getPasswordStrength, validateEmail, validatePassword } from "@/lib/validation";
 
 interface LoginModalProps {
@@ -36,7 +36,6 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess }) => {
   const [showSignup, setShowSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [availableProviders, setAvailableProviders] = useState<Record<string, any>>({});
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -56,23 +55,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
   });
 
   const [rememberMe, setRememberMe] = useState(false);
-
-  // Fetch available providers when the modal opens
-  useEffect(() => {
-    if (isOpen) {
-      const fetchProviders = async () => {
-        try {
-          const response = await fetch("/api/auth/providers");
-          const data = await response.json();
-          console.log("Available authentication providers:", data);
-          setAvailableProviders(data);
-        } catch (error) {
-          console.error("Failed to fetch providers:", error);
-        }
-      };
-      fetchProviders();
-    }
-  }, [isOpen]);
 
   const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -115,24 +97,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
     try {
       setIsLoading(true);
-      const result = await signIn("credentials", {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: loginFormData.email,
         password: loginFormData.password,
-        redirect: false,
-        callbackUrl: "/",
       });
 
-      if (result?.error) {
-        toast.error("Invalid email or password");
+      if (error) {
+        toast.error(error.message || "Invalid email or password");
         return;
       }
 
-      if (result?.ok) {
+      if (data.session) {
         toast.success("Login successful!");
         onSuccess?.();
         onOpenChange();
-
-        // No longer redirecting to onboarding - just refresh the page if needed
         window.location.reload();
       }
     } catch (error) {
@@ -166,46 +145,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
     try {
       setIsLoading(true);
-
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: signupFormData.name,
-          surname: signupFormData.surname,
-          company_name: signupFormData.company_name,
-          email: signupFormData.email,
-          password: signupFormData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create account");
-      }
-
-      // Auto-login after successful signup
-      const loginResult = await signIn("credentials", {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
         email: signupFormData.email,
         password: signupFormData.password,
-        redirect: false,
+        options: {
+          data: {
+            name: `${signupFormData.name} ${signupFormData.surname}`.trim(),
+            company_name: signupFormData.company_name,
+          },
+        },
       });
 
-      if (loginResult?.error) {
-        toast.error("Account created but login failed. Please try logging in.");
-        setShowSignup(false);
-        return;
+      if (error) {
+        throw new Error(error.message || "Failed to create account");
       }
 
-      toast.success("Account created and logged in successfully!");
+      toast.success("Account created successfully!");
       onSuccess?.();
       onOpenChange();
-
-      // No longer redirecting to onboarding - just refresh the page
       window.location.reload();
     } catch (error) {
       console.error("Signup error:", error);
@@ -217,30 +175,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
 
   const handleOAuthSignIn = async (provider: string) => {
     try {
-      console.log(`Starting ${provider} sign in process`);
       setIsLoading(true);
-
-      // Check if we're in a development environment
-      const isDev =
-        process.env.NODE_ENV === "development" || window.location.hostname === "localhost";
-
-      console.log(`Environment: ${isDev ? "development" : "production"}`);
-
-      // Get the base URL for the callback
-      const callbackUrl = window.location.origin;
-      console.log(`Using callback URL: ${callbackUrl}`);
-
-      // Directly sign in with the provider
-      await signIn(provider, {
-        callbackUrl,
-        redirect: true,
+      const supabase = createClient();
+      const redirectTo = `${window.location.origin}/api/auth/callback`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider as any,
+        options: {
+          redirectTo,
+        },
       });
 
-      // Note: This code below won't execute since redirect: true will navigate away
-      console.log(`${provider} sign-in initiated`);
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error(`${provider} sign in error:`, error);
-      toast.error(`Failed to sign in with ${provider}. Please try again later.`);
+      toast.error(`Failed to sign in with ${provider}.`);
       setIsLoading(false);
     }
   };
@@ -259,243 +209,110 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      placement="top-center"
-      classNames={{
-        base: "max-w-md",
-      }}
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
       <ModalContent>
-        {() => (
+        {onClose => (
           <>
-            {!showSignup ? (
-              <>
-                <ModalHeader className="flex flex-col gap-1">
-                  <h2 className="text-2xl">Log in</h2>
-                  <p className="text-sm text-default-500">Welcome back!</p>
-                </ModalHeader>
-                <ModalBody>
+            <ModalHeader className="flex flex-col gap-1">
+              {showSignup ? "Create an Account" : "Sign In"}
+            </ModalHeader>
+            <ModalBody>
+              {showSignup ? (
+                <div className="flex flex-col gap-4">
                   <Input
-                    autoFocus
-                    endContent={
-                      <IconMail className="pointer-events-none flex-shrink-0 text-2xl text-default-400" />
-                    }
-                    label="Email"
-                    placeholder="Enter your email"
-                    variant="bordered"
-                    name="email"
-                    value={loginFormData.email}
-                    onChange={handleLoginInputChange}
-                    onKeyPress={e => handleKeyPress(e, "login")}
+                    label="First Name"
+                    placeholder="Enter your first name"
+                    name="name"
+                    value={signupFormData.name}
+                    onChange={handleSignupInputChange}
                   />
                   <Input
-                    endContent={
-                      <IconLock className="pointer-events-none flex-shrink-0 text-2xl text-default-400" />
-                    }
-                    label="Password"
-                    placeholder="Enter your password"
-                    type="password"
-                    variant="bordered"
-                    name="password"
-                    value={loginFormData.password}
-                    onChange={handleLoginInputChange}
-                    onKeyPress={e => handleKeyPress(e, "login")}
-                  />
-                  <div className="flex justify-between px-1 py-2">
-                    <Checkbox
-                      isSelected={rememberMe}
-                      onValueChange={setRememberMe}
-                      classNames={{
-                        label: "text-small",
-                      }}
-                    >
-                      Remember me
-                    </Checkbox>
-                    <Link color="primary" href="#" size="sm" onClick={() => handleSwitchMode(true)}>
-                      Create account
-                    </Link>
-                  </div>
-                </ModalBody>
-                <ModalFooter className="flex-col">
-                  <Button
-                    color="warning"
-                    onPress={handleLogin}
-                    isLoading={isLoading}
-                    className="w-full"
-                  >
-                    Sign in
-                  </Button>
-
-                  {/* Only show OAuth providers section if any are available */}
-                  {Object.keys(availableProviders).length > 0 && (
-                    <>
-                      <Divider className="my-4" />
-                      <div className="mb-2 text-center text-small text-default-500">
-                        Or continue with
-                      </div>
-
-                      {availableProviders.github && (
-                        <Button
-                          onClick={() => handleOAuthSignIn("github")}
-                          startContent={<IconBrandGithub />}
-                          className="mt-2 w-full bg-[#4078c0] text-white"
-                          isLoading={isLoading}
-                        >
-                          Continue with GitHub
-                        </Button>
-                      )}
-
-                      {availableProviders.google && (
-                        <Button
-                          onClick={() => handleOAuthSignIn("google")}
-                          startContent={<IconBrandGoogle />}
-                          className="mt-2 w-full bg-[#dd4b39] text-white"
-                          isLoading={isLoading}
-                        >
-                          Continue with Google
-                        </Button>
-                      )}
-
-                      {availableProviders.linkedin && (
-                        <Button
-                          onClick={() => handleOAuthSignIn("linkedin")}
-                          startContent={<IconBrandLinkedin />}
-                          className="mt-2 w-full bg-[#0A66C2] text-white"
-                          isLoading={isLoading}
-                        >
-                          Continue with LinkedIn
-                        </Button>
-                      )}
-
-                      {availableProviders.discord && (
-                        <Button
-                          onClick={() => handleOAuthSignIn("discord")}
-                          startContent={<IconBrandDiscord />}
-                          className="mt-2 w-full bg-[#5865F2] text-white"
-                          isLoading={isLoading}
-                        >
-                          Continue with Discord
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </ModalFooter>
-              </>
-            ) : (
-              <>
-                <ModalHeader className="flex flex-col gap-1">
-                  <h2 className="text-2xl">Create account</h2>
-                  <p className="text-sm text-default-500">Get started with your account</p>
-                </ModalHeader>
-                <ModalBody>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="First Name"
-                      placeholder="Enter your first name"
-                      variant="bordered"
-                      name="name"
-                      value={signupFormData.name}
-                      onChange={handleSignupInputChange}
-                      isRequired
-                    />
-                    <Input
-                      label="Last Name"
-                      placeholder="Enter your last name"
-                      variant="bordered"
-                      name="surname"
-                      value={signupFormData.surname}
-                      onChange={handleSignupInputChange}
-                    />
-                  </div>
-                  <Input
-                    label="Company Name"
-                    placeholder="Enter your company name (optional)"
-                    variant="bordered"
-                    name="company_name"
-                    value={signupFormData.company_name}
+                    label="Last Name"
+                    placeholder="Enter your last name"
+                    name="surname"
+                    value={signupFormData.surname}
                     onChange={handleSignupInputChange}
                   />
                   <Input
                     label="Email"
                     placeholder="Enter your email"
-                    variant="bordered"
                     name="email"
+                    type="email"
                     value={signupFormData.email}
                     onChange={handleSignupInputChange}
-                    isRequired
                   />
                   <Input
                     label="Password"
-                    placeholder="Create a password"
-                    type="password"
-                    variant="bordered"
+                    placeholder="Enter your password"
                     name="password"
+                    type="password"
                     value={signupFormData.password}
                     onChange={handleSignupInputChange}
-                    isRequired
                   />
-                  {signupFormData.password && (
-                    <div className="w-full">
-                      <Progress
-                        value={passwordStrength.score * 20}
-                        className="w-full"
-                        color={
-                          passwordStrength.score < 2
-                            ? "danger"
-                            : passwordStrength.score < 4
-                              ? "warning"
-                              : "success"
-                        }
-                      />
-                      <p className="mt-1 text-sm text-default-500">{passwordStrength.feedback}</p>
-                    </div>
-                  )}
                   <Input
                     label="Confirm Password"
-                    placeholder="Confirm your password"
-                    type="password"
-                    variant="bordered"
+                    placeholder="Re-enter your password"
                     name="verifyPassword"
+                    type="password"
                     value={signupFormData.verifyPassword}
                     onChange={handleSignupInputChange}
-                    isRequired
+                    onKeyDown={e => handleKeyPress(e, "signup")}
                   />
-                </ModalBody>
-                <ModalFooter className="flex-col">
-                  <Button
-                    color="warning"
-                    onPress={handleSignup}
-                    isLoading={isLoading}
-                    className="w-full"
-                  >
-                    Create account
+                  <Button color="primary" isLoading={isLoading} onPress={handleSignup}>
+                    Sign Up
                   </Button>
-                  <Button
-                    color="danger"
-                    variant="light"
-                    onPress={() => handleSwitchMode(false)}
-                    className="mt-2 w-full"
-                  >
-                    Back to login
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <Input
+                    label="Email"
+                    placeholder="Enter your email"
+                    name="email"
+                    type="email"
+                    value={loginFormData.email}
+                    onChange={handleLoginInputChange}
+                  />
+                  <Input
+                    label="Password"
+                    placeholder="Enter your password"
+                    name="password"
+                    type="password"
+                    value={loginFormData.password}
+                    onChange={handleLoginInputChange}
+                    onKeyDown={e => handleKeyPress(e, "login")}
+                  />
+                  <Button color="primary" isLoading={isLoading} onPress={handleLogin}>
+                    Sign In
                   </Button>
-                  <div className="mt-4 text-center text-small text-default-500">
-                    <p>
-                      By clicking "Create account", you agree to our{" "}
-                      <Link href="#" size="sm">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link href="#" size="sm">
-                        Privacy Policy
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                </ModalFooter>
-              </>
-            )}
+                </div>
+              )}
+
+              <Divider className="my-4" />
+
+              <div className="flex justify-center gap-2">
+                <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("google")}>
+                  <IconBrandGoogle />
+                </Button>
+                <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("github")}>
+                  <IconBrandGithub />
+                </Button>
+                <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("discord")}>
+                  <IconBrandDiscord />
+                </Button>
+              </div>
+            </ModalBody>
+            <ModalFooter className="justify-center">
+              <p className="text-sm text-default-500">
+                {showSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+                <Link
+                  className="cursor-pointer"
+                  size="sm"
+                  onPress={() => handleSwitchMode(!showSignup)}
+                >
+                  {showSignup ? "Sign In" : "Sign Up"}
+                </Link>
+              </p>
+            </ModalFooter>
           </>
         )}
       </ModalContent>

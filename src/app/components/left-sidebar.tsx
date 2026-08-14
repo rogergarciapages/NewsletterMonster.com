@@ -17,7 +17,7 @@ import {
   IconTrendingUp,
   IconUser,
 } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { useTheme } from "next-themes";
 
 import { useBookmarkCount } from "@/hooks/use-bookmark-count";

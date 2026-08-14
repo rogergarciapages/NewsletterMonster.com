@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 
 import { Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
 

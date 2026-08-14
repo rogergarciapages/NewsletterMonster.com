@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@nextui-org/react";
 import { IconBuildingStore, IconEdit } from "@tabler/icons-react";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "@/lib/auth";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";

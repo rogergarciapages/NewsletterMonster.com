@@ -1,7 +1,7 @@
 "use client";
 
 // Supports weights 100-900
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 import { useEffect } from "react";
 
 import "@fontsource-variable/inter";

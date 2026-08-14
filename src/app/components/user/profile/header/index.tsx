@@ -1,7 +1,7 @@
 // src/app/components/user/profile/header/index.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 import ProfileImage from "@/app/components/brand/profile/header/profile-image";
 import ProfileInfo from "@/app/components/brand/profile/header/profile-info";

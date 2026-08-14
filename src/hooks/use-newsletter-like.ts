@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 interface UseNewsletterLikeProps {
   newsletterId: number;

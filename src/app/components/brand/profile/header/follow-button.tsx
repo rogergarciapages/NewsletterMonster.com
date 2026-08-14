@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@nextui-org/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa";
 
 import LoginModal from "@/app/components/login-modal";

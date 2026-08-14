@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 
 import { Card } from "@nextui-org/react";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/lib/auth";
 
 import NewsletterCard from "@/app/components/brand/newsletter/card";
 import EmailContent from "@/app/components/brand/newsletter/email-content";

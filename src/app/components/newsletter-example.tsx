@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 
 interface NewsletterExampleProps {
   image: string;
@@ -62,7 +62,7 @@ export default function NewsletterExample({
             {relatedNewsletters.map((newsletter, index) => (
               <Link
                 key={`${componentId}-related-${index}`}
-                href={`/newsletters/${newsletter.id}`}
+                href={`/newsletters/${newsletter.id}` as any}
                 className="group overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
               >
                 <div className="relative h-40 w-full">

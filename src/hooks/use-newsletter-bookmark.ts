@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 // Custom event for bookmark changes
 export const BOOKMARK_CHANGED_EVENT = "bookmarkChanged";

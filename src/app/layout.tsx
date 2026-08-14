@@ -2,7 +2,7 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
 
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/lib/auth";
 
 import AppNavbar from "@/app/components/app-navbar/index";
 import AuthRedirect from "@/app/components/auth-redirect";
@@ -39,7 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </Script>
       </head>
       <body className="flex min-h-screen flex-col bg-background font-sans antialiased">
-        <Providers _session={session}>
+        <Providers>
           <AuthRedirect />
           <AppNavbar />
           <main>

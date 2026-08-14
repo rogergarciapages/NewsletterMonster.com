@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/lib/auth";
 
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { authOptions } from "@/lib/auth";

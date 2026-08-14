@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button, Tooltip } from "@nextui-org/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 
 import LoginModal from "@/app/components/login-modal";

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@nextui-org/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa";
 import { toast } from "sonner";
 

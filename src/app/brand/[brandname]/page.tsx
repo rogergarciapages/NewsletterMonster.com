@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Card } from "@nextui-org/react";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/lib/auth";
 
 import NewsletterGrid from "@/app/components/brand/newsletter/grid";
 import { Newsletter } from "@/app/components/brand/newsletter/types";

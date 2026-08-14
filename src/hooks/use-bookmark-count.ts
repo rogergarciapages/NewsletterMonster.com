@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 import { BOOKMARK_CHANGED_EVENT } from "./use-newsletter-bookmark";
 

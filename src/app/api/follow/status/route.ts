@@ -1,7 +1,7 @@
 // src/app/api/follow/status/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/lib/auth";
 
 import { authOptions } from "@/config/auth";
 import prisma from "@/lib/prisma";

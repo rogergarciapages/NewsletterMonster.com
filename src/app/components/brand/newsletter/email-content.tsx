@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 
 import { useDisclosure } from "@nextui-org/react";
 import { IconDownload, IconExternalLink } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 import { KeyInsights } from "@/app/components/brand/newsletter/key-insights";
 import LoginModal from "@/app/components/login-modal";

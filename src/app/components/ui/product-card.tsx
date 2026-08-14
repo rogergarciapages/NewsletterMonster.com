@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 import { useRef } from "react";
 
 import { MotionValue, motion, useScroll, useSpring, useTransform } from "framer-motion";

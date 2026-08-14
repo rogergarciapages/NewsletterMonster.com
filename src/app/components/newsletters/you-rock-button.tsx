@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Tooltip } from "@nextui-org/react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 import LoginModal from "@/app/components/login-modal";
 import { useNewsletterYouRock } from "@/hooks/use-newsletter-you-rock";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/app/components/ui/next-link";
 
 import Footer from "@/app/components/footer";
 

@@ -14,28 +14,11 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import { IconLock, IconLogout, IconUser } from "@tabler/icons-react";
-import { signOut, useSession } from "next-auth/react";
-
-// src/app/components/app-navbar/auth-button.tsx
+import { useSession } from "@/hooks/use-session";
 
 interface AuthButtonProps {
   onOpenLoginModal: () => void;
 }
-
-// Utility function to ensure profile image URL has the correct structure
-const ensureCorrectImageUrl = (url: string | null): string | null => {
-  if (!url) return null;
-  if (url.includes("/userpics/public/")) return url;
-
-  const match = url.match(/\/([a-f0-9-]+)\/([a-f0-9-]+)(-\d+)?\.(jpg|jpeg|png|webp|gif)$/i);
-  if (match) {
-    const userId = match[1];
-    const extension = match[4].toLowerCase();
-    const minioEndpoint = url.split("/userpics")[0];
-    return `${minioEndpoint}/userpics/public/${userId}/${userId}.${extension}`;
-  }
-  return url;
-};
 
 const LoadingState = memo(() => (
   <div className="flex h-10 w-10 items-center justify-center">
@@ -54,26 +37,19 @@ interface UserDropdownProps {
   session: {
     user: {
       user_id: string;
-      email: string;
-      name: string;
+      email?: string | null;
+      name?: string | null;
       image?: string | null;
       profile_photo?: string | null;
       username?: string | null;
-      role?: string;
+      role?: string | null;
     };
   };
+  onSignOut: () => Promise<void>;
 }
 
-const UserDropdown = memo(({ session }: UserDropdownProps) => {
+const UserDropdown = memo(({ session, onSignOut }: UserDropdownProps) => {
   const router = useRouter();
-
-  const handleSignOut = useCallback(async () => {
-    try {
-      await signOut({ callbackUrl: "/" });
-    } catch (error) {
-      console.error("Sign out failed:", error);
-    }
-  }, []);
 
   const handleAction = useCallback(
     (key: string | number) => {
@@ -86,11 +62,11 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
           }
           break;
         case "sign-out":
-          handleSignOut();
+          onSignOut();
           break;
       }
     },
-    [router, session.user, handleSignOut]
+    [router, session.user, onSignOut]
   );
 
   return (
@@ -101,8 +77,8 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
           as="button"
           className="transition-transform hover:scale-105"
           showFallback
-          src={ensureCorrectImageUrl(session.user.profile_photo || null) || ""}
-          name={session.user.name?.charAt(0).toUpperCase() || "R"}
+          src={session.user.image || session.user.profile_photo || ""}
+          name={session.user.name?.charAt(0).toUpperCase() || "U"}
           aria-label="User menu"
         />
       </DropdownTrigger>
@@ -111,7 +87,7 @@ const UserDropdown = memo(({ session }: UserDropdownProps) => {
           key="user-info"
           className="h-14"
           startContent={<IconLock className="h-4 w-4 text-default-500" />}
-          description={session.user.email}
+          description={session.user.email || ""}
         >
           Signed in as
         </DropdownItem>
@@ -142,7 +118,6 @@ const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => {
     <Button
       color="warning"
       onClick={() => {
-        console.log("Sign In button clicked, opening modal");
         onOpenLoginModal();
       }}
       variant="flat"
@@ -155,14 +130,14 @@ const SignInButton = memo(({ onOpenLoginModal }: AuthButtonProps) => {
 SignInButton.displayName = "SignInButton";
 
 function AuthButton({ onOpenLoginModal }: AuthButtonProps) {
-  const { data: session, status } = useSession();
+  const { data: session, status, signOut } = useSession();
 
   if (status === "loading") {
     return <LoadingState />;
   }
 
   if (status === "authenticated" && session?.user) {
-    return <UserDropdown session={session} />;
+    return <UserDropdown session={session} onSignOut={signOut} />;
   }
 
   return <SignInButton onOpenLoginModal={onOpenLoginModal} />;

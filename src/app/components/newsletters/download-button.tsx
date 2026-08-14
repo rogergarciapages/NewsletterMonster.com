@@ -12,7 +12,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { IconDownload } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 
 interface DownloadButtonProps {
   newsletterId: number;
