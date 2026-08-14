@@ -14,8 +14,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Newsletter Manager",
-  description: "Newsletter Manager",
+  title: "Newsletterzilla - The Newsletter Archive & Discovery Platform",
+  description: "Newsletterzilla is an archive and discovery platform for newsletter creators and readers. Explore, bookmark, and follow your favorite email newsletters.",
   verification: {
     google: "bvpPc-4eFCo7zYJyOwRQdv5q-qieCEXz-2cQXVHJxj4",
   },

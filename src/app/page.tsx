@@ -37,8 +37,39 @@ export default function Home() {
           <HeroSection />
         </section>
 
+        {/* About Newsletterzilla & Purpose */}
+        <section
+          data-aos="fade-up"
+          data-aos-delay="100"
+          className="border-y border-gray-200 bg-white py-12 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div className="container mx-auto max-w-4xl px-4 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+              What is Newsletterzilla?
+            </h2>
+            <p className="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-300">
+              <strong>Newsletterzilla</strong> is an archive and discovery platform designed for newsletter creators and readers.
+              We archive quality email newsletters to make them searchable, reusable, and discoverable via search engines.
+            </p>
+            <div className="mt-8 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Discover Content</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Browse thousands of curated newsletters across tech, business, design, and marketing.</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Follow & Bookmark</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Sign in with your Google account to follow brands, build your custom feed, and save bookmarks.</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Creator Archiving</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Give your email newsletters a permanent home and boost your organic SEO search traffic.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Mission Statement - Quick explanation of what we do */}
-        <section data-aos="fade-up" data-aos-delay="100">
+        <section data-aos="fade-up" data-aos-delay="150">
           <HeroLanding currentImageIndex={0} images={[]} />
         </section>
 
