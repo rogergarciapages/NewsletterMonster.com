@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   if (!tag || !isValidTag(tag)) return notFound();
 
   const tagName = tag.name.toLowerCase();
-  const title = `${tag.name} Newsletters | Best ${tagName} Email Newsletters | NewsletterMonster`;
+  const title = `${tag.name} Newsletters | Best ${tagName} Email Newsletters | Newsletterzilla`;
   const description = `Discover the best ${tag.name} newsletters. Browse our curated collection of ${tag.count}+ popular ${tagName} newsletters, reviews, and recommendations.`;
 
   return {
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
       title,
       description,
       type: "website",
-      url: `https://newslettermonster.com/tag/${params.slug}`,
+      url: `https://newsletterzilla.com/tag/${params.slug}`,
       images: [
         {
           url: "/social-share-image.png",
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
       description,
     },
     alternates: {
-      canonical: `https://newslettermonster.com/tag/${params.slug}`,
+      canonical: `https://newsletterzilla.com/tag/${params.slug}`,
     },
   };
 }
@@ -68,7 +68,7 @@ function generateSchema(tag: Tag) {
     isPartOf: {
       "@type": "WebSite",
       "@id": `${baseUrl}/#website`,
-      name: "NewsletterMonster",
+      name: "Newsletterzilla",
       url: baseUrl,
     },
     breadcrumb: {

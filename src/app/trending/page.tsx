@@ -4,24 +4,24 @@ import { Metadata } from "next";
 import TrendingNewslettersClient from "./trending-newsletters-client";
 
 export const metadata: Metadata = {
-  title: "Trending Newsletters | Most Popular Email Newsletters | NewsletterMonster",
+  title: "Trending Newsletters | Most Popular Email Newsletters | Newsletterzilla",
   description: "Discover the most popular and trending email newsletters.",
   keywords:
     "trending newsletters, popular newsletters, best newsletters, email newsletters, newsletter trends, top newsletters",
   openGraph: {
-    title: "Trending Newsletters | NewsletterMonster",
-    description: "Discover the most popular and trending email newsletters on NewsletterMonster.",
+    title: "Trending Newsletters | Newsletterzilla",
+    description: "Discover the most popular and trending email newsletters on Newsletterzilla.",
     type: "website",
-    siteName: "NewsletterMonster",
+    siteName: "Newsletterzilla",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Trending Newsletters | NewsletterMonster",
-    description: "Discover the most popular and trending email newsletters on NewsletterMonster.",
+    title: "Trending Newsletters | Newsletterzilla",
+    description: "Discover the most popular and trending email newsletters on Newsletterzilla.",
   },
   alternates: {
-    canonical: "https://newslettermonster.com/trending",
+    canonical: "https://newsletterzilla.com/trending",
   },
   robots: {
     index: true,
@@ -41,16 +41,16 @@ export default function TrendingPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "@id": "https://newslettermonster.com/trending#webpage",
+            "@id": "https://newsletterzilla.com/trending#webpage",
             name: "Trending Newsletters",
             description:
-              "Discover the most popular and trending email newsletters on NewsletterMonster.",
-            url: "https://newslettermonster.com/trending",
+              "Discover the most popular and trending email newsletters on Newsletterzilla.",
+            url: "https://newsletterzilla.com/trending",
             isPartOf: {
               "@type": "WebSite",
-              "@id": "https://newslettermonster.com/#website",
-              name: "NewsletterMonster",
-              url: "https://newslettermonster.com",
+              "@id": "https://newsletterzilla.com/#website",
+              name: "Newsletterzilla",
+              url: "https://newsletterzilla.com",
             },
             breadcrumb: {
               "@type": "BreadcrumbList",
@@ -59,7 +59,7 @@ export default function TrendingPage() {
                   "@type": "ListItem",
                   position: 1,
                   item: {
-                    "@id": "https://newslettermonster.com/",
+                    "@id": "https://newsletterzilla.com/",
                     name: "Home",
                   },
                 },
@@ -67,7 +67,7 @@ export default function TrendingPage() {
                   "@type": "ListItem",
                   position: 2,
                   item: {
-                    "@id": "https://newslettermonster.com/trending",
+                    "@id": "https://newsletterzilla.com/trending",
                     name: "Trending Newsletters",
                   },
                 },

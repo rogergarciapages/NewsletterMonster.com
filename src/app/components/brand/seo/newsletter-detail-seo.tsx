@@ -63,7 +63,7 @@ export function generateNewsletterMetadata({
       description,
       type: "article",
       url: currentUrl,
-      siteName: "NewsletterMonster",
+      siteName: "Newsletterzilla",
       publishedTime: newsletter.created_at?.toISOString(),
       modifiedTime: newsletter.created_at?.toISOString(),
       images: newsletter.top_screenshot_url
@@ -102,7 +102,7 @@ export function generateNewsletterJsonLd({
   brandDisplayName,
   currentUrl,
 }: NewsletterSEOProps): Array<WithContext<Article> | WithContext<BreadcrumbList>> {
-  const baseUrl = "https://newslettermonster.com";
+  const baseUrl = "https://newsletterzilla.com";
   const brandUrl = `${baseUrl}/${brandname}`;
 
   // Article schema
@@ -125,7 +125,7 @@ export function generateNewsletterJsonLd({
     },
     publisher: {
       "@type": "Organization",
-      name: "NewsletterMonster",
+      name: "Newsletterzilla",
       url: baseUrl,
     },
     keywords: newsletter.NewsletterTag?.map(({ Tag }) => Tag.name).join(", ") || "",

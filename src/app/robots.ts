@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 // Define base URL for production and development
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://newslettermonster.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://newsletterzilla.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {

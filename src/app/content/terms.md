@@ -1,12 +1,12 @@
-# Terms and Conditions for NewsletterMonster.com
+# Terms and Conditions for Newsletterzilla.com
 
 **Effective Date:** 02 November 2024
 
 ## 1. Introduction
 
-These Terms of Use (“Terms”, “Terms of Use”) introduce the basic terms and conditions of the services provided by NewsletterMonster through its website and mobile application.
+These Terms of Use (“Terms”, “Terms of Use”) introduce the basic terms and conditions of the services provided by Newsletterzilla through its website and mobile application.
 
-Please note that throughout these Terms, "we," "us," and "our" refer to NewsletterMonster, and "you," "your," and "yours" refer to the user.
+Please note that throughout these Terms, "we," "us," and "our" refer to Newsletterzilla, and "you," "your," and "yours" refer to the user.
 
 ## 2. General Rules
 
@@ -167,13 +167,13 @@ You agree not to engage in actions that interfere with the Website’s operation
 
 ## 17. User Account Security
 
-Registered users are responsible for securing their access credentials. NewsletterMonster reserves the right to deactivate any user account without prior notice if we suspect unauthorized or improper use.
+Registered users are responsible for securing their access credentials. Newsletterzilla reserves the right to deactivate any user account without prior notice if we suspect unauthorized or improper use.
 
 ## 18. Content Removal and Copyright Disputes
 
 ### 18.1. Request for Content Removal
 
-NewsletterMonster respects the rights of content creators. If you believe your content has been archived or reproduced in a way that infringes your intellectual property rights, please contact us with specific details. We will review and, if appropriate, remove or restrict access to the disputed content.
+Newsletterzilla respects the rights of content creators. If you believe your content has been archived or reproduced in a way that infringes your intellectual property rights, please contact us with specific details. We will review and, if appropriate, remove or restrict access to the disputed content.
 
 ### 18.2. Copyright Notice
 
@@ -183,21 +183,21 @@ The Website may contain copyrighted material that is used under fair use or simi
 
 ### 19.1. No Warranty
 
-The Website and its content are provided "as is," without any warranties of any kind, express or implied, including, but not limited to, accuracy, completeness, reliability, or timeliness of information. NewsletterMonster makes no warranty that the Website will operate error-free, secure, or uninterrupted.
+The Website and its content are provided "as is," without any warranties of any kind, express or implied, including, but not limited to, accuracy, completeness, reliability, or timeliness of information. Newsletterzilla makes no warranty that the Website will operate error-free, secure, or uninterrupted.
 
 ### 19.2. Liability Limitation
 
-NewsletterMonster is not liable for any direct, indirect, incidental, consequential, or punitive damages arising out of your use or inability to use the Website. In jurisdictions where exclusion of implied warranties or limitation of liability is not permitted, our liability shall be limited to the extent permitted by law.
+Newsletterzilla is not liable for any direct, indirect, incidental, consequential, or punitive damages arising out of your use or inability to use the Website. In jurisdictions where exclusion of implied warranties or limitation of liability is not permitted, our liability shall be limited to the extent permitted by law.
 
 ## 20. Indemnification
 
-You agree to indemnify and hold harmless NewsletterMonster and its employees, affiliates, agents, and partners from any claims, liabilities, damages, losses, or expenses (including legal fees) arising from your use of the Website, your violation of these Terms, or your infringement of any third-party rights.
+You agree to indemnify and hold harmless Newsletterzilla and its employees, affiliates, agents, and partners from any claims, liabilities, damages, losses, or expenses (including legal fees) arising from your use of the Website, your violation of these Terms, or your infringement of any third-party rights.
 
 ## 21. Termination and Modifications
 
 ### 21.1. Termination
 
-NewsletterMonster reserves the right to terminate your access to the Website at its discretion, without notice, for any reason, including violations of these Terms.
+Newsletterzilla reserves the right to terminate your access to the Website at its discretion, without notice, for any reason, including violations of these Terms.
 
 ### 21.2. Modifications to Terms
 

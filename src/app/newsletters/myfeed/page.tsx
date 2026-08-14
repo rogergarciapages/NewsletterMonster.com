@@ -5,23 +5,23 @@ import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import MyFeedClient from "./myfeed-client";
 
 export const metadata: Metadata = {
-  title: "My Feed | Newsletters from Brands You Follow | NewsletterMonster",
+  title: "My Feed | Newsletters from Brands You Follow | Newsletterzilla",
   description: "View the latest newsletters from brands you follow in your personalized feed.",
   keywords: "newsletter feed, curated feed, newsletters, followed brands, personalized content",
   openGraph: {
-    title: "My Feed | NewsletterMonster",
+    title: "My Feed | Newsletterzilla",
     description: "View the latest newsletters from brands you follow in your personalized feed.",
     type: "website",
-    siteName: "NewsletterMonster",
+    siteName: "Newsletterzilla",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "My Feed | NewsletterMonster",
+    title: "My Feed | Newsletterzilla",
     description: "View the latest newsletters from brands you follow in your personalized feed.",
   },
   alternates: {
-    canonical: "https://newslettermonster.com/newsletters/myfeed",
+    canonical: "https://newsletterzilla.com/newsletters/myfeed",
   },
   robots: {
     index: true,
@@ -41,16 +41,16 @@ export default function MyFeedPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "@id": "https://newslettermonster.com/newsletters/myfeed#webpage",
+            "@id": "https://newsletterzilla.com/newsletters/myfeed#webpage",
             name: "My Feed",
             description:
               "View the latest newsletters from brands you follow in your personalized feed.",
-            url: "https://newslettermonster.com/newsletters/myfeed",
+            url: "https://newsletterzilla.com/newsletters/myfeed",
             isPartOf: {
               "@type": "WebSite",
-              "@id": "https://newslettermonster.com/#website",
-              name: "NewsletterMonster",
-              url: "https://newslettermonster.com",
+              "@id": "https://newsletterzilla.com/#website",
+              name: "Newsletterzilla",
+              url: "https://newsletterzilla.com",
             },
             breadcrumb: {
               "@type": "BreadcrumbList",
@@ -59,7 +59,7 @@ export default function MyFeedPage() {
                   "@type": "ListItem",
                   position: 1,
                   item: {
-                    "@id": "https://newslettermonster.com/",
+                    "@id": "https://newsletterzilla.com/",
                     name: "Home",
                   },
                 },
@@ -67,7 +67,7 @@ export default function MyFeedPage() {
                   "@type": "ListItem",
                   position: 2,
                   item: {
-                    "@id": "https://newslettermonster.com/newsletters/myfeed",
+                    "@id": "https://newsletterzilla.com/newsletters/myfeed",
                     name: "My Feed",
                   },
                 },

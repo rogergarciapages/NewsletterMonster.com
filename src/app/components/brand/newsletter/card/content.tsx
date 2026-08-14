@@ -26,7 +26,7 @@ const NewsletterContent = memo(
       </h2>
     );
 
-    const seoTitle = `Read ${newsletter.subject || "Newsletter"} by ${brandname} on NewsletterMonster.com`;
+    const seoTitle = `Read ${newsletter.subject || "Newsletter"} by ${brandname} on Newsletterzilla.com`;
 
     // Create the URL object to satisfy type requirements
     const href = {

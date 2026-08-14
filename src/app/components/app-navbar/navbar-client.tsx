@@ -65,9 +65,9 @@ const NavbarClient = memo(() => {
             <Link href="/" className="cursor-pointer">
               <div className={logoClassName}>
                 {!mounted || resolvedTheme === "dark" ? (
-                  <LogoNewsletterMonsterdark aria-label="NewsletterMonster Logo Dark Theme - Home" />
+                  <LogoNewsletterMonsterdark aria-label="Newsletterzilla Logo Dark Theme - Home" />
                 ) : (
-                  <LogoNewsletterMonsterlight aria-label="NewsletterMonster Logo Light Theme - Home" />
+                  <LogoNewsletterMonsterlight aria-label="Newsletterzilla Logo Light Theme - Home" />
                 )}
               </div>
             </Link>

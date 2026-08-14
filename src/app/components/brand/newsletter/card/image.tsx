@@ -54,7 +54,7 @@ const NewsletterImage = memo(
   }: NewsletterImageProps) => {
     if (!imageUrl) return null;
 
-    const imageTitle = `${subject || "Newsletter"} by ${brandname} | NewsletterMonster`;
+    const imageTitle = `${subject || "Newsletter"} by ${brandname} | Newsletterzilla`;
     const imageAlt = `${subject || "Newsletter"} by ${brandname}`;
 
     const imageContent = (

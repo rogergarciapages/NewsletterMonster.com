@@ -22,7 +22,7 @@ const EmailCopyProfile = ({ user, isOwnProfile }: EmailCopyProfileProps) => {
 
   const heading =
     "Simply copy our email, add it to your list. As soon as your newsletters get sent out, our system will process your newsletter into our archive.";
-  const email = "helloworld@newslettermonster.com";
+  const email = "helloworld@newsletterzilla.com";
 
   // Domain verification handler
   const handleVerifyDomain = async () => {
@@ -85,7 +85,7 @@ const EmailCopyProfile = ({ user, isOwnProfile }: EmailCopyProfileProps) => {
 
   return (
     <div className="my-8 flex flex-col items-center">
-      <h2 className="mb-4 text-2xl font-bold">Get Started with Newsletter Monster</h2>
+      <h2 className="mb-4 text-2xl font-bold">Get Started with Newsletterzilla</h2>
       <div className="py-12">
         <ul className="steps steps-vertical lg:steps-horizontal">
           <li className="step step-warning" data-content="✓">

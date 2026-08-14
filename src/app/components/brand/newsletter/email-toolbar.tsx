@@ -55,7 +55,7 @@ export default function EmailToolbar({
           newsletterId={newsletterId}
           size="md"
           url={currentUrl}
-          title={subject || "Check out this newsletter on NewsletterMonster"}
+          title={subject || "Check out this newsletter on Newsletterzilla"}
           className={buttonClassName}
         />
         <BookmarkButton

@@ -4,7 +4,7 @@ import { getPopularTags } from "@/lib/services/tags";
 import { getAllCategoryData, getAllPostSlugs } from "@/lib/simple-mdx";
 
 // Define base URL for production and development
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://newslettermonster.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://newsletterzilla.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {

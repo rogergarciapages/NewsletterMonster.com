@@ -86,7 +86,7 @@ const Footer = () => {
                 Made by YOU &{" "}
                 <a
                   className="text-[#fc0036] underline hover:text-[#d1002d] dark:text-[#fc0036] dark:hover:text-[#ff1a4d]"
-                  href="https://newslettermonster.com/"
+                  href="https://newsletterzilla.com/"
                 >
                   Monster Industries ltd.
                 </a>{" "}

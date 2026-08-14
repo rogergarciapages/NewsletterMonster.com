@@ -38,7 +38,7 @@ export function ShareButton({
   size = "md",
   showTooltip = true,
   url = typeof window !== "undefined" ? window.location.href : "",
-  title = "Check out this newsletter on NewsletterMonster",
+  title = "Check out this newsletter on Newsletterzilla",
   className = "",
 }: ShareButtonProps) {
   const effectiveNewsletterId = newsletterId || _newsletterId;

@@ -67,7 +67,7 @@ export function generateBrandJsonLd({
   user,
   newsletters,
 }: BrandSEOProps): WithContext<Organization | Person> {
-  const baseUrl = `https://newslettermonster.com/${brandname}`;
+  const baseUrl = `https://newsletterzilla.com/${brandname}`;
 
   if (user) {
     return {
@@ -91,8 +91,8 @@ export function generateBrandJsonLd({
         : undefined,
       memberOf: {
         "@type": "Organization",
-        name: "NewsletterMonster",
-        url: "https://newslettermonster.com",
+        name: "Newsletterzilla",
+        url: "https://newsletterzilla.com",
       },
     };
   }
@@ -105,8 +105,8 @@ export function generateBrandJsonLd({
     "@id": baseUrl,
     subOrganization: {
       "@type": "Organization",
-      name: "NewsletterMonster",
-      url: "https://newslettermonster.com",
+      name: "Newsletterzilla",
+      url: "https://newsletterzilla.com",
     },
     makesOffer: newsletters.map(newsletter => ({
       "@type": "Offer",

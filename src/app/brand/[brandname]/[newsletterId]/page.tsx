@@ -340,7 +340,7 @@ export async function generateMetadata({
   if (!newsletter) return notFound();
 
   const brandDisplayName = formatBrandName(params.brandname);
-  const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
+  const currentUrl = `https://newsletterzilla.com/${params.brandname}/${params.newsletterId}`;
 
   return generateNewsletterMetadata({
     newsletter,
@@ -360,7 +360,7 @@ export default async function NewsletterPage({
   if (!newsletter) notFound();
 
   const brandDisplayName = formatBrandName(params.brandname);
-  const currentUrl = `https://newslettermonster.com/${params.brandname}/${params.newsletterId}`;
+  const currentUrl = `https://newsletterzilla.com/${params.brandname}/${params.newsletterId}`;
 
   // Get the user session
   const session = await getServerSession(authOptions);
@@ -563,7 +563,7 @@ export default async function NewsletterPage({
 
             {/* SEO metadata */}
             <meta itemProp="datePublished" content={newsletter.created_at?.toISOString()} />
-            <meta itemProp="publisher" content="NewsletterMonster" />
+            <meta itemProp="publisher" content="Newsletterzilla" />
             <meta itemProp="author" content={brandDisplayName} />
             {newsletter.summary && <meta itemProp="description" content={newsletter.summary} />}
 

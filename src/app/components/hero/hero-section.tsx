@@ -118,7 +118,7 @@ export const HeroSection = () => {
                     Turn your Newsletters into SEO Powerhouses.
                 </h1>
                 <p className="mt-4 text-center leading-snug text-[#2e2e2e] dark:text-[#ccc] text-lg md:text-lg lg:base sm:base">
-                    Newslettermonster makes your newsletters go into next level SEO
+                    Newsletterzilla makes your newsletters go into next level SEO
                 </p>
             </div> 
             <div className="flex flex-row md:flex-row justify-center items-center gap-2 mt-4">

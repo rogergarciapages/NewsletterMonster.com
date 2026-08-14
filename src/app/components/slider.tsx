@@ -40,7 +40,7 @@ export function HeroLanding({}: HeroLandingProps) {
           <div className="relative h-[400px] w-full max-w-full overflow-hidden rounded-xl shadow-xl sm:h-[600px]">
             <div className="mockup-browser h-full border bg-base-300">
               <div className="mockup-browser-toolbar">
-                <div className="input">https://newslettermonster.com</div>
+                <div className="input">https://newsletterzilla.com</div>
               </div>
               <div className="bg-base-900 flex justify-center px-4 py-16">
                 <ImageSlider />

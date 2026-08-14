@@ -33,7 +33,7 @@ export default function EmailHeader({
   sender,
   brandname,
   date,
-  recipientEmail = "you@newslettermonster.com",
+  recipientEmail = "you@newsletterzilla.com",
   badges = [],
 }: EmailHeaderProps) {
   return (
