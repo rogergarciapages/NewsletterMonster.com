@@ -5,10 +5,15 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const dbUrl =
+let dbUrl =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
   "postgresql://postgres:Bpx2fQWrVxEyAat9UokmNd9bzKKqhfFv@supabase-db:5432/postgres?schema=public";
+
+// Safely convert public domain port 5432 to internal Docker container network hostname when running in server container
+if (dbUrl.includes("supabasenewsletter.oncewerehumans.com:5432")) {
+  dbUrl = dbUrl.replace("supabasenewsletter.oncewerehumans.com:5432", "supabase-db:5432");
+}
 
 const prisma =
   global.prisma ||
