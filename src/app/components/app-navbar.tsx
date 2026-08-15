@@ -28,8 +28,8 @@ export default function AppNavbar() {
 
   // Memoize the profile image URL to prevent unnecessary re-renders
   const profileImageUrl = useMemo(
-    () => session?.user?.profile_photo,
-    [session?.user?.profile_photo]
+    () => session?.user?.profile_photo || session?.user?.image,
+    [session?.user?.profile_photo, session?.user?.image]
   );
 
   // Memoize the session refresh function
@@ -129,7 +129,7 @@ export default function AppNavbar() {
     if (session?.user?.username) {
       router.push(`/user/${session.user.username}`);
     } else if (session?.user?.user_id) {
-      router.push(`/user/${session.user.user_id}/edit`);
+      router.push(`/user/${session.user.user_id}`);
     }
   }, [router, session?.user?.username, session?.user?.user_id]);
 

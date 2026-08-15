@@ -57,8 +57,8 @@ const UserDropdown = memo(({ session, onSignOut }: UserDropdownProps) => {
         case "profile":
           if (session.user.username) {
             router.push(`/user/${session.user.username}`);
-          } else {
-            router.push(`/user/${session.user.user_id}/edit`);
+          } else if (session.user.user_id) {
+            router.push(`/user/${session.user.user_id}`);
           }
           break;
         case "sign-out":
@@ -69,6 +69,8 @@ const UserDropdown = memo(({ session, onSignOut }: UserDropdownProps) => {
     [router, session.user, onSignOut]
   );
 
+  const avatarUrl = session.user.profile_photo || session.user.image || undefined;
+
   return (
     <Dropdown placement="bottom-end">
       <DropdownTrigger>
@@ -77,7 +79,7 @@ const UserDropdown = memo(({ session, onSignOut }: UserDropdownProps) => {
           as="button"
           className="transition-transform hover:scale-105"
           showFallback
-          src={session.user.image || session.user.profile_photo || ""}
+          src={avatarUrl}
           name={session.user.name?.charAt(0).toUpperCase() || "U"}
           aria-label="User menu"
         />
@@ -94,7 +96,7 @@ const UserDropdown = memo(({ session, onSignOut }: UserDropdownProps) => {
         <DropdownItem
           key="profile"
           startContent={<IconUser className="h-4 w-4" />}
-          description="View and edit your profile"
+          description="View your profile"
         >
           Your Profile
         </DropdownItem>
