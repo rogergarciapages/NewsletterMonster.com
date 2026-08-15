@@ -8,7 +8,7 @@ declare global {
 const dbUrl =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
-  "postgresql://postgres:Bpx2fQWrVxEyAat9UokmNd9bzKKqhfFv@supabasenewsletter.oncewerehumans.com:5432/postgres?schema=public";
+  "postgresql://postgres:Bpx2fQWrVxEyAat9UokmNd9bzKKqhfFv@supabase-db:5432/postgres?schema=public";
 
 const prisma =
   global.prisma ||
