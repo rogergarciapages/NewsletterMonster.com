@@ -38,6 +38,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "supabasenewsletter.oncewerehumans.com",
+      },
+      {
+        protocol: "https",
         hostname: "source.unsplash.com",
       },
       // Google
