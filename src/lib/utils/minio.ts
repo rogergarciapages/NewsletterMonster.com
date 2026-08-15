@@ -68,13 +68,41 @@ export async function uploadProfileImage(file: File, userId: string): Promise<st
 
     const supabase = getSupabaseClient();
 
-    // Ensure bucket exists or handle upload directly
-    const { error: uploadError } = await supabase.storage
+    // First upload attempt
+    let { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, Buffer.from(fileBuffer), {
         contentType: file.type,
         upsert: true,
       });
+
+    // Auto-create bucket if it doesn't exist yet and retry
+    if (
+      uploadError &&
+      (uploadError.message.includes("Bucket not found") ||
+        uploadError.message.includes("not_found") ||
+        uploadError.message.includes("404"))
+    ) {
+      console.log(`Bucket '${BUCKET_NAME}' not found. Creating public bucket automatically...`);
+      try {
+        await supabase.storage.createBucket(BUCKET_NAME, {
+          public: true,
+          allowedMimeTypes: ACCEPTED_IMAGE_TYPES,
+        });
+
+        // Retry upload after bucket creation
+        const retryResult = await supabase.storage
+          .from(BUCKET_NAME)
+          .upload(filePath, Buffer.from(fileBuffer), {
+            contentType: file.type,
+            upsert: true,
+          });
+
+        uploadError = retryResult.error;
+      } catch (createErr) {
+        console.error("Error auto-creating storage bucket:", createErr);
+      }
+    }
 
     if (uploadError) {
       console.error("Supabase Storage upload error:", uploadError);
