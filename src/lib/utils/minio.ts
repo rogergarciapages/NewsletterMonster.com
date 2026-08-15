@@ -1,17 +1,25 @@
 // src/lib/utils/minio.ts
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const BUCKET_NAME = process.env.MINIO_BUCKET || "userpics";
+const DEFAULT_SUPABASE_URL = "https://supabasenewsletter.oncewerehumans.com";
+const DEFAULT_ANON_KEY =
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc4NjY1MzYwMCwiZXhwIjo0OTQyMzI3MjAwLCJyb2xlIjoiYW5vbiJ9.rmFjH04D-eYhVWMW7zEMHpYCRXapHQqocx3yf4CJu90";
 
 function getSupabaseClient() {
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Supabase URL and Anon Key must be configured in environment");
-  }
-  return createClient(supabaseUrl, supabaseKey);
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    DEFAULT_SUPABASE_URL;
+
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    DEFAULT_ANON_KEY;
+
+  return createClient(url, key);
 }
 
+const BUCKET_NAME = process.env.MINIO_BUCKET || "userpics";
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
 export async function deleteUserProfileImages(userId: string): Promise<void> {
@@ -59,6 +67,8 @@ export async function uploadProfileImage(file: File, userId: string): Promise<st
     await deleteUserProfileImages(userId);
 
     const supabase = getSupabaseClient();
+
+    // Ensure bucket exists or handle upload directly
     const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, Buffer.from(fileBuffer), {
