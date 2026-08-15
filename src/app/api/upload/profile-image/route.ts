@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
-
-import authOptions from "@/config/auth";
 import prisma from "@/lib/prisma";
 import { uploadProfileImage, deleteUserProfileImages } from "@/lib/utils/minio";
 
@@ -21,17 +19,23 @@ function createResponse(status: number, body: any) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.email) {
       return createResponse(401, { error: "Unauthorized" });
     }
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
     if (!user) {
-      return createResponse(404, { error: "User not found" });
+      user = await prisma.user.create({
+        data: {
+          user_id: session.user.user_id,
+          email: session.user.email,
+          name: session.user.name || session.user.email.split("@")[0],
+        },
+      });
     }
 
     const userId = user.user_id;
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

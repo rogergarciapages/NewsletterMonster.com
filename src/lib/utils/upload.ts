@@ -1,5 +1,5 @@
 // src/lib/utils/upload.ts
-import { getSession } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 
 /**
  * Uploads a profile image to the server with improved error handling and transaction support
@@ -9,12 +9,17 @@ import { getSession } from "next-auth/react";
  * @returns The URL of the uploaded image or null if upload fails
  */
 export async function uploadProfileImage(file: File): Promise<string | null> {
-  const session = await getSession();
-  if (!session?.user?.user_id) {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const userId = session?.user?.id;
+  if (!userId) {
     throw new Error("User not authenticated");
   }
 
-  console.log("Starting profile image upload for user:", session.user.user_id);
+  console.log("Starting profile image upload for user:", userId);
 
   // Validate file before uploading
   if (!file || !(file instanceof File)) {
@@ -37,8 +42,8 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
 
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("userId", session.user.user_id);
-  formData.append("transaction_id", generateTransactionId()); // For potential rollback
+  formData.append("userId", userId);
+  formData.append("transaction_id", generateTransactionId());
 
   // Retry mechanism
   const MAX_RETRIES = 2;
@@ -49,7 +54,6 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
     try {
       console.log(`Upload attempt ${retries + 1}/${MAX_RETRIES + 1}`);
 
-      // Add a delay for retries
       if (retries > 0) {
         console.log(`Waiting ${retries * 1000}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, retries * 1000));
@@ -67,25 +71,20 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          // If parsing JSON fails, try to get the text
           try {
             errorMessage = await response.text();
           } catch (_) {
-            // If that fails too, use status code
             errorMessage = `Upload failed with status: ${response.status}`;
           }
         }
         console.error(`Profile image upload failed (attempt ${retries + 1}):`, errorMessage);
 
-        // Store error for potential throw
         lastError = new Error(errorMessage);
 
-        // Only retry on certain status codes
         if (response.status === 500 || response.status === 503) {
           retries++;
           continue;
         } else {
-          // Don't retry client errors (400s)
           throw lastError;
         }
       }
@@ -93,8 +92,7 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
       const data = await response.json();
       console.log("Upload successful, image URL:", data.url);
 
-      // Verify the URL is correct format
-      if (!data.url || typeof data.url !== "string" || !data.url.includes("/userpics/")) {
+      if (!data.url || typeof data.url !== "string") {
         console.error("Received invalid image URL:", data.url);
         throw new Error("Server returned invalid image URL");
       }
@@ -104,13 +102,11 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
       console.error(`Profile image upload error (attempt ${retries + 1}):`, error);
       lastError = error;
 
-      // For network errors, try again
       if (error instanceof TypeError && error.message.includes("fetch")) {
         retries++;
         continue;
       }
 
-      // For other errors, only retry if we haven't hit the limit
       if (retries < MAX_RETRIES) {
         retries++;
         continue;
@@ -119,7 +115,6 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
     }
   }
 
-  // If we're here, all retries failed
   if (lastError instanceof Error) {
     throw lastError;
   }
@@ -128,16 +123,11 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
 
 /**
  * Generate a unique transaction ID for the upload process
- * This can be used to track and potentially rollback failed transactions
  */
 function generateTransactionId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
-/**
- * A utility to debounce function calls - use this for React effects
- * that are causing performance warnings
- */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number

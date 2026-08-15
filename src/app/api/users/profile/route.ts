@@ -56,14 +56,21 @@ export async function PUT(request: Request) {
       {} as Record<string, any>
     );
 
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.user.upsert({
       where: {
         email: session.user.email,
       },
-      data: {
+      update: {
         ...sanitizedData,
         ...(body.profile_photo ? { profile_photo: body.profile_photo } : {}),
         updated_at: new Date(),
+      },
+      create: {
+        user_id: session.user.user_id,
+        email: session.user.email,
+        name: (sanitizedData.name as string) || session.user.name || session.user.email.split("@")[0],
+        ...sanitizedData,
+        ...(body.profile_photo ? { profile_photo: body.profile_photo } : {}),
       },
     });
 
