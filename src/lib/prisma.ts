@@ -5,9 +5,19 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+const dbUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  "postgresql://postgres:Bpx2fQWrVxEyAat9UokmNd9bzKKqhfFv@supabasenewsletter.oncewerehumans.com:5432/postgres?schema=public";
+
 const prisma =
   global.prisma ||
   new PrismaClient({
+    datasources: {
+      db: {
+        url: dbUrl,
+      },
+    },
     log: [{ emit: "event", level: "query" }],
   });
 
@@ -15,7 +25,6 @@ const prisma =
 if (process.env.NODE_ENV === "development") {
   (prisma.$on as any)("query", (e: any) => {
     if (e.duration >= 500) {
-      // Only log queries slower than 500ms
       console.log(`Slow query (${e.duration}ms):`, {
         query: e.query,
         params: e.params,
