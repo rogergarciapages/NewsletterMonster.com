@@ -14,7 +14,15 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email || !session?.user?.user_id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json(
+        { socialLinks: {} },
+        {
+          headers: {
+            "Cache-Control": "no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        }
+      );
     }
 
     const socialLinks = await prisma.socialLinks.findUnique({
@@ -23,7 +31,6 @@ export async function GET() {
       },
     });
 
-    // Return empty object if no social links exist yet
     return NextResponse.json(
       {
         socialLinks: socialLinks || {},
