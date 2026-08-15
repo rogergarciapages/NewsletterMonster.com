@@ -14,7 +14,7 @@ export interface ServerSession {
   };
 }
 
-export async function getServerSession(): Promise<ServerSession | null> {
+export async function getServerSession(_options?: any): Promise<ServerSession | null> {
   try {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);

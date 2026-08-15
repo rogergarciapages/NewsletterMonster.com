@@ -84,8 +84,7 @@ interface UserProfileData {
   followersCount: number;
 }
 
-// Add caching configuration
-export const revalidate = 60; // Revalidate every 60 seconds
+export const dynamic = "force-dynamic";
 
 // Cache the user data fetch function
 async function getUserData(userIdentifier: string): Promise<UserProfileData | null> {
