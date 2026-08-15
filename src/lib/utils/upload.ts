@@ -59,9 +59,15 @@ export async function uploadProfileImage(file: File): Promise<string | null> {
         await new Promise(resolve => setTimeout(resolve, retries * 1000));
       }
 
+      const headersObj: Record<string, string> = {};
+      if (session?.access_token) {
+        headersObj["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch("/api/upload/profile-image", {
         method: "POST",
         body: formData,
+        headers: headersObj,
         credentials: "same-origin",
       });
 

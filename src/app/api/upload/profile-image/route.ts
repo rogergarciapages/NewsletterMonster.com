@@ -19,28 +19,30 @@ function createResponse(status: number, body: any) {
 
 export async function POST(request: Request) {
   try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    const userIdFromForm = formData.get("userId") as string;
+
     const session = await getServerSession();
-    if (!session?.user?.email) {
+    let userId = session?.user?.user_id || userIdFromForm;
+
+    if (!userId) {
       return createResponse(401, { error: "Unauthorized" });
     }
 
     let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { user_id: userId },
     });
 
-    if (!user) {
+    if (!user && session?.user?.email) {
       user = await prisma.user.create({
         data: {
-          user_id: session.user.user_id,
+          user_id: userId,
           email: session.user.email,
           name: session.user.name || session.user.email.split("@")[0],
         },
       });
     }
-
-    const userId = user.user_id;
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
 
     if (!file) {
       return createResponse(400, { error: "No file provided" });

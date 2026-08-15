@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
 
@@ -18,10 +18,28 @@ export async function getServerSession(): Promise<ServerSession | null> {
   try {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
-    const {
+    
+    // First try standard cookie auth
+    let {
       data: { user: supabaseUser },
       error,
     } = await supabase.auth.getUser();
+
+    // If cookie auth failed, check for Bearer token in Authorization header
+    if ((error || !supabaseUser) && typeof headers === "function") {
+      try {
+        const headerStore = headers();
+        const authHeader = headerStore.get("authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          const token = authHeader.substring(7);
+          const res = await supabase.auth.getUser(token);
+          if (res.data?.user) {
+            supabaseUser = res.data.user;
+            error = null;
+          }
+        }
+      } catch (_) {}
+    }
 
     if (error || !supabaseUser || !supabaseUser.email) {
       return null;
