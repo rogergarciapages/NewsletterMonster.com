@@ -246,7 +246,7 @@ export default function EditProfilePage() {
     }
 
     fetchUserData();
-  }, [session, reset, resetSocial]);
+  }, [session?.user?.user_id, reset, resetSocial]);
 
   // Reset entire form
   const resetForm = () => {
