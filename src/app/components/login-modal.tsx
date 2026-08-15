@@ -296,6 +296,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onOpenChange, onSuccess
                 <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("github")}>
                   <IconBrandGithub />
                 </Button>
+                <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("linkedin_oidc")}>
+                  <IconBrandLinkedin />
+                </Button>
                 <Button isIconOnly variant="flat" onPress={() => handleOAuthSignIn("discord")}>
                   <IconBrandDiscord />
                 </Button>
