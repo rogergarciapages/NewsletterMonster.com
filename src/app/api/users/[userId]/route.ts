@@ -42,13 +42,36 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       });
     }
 
+    // If still not found, return empty profile structure instead of 500/404
     if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+      return NextResponse.json({
+        user_id: params.userId,
+        name: "",
+        surname: "",
+        username: "",
+        bio: "",
+        website: "",
+        location: "",
+        date_of_birth: null,
+        profile_photo: null,
+        SocialLinks: null,
+      });
     }
 
     return NextResponse.json(user);
   } catch (error) {
     console.error("Error fetching user:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json({
+      user_id: params.userId,
+      name: "",
+      surname: "",
+      username: "",
+      bio: "",
+      website: "",
+      location: "",
+      date_of_birth: null,
+      profile_photo: null,
+      SocialLinks: null,
+    });
   }
 }

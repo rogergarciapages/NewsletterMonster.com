@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { getServerSession } from "@/lib/auth";
-
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -11,9 +9,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    // If user is not authenticated, return unauthorized
+    // If user is not authenticated, return empty feed gracefully
     if (!session?.user?.user_id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ newsletters: [], hasMore: false });
     }
 
     const url = new URL(request.url);
@@ -58,7 +56,7 @@ export async function GET(request: NextRequest) {
         created_at: "desc",
       },
       skip: offset,
-      take: limit + 1, // Take one extra to check if there are more
+      take: limit + 1,
     });
 
     const hasMore = newsletters.length > limit;
@@ -70,6 +68,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching my feed:", error);
-    return NextResponse.json({ error: "Failed to fetch newsletters" }, { status: 500 });
+    return NextResponse.json({ newsletters: [], hasMore: false });
   }
 }
