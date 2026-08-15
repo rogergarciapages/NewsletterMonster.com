@@ -1,35 +1,7 @@
 import { NextResponse } from "next/server";
-
-import { Prisma } from "@prisma/client";
-
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-async function executeWithRetry<T>(operation: () => Promise<T>, retries = 3): Promise<T> {
-  let lastError: Error | unknown;
-
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      await prisma.$connect();
-      return await operation();
-    } catch (error: unknown) {
-      lastError = error;
-      console.error(`Attempt ${attempt} failed:`, error);
-
-      if (attempt === retries) break;
-
-      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-      await wait(delay);
-
-      await prisma.$disconnect();
-    }
-  }
-
-  throw lastError;
-}
 
 export async function GET(request: Request) {
   try {
@@ -37,13 +9,10 @@ export async function GET(request: Request) {
     const skip = parseInt(searchParams.get("skip") || "0");
     const take = parseInt(searchParams.get("take") || "15");
 
-    const newsletters = await executeWithRetry(async () => {
-      return prisma.newsletter.findMany({
-        where: {
-          // Optional filters can be added here
-        },
+    const [newsletters, totalCount] = await Promise.all([
+      prisma.newsletter.findMany({
         orderBy: {
-          created_at: "desc", // Most recent first
+          created_at: "desc",
         },
         skip,
         take,
@@ -70,39 +39,24 @@ export async function GET(request: Request) {
             },
           },
         },
-      });
-    });
-
-    // Count total newsletters for pagination info
-    const totalCount = await executeWithRetry(async () => {
-      return prisma.newsletter.count({
-        where: {
-          // Same filters as above if any
-        },
-      });
-    });
+      }),
+      prisma.newsletter.count(),
+    ]);
 
     return NextResponse.json({
-      newsletters,
+      newsletters: newsletters || [],
       pagination: {
-        total: totalCount,
+        total: totalCount || 0,
         skip,
         take,
-        hasMore: skip + take < totalCount,
+        hasMore: skip + take < (totalCount || 0),
       },
     });
   } catch (error) {
     console.error("Error fetching all newsletters:", error);
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P5010") {
-        return NextResponse.json(
-          { error: "Database connection error. Please try again." },
-          { status: 503 }
-        );
-      }
-    }
-
-    return NextResponse.json({ error: "Failed to fetch newsletters" }, { status: 500 });
+    return NextResponse.json({
+      newsletters: [],
+      pagination: { total: 0, skip: 0, take: 15, hasMore: false },
+    });
   }
 }
