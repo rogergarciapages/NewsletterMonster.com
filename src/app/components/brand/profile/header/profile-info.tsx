@@ -1,19 +1,11 @@
 // src/app/components/brand/profile/header/profile-info.tsx
 "use client";
 
-import { IconRosetteDiscountCheckFilled } from "@tabler/icons-react";
+import { IconMapPin, IconRosetteDiscountCheckFilled } from "@tabler/icons-react";
 
 import { BrandUser } from "../types";
 import SocialLinks from "./social-links";
 import Stats from "./stats";
-
-// src/app/components/brand/profile/header/profile-info.tsx
-
-// src/app/components/brand/profile/header/profile-info.tsx
-
-// src/app/components/brand/profile/header/profile-info.tsx
-
-// src/app/components/brand/profile/header/profile-info.tsx
 
 interface ProfileInfoProps {
   brandName: string;
@@ -47,14 +39,20 @@ export default function ProfileInfo({
           </div>
         )}
       </div>
-      {user?.username && (
-        <div className="mt-1">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+        {user?.username && (
           <span className="text-base text-gray-600 dark:text-gray-400">
             <span className="text-gray-400 dark:text-gray-500">@</span>
             {user.username}
           </span>
-        </div>
-      )}
+        )}
+        {user?.location && (
+          <div className="flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+            <IconMapPin size={18} className="text-[#EA4335] shrink-0" />
+            <span>{user.location}</span>
+          </div>
+        )}
+      </div>
 
       <Stats newsletterCount={newsletterCount} followersCount={followersCount} />
 

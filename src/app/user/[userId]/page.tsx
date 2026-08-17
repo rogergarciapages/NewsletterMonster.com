@@ -9,6 +9,8 @@ import { getServerSession } from "@/lib/auth";
 import ThreeColumnLayout from "@/app/components/layouts/three-column-layout";
 import { NewsletterCard } from "@/app/components/newsletters/newsletter-card";
 import UserProfileHeader from "@/app/components/user/profile/header";
+import NewsletterProvidersSection from "@/app/components/user/profile/newsletter-providers-section";
+import UserBrandsSection, { ManagedBrandItem } from "@/app/components/user/profile/user-brands-section";
 import { authOptions } from "@/config/auth";
 import prisma from "@/lib/prisma";
 import { BrandProfile } from "@/types/brands";
@@ -72,6 +74,7 @@ interface UserProfileData {
     email: string;
     profile_photo: string | null;
     bio: string;
+    location: string | null;
     website: string | null;
     website_domain: string | null;
     domain_verified: boolean;
@@ -81,6 +84,7 @@ interface UserProfileData {
     linkedin_profile: string | null;
     role: string;
   };
+  managedBrands: ManagedBrandItem[];
   followersCount: number;
 }
 
@@ -89,17 +93,36 @@ export const dynamic = "force-dynamic";
 // Cache the user data fetch function
 async function getUserData(userIdentifier: string): Promise<UserProfileData | null> {
   try {
+    const brandInclude = {
+      include: {
+        SocialLinks: true,
+        BrandManager: {
+          include: {
+            Brand: {
+              include: {
+                _count: {
+                  select: {
+                    Newsletter: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
     // First try to find by username
     let user = await prisma!.user.findUnique({
       where: { username: userIdentifier },
-      include: { SocialLinks: true },
+      ...brandInclude,
     });
 
     // If not found by username, try by user_id (UUID)
     if (!user) {
       user = await prisma!.user.findUnique({
         where: { user_id: userIdentifier },
-        include: { SocialLinks: true },
+        ...brandInclude,
       });
     }
 
@@ -129,17 +152,30 @@ async function getUserData(userIdentifier: string): Promise<UserProfileData | nu
       }),
     ]);
 
+    const managedBrands: ManagedBrandItem[] = (user.BrandManager || []).map(bm => ({
+      brand_id: bm.Brand.brand_id,
+      name: bm.Brand.name,
+      slug: bm.Brand.slug,
+      logo: bm.Brand.logo,
+      description: bm.Brand.description,
+      website: bm.Brand.website,
+      domain: bm.Brand.domain,
+      followers_count: bm.Brand.followers_count || 0,
+      newslettersCount: bm.Brand._count?.Newsletter || 0,
+    }));
+
     return {
       newsletters,
       user: {
         user_id: user.user_id,
         name: user.name || "",
-        surname: "",
+        surname: user.surname || "",
         company_name: user.name || "",
         username: user.username || user.user_id,
         email: user.email || "",
         profile_photo: user.profile_photo,
         bio: user.bio || "",
+        location: user.location || null,
         website: user.website || null,
         website_domain: null,
         domain_verified: false,
@@ -149,6 +185,7 @@ async function getUserData(userIdentifier: string): Promise<UserProfileData | nu
         linkedin_profile: user.SocialLinks?.linkedin || null,
         role: "USER",
       },
+      managedBrands,
       followersCount,
     };
   } catch (error) {
@@ -173,7 +210,8 @@ export async function generateMetadata({
   }
 
   const { user, newsletters, followersCount } = userData;
-  const displayName = user.username || user.name || "User";
+  const fullName = [user.name, user.surname].filter(Boolean).join(" ");
+  const displayName = fullName || user.username || "User";
 
   // Generate canonical URL based on username if available
   const canonicalUrl = user.username ? `/user/${user.username}` : `/user/${params.userId}`;
@@ -192,6 +230,7 @@ export async function generateMetadata({
       images: user.profile_photo ? [{ url: user.profile_photo }] : undefined,
       type: "profile",
       firstName: user.name || undefined,
+      lastName: user.surname || undefined,
       username: user.username || undefined,
       siteName: "Newsletter Monster",
       locale: "en_US",
@@ -229,15 +268,17 @@ export default async function UserProfilePage({ params }: { params: { userId: st
     notFound();
   }
 
-  const { newsletters, user, followersCount } = data;
+  const { newsletters, user, managedBrands, followersCount } = data;
   // Check if profile belongs to current user by comparing both user_id and username
   const isOwnProfile: boolean =
     (!!session?.user?.user_id && session.user.user_id === user.user_id) ||
     !!(session?.user?.username && session.user.username === params.userId);
 
+  const fullName = [user.name, user.surname].filter(Boolean).join(" ");
+
   const brandProfile: BrandProfile = {
     user_id: user.user_id,
-    company_name: user.company_name,
+    company_name: fullName || user.company_name,
     profile_photo: user.profile_photo,
     bio: user.bio,
     website: user.website,
@@ -266,13 +307,14 @@ export default async function UserProfilePage({ params }: { params: { userId: st
             user_id: user.user_id,
             name: user.name,
             surname: user.surname || "",
+            location: user.location || null,
             username: user.username || "",
             email: user.email,
             profile_photo: user.profile_photo,
             bio: user.bio || "",
             role: user.role,
             website: user.website || null,
-            company_name: user.name,
+            company_name: fullName || user.name,
             website_domain: user.website_domain || null,
             domain_verified: user.domain_verified || false,
             twitter_username: user.twitter_username || null,
@@ -310,7 +352,22 @@ export default async function UserProfilePage({ params }: { params: { userId: st
         )}
 
         <main className="mx-auto max-w-6xl px-4 py-8">
-          <h1 className="sr-only">{user.name}&apos;s Newsletters</h1>
+          {/* Managed Brands or Provider Fallback Cards */}
+          {managedBrands.length > 0 ? (
+            <UserBrandsSection brands={managedBrands} />
+          ) : (
+            <NewsletterProvidersSection isOwnProfile={isOwnProfile} />
+          )}
+
+          {/* Published Newsletters Section */}
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              Published Newsletters
+            </h2>
+          </div>
+
+          <h1 className="sr-only">{fullName || user.name}&apos;s Newsletters</h1>
+
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {newsletters.length > 0 ? (
               newsletters.map((newsletter, index) => (
@@ -327,7 +384,7 @@ export default async function UserProfilePage({ params }: { params: { userId: st
                 <IconBuildingStore className="h-12 w-12 text-gray-400" />
                 <div>
                   <h3 className="mb-1 text-lg font-medium">
-                    {user.name} hasn&apos;t published any newsletters yet
+                    {fullName || user.name} hasn&apos;t published any newsletters yet
                   </h3>
                   <p className="mb-4 text-sm text-gray-500">
                     Their newsletters will appear here once they start publishing.

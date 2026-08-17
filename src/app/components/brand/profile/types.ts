@@ -12,6 +12,7 @@ export interface BrandUser {
   name: string;
   email: string;
   surname: string | null;
+  location?: string | null;
   company_name: string | null;
   username: string | null;
   profile_photo: string | null;
