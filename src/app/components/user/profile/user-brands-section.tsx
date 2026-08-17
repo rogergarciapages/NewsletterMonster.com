@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Avatar, Button, Card, CardBody } from "@nextui-org/react";
 import { IconArrowRight, IconBuildingStore, IconMail, IconUsers } from "@tabler/icons-react";
 
@@ -99,7 +98,7 @@ export default function UserBrandsSection({ brands }: UserBrandsSectionProps) {
                 </div>
 
                 <Button
-                  as={Link}
+                  as="a"
                   href={`/brand/${brand.slug}`}
                   color="primary"
                   variant="flat"
